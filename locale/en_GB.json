@@ -1,0 +1,11 @@
+{
+    "name": "English (United Kingdom)",
+    "nameShort": "English",
+    "textDirection": "ltr",
+    "strings": {
+        "subnodal": "Subnodal",
+        "cloud": "Cloud",
+
+        "loading": "Loading..."
+    }
+}

@@ -24,21 +24,11 @@
         <script src="/script.js"></script>
         <script src="/resources.js"></script>
         <script src="/profiles.js"></script>
+        <script src="/auth.js"></script>
     </head>
     <body hidden>
-        <nav sui-style="thick" sui-screen="desktop">
-            <a href="/" sui-style="integrated">
-                <img src="https://cloud.subnodal.com/media/icon.svg" aria-hidden="true">
-                <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
-            </a>
-            <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="thick flat circular">
-                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="Account">
-            </button>
-        </nav>
         <main>
-            <h1>Welcome to Subnodal Cloud</h1>
-            <p>Subnodal Cloud is still in development. Check back later to see what we've made!</p>
+            <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
         </main>
     </body>
 </html>
