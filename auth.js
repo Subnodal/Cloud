@@ -18,6 +18,8 @@ namespace("com.subnodal.cloud.auth", function(exports) {
 
     exports.processToken = function(token) {
         return resources.getProfileInfo(token).then(function(data) {
+            profiles.setSelectedProfileToken(token);
+
             if (data == null) {
                 profiles.setProfile(token, {
                     lastSelected: new Date().getTime()

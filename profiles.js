@@ -42,11 +42,11 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         };
     };
 
-    exports.getSelectedProfile = function() {
+    exports.getSelectedProfileToken = function() {
         return localStorage.getItem("subnodalCloud_selectedProfile");
     };
 
-    exports.setSelectedProfile = function(token) {
+    exports.setSelectedProfileToken = function(token) {
         localStorage.setItem("subnodalCloud_selectedProfile", token);
     };
 
