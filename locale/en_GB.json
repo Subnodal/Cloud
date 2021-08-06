@@ -5,6 +5,7 @@
     "strings": {
         "subnodal": "Subnodal",
         "cloud": "Cloud",
+        "subnodalCloud": "Subnodal Cloud",
 
         "loading": "Loading..."
     }

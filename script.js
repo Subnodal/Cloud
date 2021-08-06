@@ -24,6 +24,8 @@ namespace("com.subnodal.cloud", function(exports) {
             fallbackLocaleCode: "en_GB"
         });
 
+        document.querySelector("title").textContent = _("subnodalCloud");
+
         if (window.location.pathname != "/auth.html") {
             profiles.checkProfilesState();
         }
