@@ -8,9 +8,8 @@
 */
 
 namespace("com.subnodal.cloud.profiles", function(exports) {
-    const NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
-
     exports.PROFILE_VERSION = 0;
+    exports.NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
 
     exports.profiles = {};
 
@@ -89,7 +88,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     exports.checkProfilesState = function() {
         return new Promise(function(resolve, reject) {
             if (Object.keys(exports.listProfiles()).length == 0) {
-                window.location.replace(NO_PROFILES_REDIRECT_URL);
+                window.location.replace(exports.NO_PROFILES_REDIRECT_URL);
 
                 return;
             }

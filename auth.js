@@ -43,6 +43,10 @@ namespace("com.subnodal.cloud.auth", function(exports) {
         });
     };
 
+    if (core.parameter("uid") == null || core.parameter("token") == null) {
+        window.location.replace(profiles.NO_PROFILES_REDIRECT_URL);
+    }
+
     exports.processProfile(core.parameter("uid"), core.parameter("token")).then(function() {
         window.location.replace(COMPLETE_REDIRECT_URL);
     });
