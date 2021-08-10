@@ -47,8 +47,8 @@ namespace("com.subnodal.cloud.auth", function(exports) {
         window.location.replace(profiles.NO_PROFILES_REDIRECT_URL);
     }
 
-    if (core.parameter("lang") != null) {
-        localStorage.setItem("subnodalCloud_lang", core.parameter("lang"));
+    if (core.parameter("locale") != null) {
+        localStorage.setItem("subnodalCloud_locale", core.parameter("locale"));
     }
 
     exports.processProfile(core.parameter("uid"), core.parameter("token")).then(function() {

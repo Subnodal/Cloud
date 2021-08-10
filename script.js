@@ -24,8 +24,8 @@ namespace("com.subnodal.cloud", function(exports) {
             fallbackLocaleCode: "en_GB"
         });
 
-        if (localStorage.getItem("subnodalCloud_lang") != null) {
-            l10n.switchToLocale(localStorage.getItem("subnodalCloud_lang"));
+        if (localStorage.getItem("subnodalCloud_locale") != null) {
+            l10n.switchToLocale(localStorage.getItem("subnodalCloud_locale"));
         }
 
         document.querySelector("title").textContent = _("subnodalCloud");
