@@ -15,11 +15,15 @@ namespace("com.subnodal.cloud", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
 
     Promise.all([
-        requests.getJson("/locale/en_GB.json")
+        requests.getJson("/locale/en_GB.json"),
+        requests.getJson("/locale/fr_FR.json"),
+        requests.getJson("/locale/zh_CN.json")
     ]).then(function(resources) {
         subElements.init({
             languageResources: {
-                "en_GB": resources[0]
+                "en_GB": resources[0],
+                "fr_FR": resources[1],
+                "zh_CN": resources[2]
             },
             fallbackLocaleCode: "en_GB"
         });

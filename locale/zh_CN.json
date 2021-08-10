@@ -1,0 +1,12 @@
+{
+    "name": "中文（简体）",
+    "nameShort": "中文",
+    "textDirection": "ltr",
+    "strings": {
+        "subnodal": "次结",
+        "cloud": "云",
+        "subnodalCloud": "次结·云",
+
+        "loading": "正在加载……"
+    }
+}
