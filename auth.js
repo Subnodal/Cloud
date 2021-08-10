@@ -16,12 +16,14 @@ namespace("com.subnodal.cloud.auth", function(exports) {
     const COMPLETE_REDIRECT_URL = "/";
     const SETUP_REDIRECT_URL = "/"; // TODO: Add distinct setup page
 
-    exports.processToken = function(token) {
+    exports.processProfile = function(uid, token) {
         return resources.getProfileInfo(token).then(function(data) {
             profiles.setSelectedProfileToken(token);
 
             if (data == null) {
                 profiles.setProfile(token, {
+                    version: profiles.PROFILE_VERSION,
+                    uid,
                     lastSelected: new Date().getTime()
                 });
 
@@ -32,6 +34,8 @@ namespace("com.subnodal.cloud.auth", function(exports) {
 
             profiles.setProfile(token, {
                 ...data,
+                version: profiles.PROFILE_VERSION,
+                uid,
                 lastSelected: new Date().getTime()
             });
 
@@ -39,7 +43,7 @@ namespace("com.subnodal.cloud.auth", function(exports) {
         });
     };
 
-    exports.processToken(core.parameter("token")).then(function() {
+    exports.processProfile(core.parameter("uid"), core.parameter("token")).then(function() {
         window.location.replace(COMPLETE_REDIRECT_URL);
     });
 });

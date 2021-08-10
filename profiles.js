@@ -10,6 +10,8 @@
 namespace("com.subnodal.cloud.profiles", function(exports) {
     const NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
 
+    exports.PROFILE_VERSION = 0;
+
     exports.profiles = {};
 
     exports.saveProfiles = function() {
@@ -47,6 +49,12 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     exports.setSelectedProfileToken = function(token) {
+        if (token == null) {
+            localStorage.removeItem("subnodalCloud_selectedProfile");
+
+            return;
+        }
+
         localStorage.setItem("subnodalCloud_selectedProfile", token);
     };
 
@@ -60,9 +68,17 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         return exports.profiles[token];
     };
 
-    exports.removeProfile = exports.withProfilesFactory(function(token) {
+    exports.removeProfile = function(token) {
+        exports.loadProfiles();
+
         delete exports.profiles[token];
-    });
+
+        exports.saveProfiles();
+
+        if (exports.getSelectedProfileToken() == token) {
+            exports.setSelectedProfileToken(exports.listProfiles()[0] || null);
+        }
+    };
 
     exports.listProfiles = function() {
         exports.loadProfiles();
