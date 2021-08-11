@@ -7,7 +7,7 @@
     Licenced by the Subnodal Open-Source Licence, which can be found at LICENCE.md.
 */
 
-namespace("com.subnodal.cloud.auth", function(exports) {
+namespace("com.subnodal.cloud.authenticate", function(exports) {
     var core = require("com.subnodal.subelements.core");
 
     var resources = require("com.subnodal.cloud.resources");
