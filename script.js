@@ -34,7 +34,7 @@ namespace("com.subnodal.cloud", function(exports) {
 
         document.querySelector("title").textContent = _("subnodalCloud");
 
-        if (window.location.pathname != "/auth.html") {
+        if (window.location.pathname != "/authenticate.html") {
             profiles.checkProfilesState();
         }
     });
