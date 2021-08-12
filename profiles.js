@@ -106,7 +106,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
 
     exports.checkCurrentProfileState = function() {
         return resources.getProfileInfo().then(function(data) {
-            if (typeof(data.name) != "string") {
+            if (typeof(data?.name) != "string") {
                 window.location.replace("/setup.html");
 
                 return Promise.resolve(false);

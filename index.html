@@ -54,7 +54,18 @@
         </sui-menu>
         <sui-menu id="accountsMenu">
             <div id="accountsMenuList">
-                <sui-loader></sui-loader>
+                <s-each in="index.getAccounts()" keyvar="token" valuevar="profile">
+                    <button data-token="{{ token }}">
+                        <sui-icon aria-hidden="true">{{ token == profiles.getSelectedProfileToken() ? 'done' : '' }}</sui-icon>
+                        <strong>{{ profile.name }}</strong>
+                        <br>
+                        <sui-icon></sui-icon>
+                        <span>{{ profile.email }}</span>
+                    </button>
+                </s-each>
+                <s-if condition="{{ Object.keys(index.getAccounts()).length == 0 }}">
+                    <sui-loader></sui-loader>
+                </s-if>
             </div>
             <hr>
             <button id="addAccountButton"><sui-icon>add</sui-icon> {{ _("addAccount") }}</button>

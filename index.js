@@ -9,55 +9,45 @@
 
 namespace("com.subnodal.cloud.index", function(exports) {
     var subElements = require("com.subnodal.subelements");
+    var elements = require("com.subnodal.subui.elements");
     var menus = require("com.subnodal.subui.menus");
 
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
 
-    exports.populateAccountsMenu = function() {
+    var accounts = {};
+
+    window.index = exports;
+    window.profiles = profiles;
+
+    exports.getAccounts = function() {
+        return accounts;
+    };
+
+    exports.populateAccounts = function() {
         var tokens = profiles.listProfiles();
 
         Promise.all(tokens.map(function(token) {
             return resources.getProfileInfo(token);
         })).then(function(profilesData) {
-            document.querySelector("#accountsMenuList").innerHTML = "";
-
             for (var i = 0; i < tokens.length; i++) {
-                var accountEntry = document.createElement("button");
-                var accountSelectedIcon = document.createElement("sui-icon");
-                var accountProfileName = document.createElement("strong");
-                var accountProfileEmail = document.createElement("span");
-
-                if (tokens[i] == profiles.getSelectedProfileToken()) {
-                    accountSelectedIcon.textContent = "done";
+                if (profilesData[i] == null) {
+                    continue;
                 }
 
-                accountProfileName.textContent = profilesData[i].name;
-                accountProfileEmail.textContent = profilesData[i].email;
-
-                accountEntry.appendChild(accountSelectedIcon);
-                accountEntry.appendChild(document.createTextNode(" "));
-                accountEntry.appendChild(accountProfileName);
-                accountEntry.appendChild(document.createElement("br"));
-                accountEntry.appendChild(document.createElement("sui-icon"));
-                accountEntry.appendChild(document.createTextNode(" "));
-                accountEntry.appendChild(accountProfileEmail);
-
-                (function(i) {
-                    accountEntry.addEventListener("click", function() {
-                        profiles.setSelectedProfileToken(tokens[i]);
-    
-                        exports.populateAccountsMenu();
-                    });
-                })(i);
-
-                document.querySelector("#accountsMenuList").appendChild(accountEntry);
+                accounts[tokens[i]] = profilesData[i];
             }
+
+            subElements.render();
         });
     };
 
+    exports.reload = function() {
+        exports.populateAccounts();
+    };
+
     subElements.ready(function() {
-        exports.populateAccountsMenu();
+        exports.reload();
 
         document.querySelector("#mobileMenuButton").addEventListener("click", function(event) {
             menus.toggleMenu(document.querySelector("#mobileMenu"), event.target);
@@ -73,6 +63,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         document.querySelector("#addAccountButton").addEventListener("click", function() {
             window.location.href = profiles.ADD_PROFILE_REDIRECT_URL;
+        });
+
+        elements.attachSelectorEvent("click", "#accountsMenuList button", function(element) {
+            profiles.setSelectedProfileToken(element.getAttribute("data-token"));
+
+            setTimeout(function() {
+                exports.reload();                
+            }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
         });
     });
 });
