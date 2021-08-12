@@ -25,22 +25,35 @@
         <script src="/resources.js"></script>
         <script src="/profiles.js"></script>
         <script src="/script.js"></script>
+        <script src="/setup.js"></script>
     </head>
     <body hidden>
-        <nav sui-style="thick" sui-screen="desktop">
-            <a href="/" sui-style="integrated">
-                <img src="https://cloud.subnodal.com/media/icon.svg" aria-hidden="true">
-                <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
-            </a>
-            <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="thick flat circular">
-                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="Account">
-            </button>
-        </nav>
-        <main>
-            <h1>Welcome to Subnodal Cloud</h1>
-            <p>Subnodal Cloud is still in-development. Check back later to see what we've made!</p>
-            <p>Visit <a href="https://subnodal.com">subnodal.com</a> to learn more about Subnodal as a whole.</p>
+        <main class="{{ !setup.isLoading() ? 'setup' : '' }}">
+            <s-if condition="{{ setup.isLoading() }}">
+                <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
+            </s-if>
+            <s-else>
+                <img src="/media/icon.svg" alt="" class="icon">
+                <h1 translate>setup_getStarted</h1>
+                <p translate>setup_getStartedDescription</p>
+                <input placeholder="{{ _('setup_enterName') }}" id="nameInput">
+                <sui-buttonrow>
+                    <button translate id="doneButton">done</button>
+                    <button sui-style="flat" translate id="learnMoreButton">learnMore</button>
+                </sui-buttonrow>
+                <p role="alert" id="error"></p>
+            </s-else>
         </main>
+        <dialog id="learnMoreDialog">
+            <sui-workarea sui-style="shrink">
+                <h1 translate>setup_whyTitle</h1>
+                <p translate>setup_whyText1</p>
+                <p translate>setup_whyText2</p>
+                <p translate>setup_whyText3</p>
+            </sui-workarea>
+            <sui-buttonrow>
+                <button sui-action="close" translate>close</button>
+            </sui-buttonrow>
+        </dialog>
     </body>
 </html>

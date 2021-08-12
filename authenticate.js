@@ -13,22 +13,17 @@ namespace("com.subnodal.cloud.authenticate", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
 
-    const COMPLETE_REDIRECT_URL = "/";
-    const SETUP_REDIRECT_URL = "/"; // TODO: Add distinct setup page
-
     exports.processProfile = function(token) {
         return resources.getProfileInfo(token).then(function(data) {
             profiles.setSelectedProfileToken(token);
 
-            if (data == null) {
+            if (data == null || typeof(data?.name) != "string") {
                 profiles.setProfile(token, {
                     version: profiles.PROFILE_VERSION,
                     lastSelected: new Date().getTime()
                 });
 
-                window.location.replace(SETUP_REDIRECT_URL);
-
-                return;
+                return Promise.resolve(true);
             }
 
             profiles.setProfile(token, {
@@ -37,7 +32,7 @@ namespace("com.subnodal.cloud.authenticate", function(exports) {
                 lastSelected: new Date().getTime()
             });
 
-            return Promise.resolve();
+            return Promise.resolve(false);
         });
     };
 
@@ -49,7 +44,7 @@ namespace("com.subnodal.cloud.authenticate", function(exports) {
         localStorage.setItem("subnodalCloud_locale", core.parameter("locale"));
     }
 
-    exports.processProfile(core.parameter("token")).then(function() {
-        window.location.replace(COMPLETE_REDIRECT_URL);
+    exports.processProfile(core.parameter("token")).then(function(needsSetup) {
+        window.location.replace(needsSetup ? profiles.SETUP_REDIRECT_URL : profiles.COMPLETE_REDIRECT_URL);
     });
 });

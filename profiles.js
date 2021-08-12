@@ -8,7 +8,11 @@
 */
 
 namespace("com.subnodal.cloud.profiles", function(exports) {
+    var resources = require("com.subnodal.cloud.resources");
+
     exports.PROFILE_VERSION = 0;
+    exports.COMPLETE_REDIRECT_URL = "/";
+    exports.SETUP_REDIRECT_URL = "/setup.html";
     exports.NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
 
     exports.profiles = {};
@@ -90,10 +94,24 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
             if (Object.keys(exports.listProfiles()).length == 0) {
                 window.location.replace(exports.NO_PROFILES_REDIRECT_URL);
 
+                resolve(false);
+
                 return;
             }
 
-            resolve();
+            resolve(true);
+        });
+    };
+
+    exports.checkCurrentProfileState = function() {
+        return resources.getProfileInfo().then(function(data) {
+            if (typeof(data.name) != "string") {
+                window.location.replace("/setup.html");
+
+                return Promise.resolve(false);
+            }
+
+            return Promise.resolve(true);
         });
     };
 });

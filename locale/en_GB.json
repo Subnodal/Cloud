@@ -7,6 +7,19 @@
         "cloud": "Cloud",
         "subnodalCloud": "Subnodal Cloud",
 
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "done": "Done",
+        "close": "Close",
+        "learnMore": "Learn more",
+
+        "setup_getStarted": "Get started with Subnodal Cloud",
+        "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",
+        "setup_enterName": "Enter your name",
+        "setup_nameBlankError": "Please enter your name.",
+        "setup_connectionError": "Couldn't save your details. Check your connection to the internet and try again.",
+        "setup_whyTitle": "Why are we asking for this information?",
+        "setup_whyText1": "We ask for your name so that it can be displayed to other users when they collaborate on documents with you. Your name will also be visible on other Subnodal services, but only to select users who you know.",
+        "setup_whyText2": "While we recommend that you enter your real name to make it easier for others to identify you when collaborating, you can also use a nickname or alias instead if you prefer.",
+        "setup_whyText3": "If you are in a workplace or school, your IT administrator is able to view and change your personal information, as with everything under your Subnodal Account. However, they won't be able to view or modify the details of your personal account."
     }
 }

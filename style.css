@@ -1,0 +1,32 @@
+/*
+    Subnodal Cloud
+
+    Copyright (C) Subnodal Technologies. All Rights Reserved.
+
+    https://cloud.subnodal.com
+    Licenced by the Subnodal Open-Source Licence, which can be found at LICENCE.md.
+*/
+
+main.setup {
+    padding-top: 20vh;
+    padding-left: 10vw;
+    padding-right: 10vw;
+    text-align: center;
+}
+
+main.setup img.icon {
+    height: 4em;
+}
+
+main.setup input#nameInput {
+    text-align: center;
+    width: 20vw;
+    max-width: 100%;
+}
+
+main.setup sui-buttonrow {
+    width: 20vw;
+    max-width: 100%;
+    margin: auto;
+    margin-top: 1em;
+}
