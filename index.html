@@ -25,6 +25,7 @@
         <script src="/resources.js"></script>
         <script src="/profiles.js"></script>
         <script src="/script.js"></script>
+        <script src="/index.js"></script>
     </head>
     <body hidden>
         <nav sui-style="thick" sui-screen="desktop">
@@ -33,8 +34,14 @@
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
             <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="thick flat circular">
-                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="Account">
+            <button sui-style="thick flat circular" title="{{ _('accounts') }}" id="accountButton">
+                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
+            </button>
+        </nav>
+        <nav sui-screen="mobile"> <!-- TODO: Nav will show on all screens when other options have been implemented -->
+            <sui-spacer sui-size="grow"></sui-spacer>
+            <button sui-style="flat" sui-screen="mobile" title="{{ _('openMainMenu') }}" aria-label="{{ _('openMainMenu') }}" id="mobileMenuButton">
+                <sui-icon>menu</sui-icon>
             </button>
         </nav>
         <main>
@@ -42,5 +49,16 @@
             <p>Subnodal Cloud is still in-development. Check back later to see what we've made!</p>
             <p>Visit <a href="https://subnodal.com">subnodal.com</a> to learn more about Subnodal as a whole.</p>
         </main>
+        <sui-menu id="mobileMenu">
+            <button id="mobileAccountButton" translate>accounts</button>
+        </sui-menu>
+        <sui-menu id="accountsMenu">
+            <div id="accountsMenuList">
+                <sui-loader></sui-loader>
+            </div>
+            <hr>
+            <button id="addAccountButton"><sui-icon>add</sui-icon> {{ _("addAccount") }}</button>
+            <button><sui-icon></sui-icon> {{ _("manageAccounts") }}</button>
+        </sui-menu>
     </body>
 </html>

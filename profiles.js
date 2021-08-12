@@ -14,6 +14,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     exports.COMPLETE_REDIRECT_URL = "/";
     exports.SETUP_REDIRECT_URL = "/setup.html";
     exports.NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
+    exports.ADD_PROFILE_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud&switchAccounts=true";
 
     exports.profiles = {};
 

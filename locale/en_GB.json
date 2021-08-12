@@ -11,6 +11,10 @@
         "done": "Done",
         "close": "Close",
         "learnMore": "Learn more",
+        "openMainMenu": "Open main menu",
+        "accounts": "Accounts",
+        "addAccount": "Add account",
+        "manageAccounts": "Manage accounts",
 
         "setup_getStarted": "Get started with Subnodal Cloud",
         "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",

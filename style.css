@@ -34,3 +34,7 @@ main.setup sui-buttonrow {
 main.setup sui-buttonrow button {
     white-space: nowrap;
 }
+
+#accountsMenuList button {
+    height: unset;
+}
