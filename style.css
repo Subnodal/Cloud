@@ -15,18 +15,22 @@ main.setup {
 }
 
 main.setup img.icon {
-    height: 4em;
+    height: 4rem;
 }
 
 main.setup input#nameInput {
     text-align: center;
-    width: 20vw;
+    width: 20rem;
     max-width: 100%;
 }
 
 main.setup sui-buttonrow {
-    width: 20vw;
+    width: 20rem;
     max-width: 100%;
     margin: auto;
     margin-top: 1em;
+}
+
+main.setup sui-buttonrow button {
+    white-space: nowrap;
 }
