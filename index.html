@@ -54,6 +54,7 @@
         </sui-menu>
         <sui-menu id="accountsMenu">
             <div id="accountsMenuList">
+                <!-- TODO: Fix subUI arrow key control for menus -->
                 <s-each in="index.getAccounts()" keyvar="token" valuevar="profile">
                     <button data-token="{{ token }}">
                         <sui-icon aria-hidden="true">{{ token == profiles.getSelectedProfileToken() ? 'done' : '' }}</sui-icon>
