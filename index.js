@@ -66,10 +66,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         elements.attachSelectorEvent("click", "#accountsMenuList button", function(element) {
-            profiles.setSelectedProfileToken(element.getAttribute("data-token"));
+            var token = element.getAttribute("data-token");
+
+            if (!profiles.listProfiles().includes(token)) {
+                return;
+            }
+
+            profiles.setSelectedProfileToken(token);
 
             setTimeout(function() {
-                exports.reload();                
+                exports.reload();
             }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
         });
     });
