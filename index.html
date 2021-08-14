@@ -64,7 +64,7 @@
                     </button>
                 </s-each>
                 <s-if condition="{{ Object.keys(index.getAccounts()).length == 0 }}">
-                    <sui-loader></sui-loader>
+                    <sui-loader aria-label="{{ _('loading') }}"></sui-loader>
                 </s-if>
             </div>
             <hr>
