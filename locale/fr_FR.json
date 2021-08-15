@@ -15,6 +15,7 @@
         "accounts": "Comptes",
         "addAccount": "Ajouter un compte",
         "manageAccounts": "Gérer les comptes",
+        "settings": "Paramètres",
 
         "setup_getStarted": "Premiers pas avec Sousnœud Cloud",
         "setup_getStartedDescription": "Nous sommes heureux de vous avoir ici ! Faisons connaissance — quel est ton nom ?",

@@ -34,6 +34,7 @@
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
             <sui-spacer sui-size="grow"></sui-spacer>
+            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon>settings</sui-icon></button>
             <button sui-style="thick flat circular" title="{{ _('accounts') }}" id="accountButton">
                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
             </button>
@@ -50,6 +51,7 @@
             <p>Visit <a href="https://subnodal.com">subnodal.com</a> to learn more about Subnodal as a whole.</p>
         </main>
         <sui-menu id="mobileMenu">
+            <button translate>settings</button>
             <button id="mobileAccountButton" translate>accounts</button>
         </sui-menu>
         <sui-menu id="accountsMenu">

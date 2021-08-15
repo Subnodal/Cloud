@@ -15,6 +15,7 @@
         "accounts": "Accounts",
         "addAccount": "Add account",
         "manageAccounts": "Manage accounts",
+        "settings": "Settings",
 
         "setup_getStarted": "Get started with Subnodal Cloud",
         "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",
