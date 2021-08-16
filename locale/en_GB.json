@@ -17,6 +17,21 @@
         "manageAccounts": "Manage accounts",
         "settings": "Settings",
 
+        "space_bytes": "{space} bytes",
+        "space_kb": "{space} KB",
+        "space_mb": "{space} MB",
+        "space_gb": "{space} GB",
+        "space_tb": "{space} TB",
+        "space_kib": "{space} KiB",
+        "space_mib": "{space} MiB",
+        "space_gib": "{space} GiB",
+        "space_tib": "{space} TiB",
+
+        "spaceLeft": {
+            "{value} > 0": "{space} left",
+            "{value} == 0": "No space left"
+        },
+
         "setup_getStarted": "Get started with Subnodal Cloud",
         "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",
         "setup_enterName": "Enter your name",

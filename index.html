@@ -50,6 +50,10 @@
             <p>Subnodal Cloud is still in-development. Check back later to see what we've made!</p>
             <p>Visit <a href="https://subnodal.com">subnodal.com</a> to learn more about Subnodal as a whole.</p>
         </main>
+        <nav sui-screen="desktop">
+            <progress value="0"></progress>
+            <span><a href="javascript:void(0);" sui-style="integrated">{{ _("spaceLeft", {value: 0, space: "0 bytes"}) }} <sui-icon aria-hidden="true">arrow_right</sui-icon></a></span>
+        </nav>
         <sui-menu id="mobileMenu">
             <button translate>settings</button>
             <button id="mobileAccountButton" translate>accounts</button>
