@@ -77,6 +77,8 @@ namespace("com.subnodal.cloud.resources", function(exports) {
                     uid
                 }
             });
+        }).then(function() {
+            return Promise.resolve(key);
         });
     };
 
