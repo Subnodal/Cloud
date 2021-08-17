@@ -16,8 +16,28 @@
         "addAccount": "新增帐户",
         "manageAccounts": "管理帐户",
         "settings": "设置",
+        "back": "后退",
+        "forward": "前进",
+        "new": "新",
 
         "rootFolderName": "我的文件夹",
+
+        "folder": "文件夹",
+
+        "space_bytes": "{space}字节",
+        "space_kb": "{space} KB",
+        "space_mb": "{space} MB",
+        "space_gb": "{space} GB",
+        "space_tb": "{space} TB",
+        "space_kib": "{space} KiB",
+        "space_mib": "{space} MiB",
+        "space_gib": "{space} GiB",
+        "space_tib": "{space} TiB",
+
+        "spaceLeft": {
+            "{value} > 0": "还剩{space}",
+            "{value} == 0": "没有剩余空间"
+        },
 
         "setup_getStarted": "开始使用次结·云",
         "setup_getStartedDescription": "我们很高兴有你在这里！ 让我们认识一下你——你叫什么名字？",
@@ -27,6 +47,9 @@
         "setup_whyTitle": "我们为什么要询问这些信息？",
         "setup_whyText1": "我们要求您提供姓名，以便在其他用户与您协作处理文档时向他们显示该姓名。 您的姓名也将出现在其他次结服务上，但仅限于选择您认识的用户。",
         "setup_whyText2": "虽然我们建议您输入您的真实姓名，以便其他人在协作时更容易识别您，但您也可以根据需要使用昵称或别名。",
-        "setup_whyText3": "如果您在工作场所或学校，您的IT管理员可以查看和更改您的个人信息，就像您次结·帐户下的所有信息一样。 但是，他们将无法查看或修改您的个人帐户的详细信息。"
+        "setup_whyText3": "如果您在工作场所或学校，您的IT管理员可以查看和更改您的个人信息，就像您次结·帐户下的所有信息一样。 但是，他们将无法查看或修改您的个人帐户的详细信息。",
+
+        "emptyFolder_title": "这里没有什么……",
+        "emptyFolder_description": "此文件夹中没有文件。 来吧，创造一个！"
     }
 }

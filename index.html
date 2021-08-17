@@ -41,8 +41,8 @@
             </button>
         </nav>
         <nav>
-            <button sui-style="flat" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
-            <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('forward') }}" id="forwardButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_forward</sui-icon></button>
+            <button sui-style="flat" title="{{ _('back') }}" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
+            <button sui-style="flat" sui-screen="desktop" title="{{ _('forward') }}" aria-label="{{ _('forward') }}" id="forwardButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_forward</sui-icon></button>
             <sui-spacer></sui-spacer>
             <button sui-screen="desktop" id="newButton">
                 <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
@@ -52,12 +52,16 @@
             <sui-spacer></sui-spacer>
             <ol sui-style="breadcrumbs" sui-size="grow">
                 <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
+                    <s-set var="name" value="item.name"></s-set>
+                    <s-if condition="{{ item.key == index.getRootFolderKey() }}">
+                        <s-set var="name" value="_('rootFolderName')"></s-set>
+                    </s-if>
                     <li>
                         <s-if condition="{{ i == index.getCurrentPath().length - 1 }}">
-                            {{ item.name }}
+                            {{ name }}
                         </s-if>
                         <s-else>
-                            <a href="javascript:index.goBack(`{{ item.key }}`);">{{ item.name }}</a>
+                            <a href="javascript:index.goBack(`{{ item.key }}`);">{{ name }}</a>
                         </s-else>
                     </li>
                 </s-each>

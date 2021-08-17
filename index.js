@@ -19,6 +19,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var fs = require("com.subnodal.cloud.fs");
 
     var accounts = {};
+    var rootFolderKey = null;
     var currentFolderKey = null;
     var currentPath = [];
     var forwardPath = [];
@@ -31,6 +32,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getAccounts = function() {
         return accounts;
+    };
+
+    exports.getRootFolderKey = function() {
+        return rootFolderKey;
     };
 
     exports.getCurrentPath = function() {
@@ -212,6 +217,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         fs.getRootObjectKeyFromProfile().then(function(key) {
+            rootFolderKey = key;
             currentFolderKey = key;
 
             exports.navigate(currentFolderKey, true);
