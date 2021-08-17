@@ -16,8 +16,13 @@
         "addAccount": "Add account",
         "manageAccounts": "Manage accounts",
         "settings": "Settings",
+        "back": "Back",
+        "forward": "Forward",
+        "new": "New",
 
         "rootFolderName": "My files",
+
+        "folder": "Folder",
 
         "space_bytes": "{space} bytes",
         "space_kb": "{space} KB",
@@ -42,6 +47,9 @@
         "setup_whyTitle": "Why are we asking for this information?",
         "setup_whyText1": "We ask for your name so that it can be displayed to other users when they collaborate on documents with you. Your name will also be visible on other Subnodal services, but only to select users who you know.",
         "setup_whyText2": "While we recommend that you enter your real name to make it easier for others to identify you when collaborating, you can also use a nickname or alias instead if you prefer.",
-        "setup_whyText3": "If you are in a workplace or school, your IT administrator is able to view and change your personal information, as with everything under your Subnodal Account. However, they won't be able to view or modify the details of your personal account."
+        "setup_whyText3": "If you are in a workplace or school, your IT administrator is able to view and change your personal information, as with everything under your Subnodal Account. However, they won't be able to view or modify the details of your personal account.",
+
+        "emptyFolder_title": "Nothing here...",
+        "emptyFolder_description": "There are no files in this folder. Go ahead and create one!"
     }
 }

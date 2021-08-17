@@ -35,6 +35,28 @@ main.setup sui-buttonrow button {
     white-space: nowrap;
 }
 
+.screenMessage {
+    margin-top: 20vh;
+    padding-left: 20vw;
+    padding-right: 20vw;
+    text-align: center;
+}
+
+.screenMessage img {
+    height: 100px;
+}
+
+.screenMessage.subtle {
+    color: var(--foregroundSubtle);
+}
+
 #accountsMenuList button {
     height: unset;
+}
+
+@media (max-width: 600px) {
+    .screenMessage {
+        padding-left: 10vw;
+        padding-right: 10vw;
+    }
 }

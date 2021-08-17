@@ -35,21 +35,66 @@
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
             <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon>settings</sui-icon></button>
+            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon sui-mirrorable aria-hidden="true">settings</sui-icon></button>
             <button sui-style="thick flat circular" title="{{ _('accounts') }}" id="accountButton">
                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
             </button>
         </nav>
-        <nav sui-screen="mobile"> <!-- TODO: Nav will show on all screens when other options have been implemented -->
-            <sui-spacer sui-size="grow"></sui-spacer>
+        <nav>
+            <button sui-style="flat" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
+            <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('forward') }}" id="forwardButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_forward</sui-icon></button>
+            <sui-spacer></sui-spacer>
+            <button sui-screen="desktop" id="newButton">
+                <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
+                {{ _("new") }}
+                <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
+            </button>
+            <sui-spacer></sui-spacer>
+            <ol sui-style="breadcrumbs" sui-size="grow">
+                <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
+                    <li>
+                        <s-if condition="{{ i == index.getCurrentPath().length - 1 }}">
+                            {{ item.name }}
+                        </s-if>
+                        <s-else>
+                            <a href="javascript:index.goBack(`{{ item.key }}`);">{{ item.name }}</a>
+                        </s-else>
+                    </li>
+                </s-each>
+            </ol>
+            <sui-spacer></sui-spacer>
+            <button sui-screen="mobile" title="{{ _('new') }}" aria-label="{{ _('new') }}" id="mobileNewButton">
+                <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
+                <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
+            </button>
             <button sui-style="flat" sui-screen="mobile" title="{{ _('openMainMenu') }}" aria-label="{{ _('openMainMenu') }}" id="mobileMenuButton">
                 <sui-icon>menu</sui-icon>
             </button>
         </nav>
-        <main>
-            <h1>Welcome to Subnodal Cloud</h1>
-            <p>Subnodal Cloud is still in-development. Check back later to see what we've made!</p>
-            <p>Visit <a href="https://subnodal.com">subnodal.com</a> to learn more about Subnodal as a whole.</p>
+        <main sui-stack="column">
+            <s-if condition="{{ !index.getListingIsLoading() }}" sui-stack="column" sui-size="grow">
+                <s-if condition="{{ index.getCurrentListing().length == 0 }}">
+                    <div class="screenMessage subtle">
+                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                        <h2 sui-mono translate>emptyFolder_title</h2>
+                        <p translate>emptyFolder_description</p>
+                    </div>
+                </s-if>
+                <s-else>
+                    <ul sui-iconlist sui-size="grow" id="currentFolderView">
+                        <s-each in="index.getCurrentListing()" valuevar="item">
+                            <li tabindex="0" data-key="{{ item.key }}">
+                                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add custom file/folder icons -->
+                                <input tabindex="-1" value="{{ item.name }}">
+                                <span>{{ l10n.formatValue(new Date(item.lastModified)) }}</span>
+                            </li>
+                        </s-each>
+                    </ul>
+                </s-else>
+            </s-if>
+            <s-if condition="{{ index.getListingIsLoading() }}">
+                <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
+            </s-if>
         </main>
         <nav sui-screen="desktop">
             <progress value="0"></progress>
@@ -77,6 +122,9 @@
             <hr>
             <button id="addAccountButton"><sui-icon>add</sui-icon> {{ _("addAccount") }}</button>
             <button><sui-icon></sui-icon> {{ _("manageAccounts") }}</button>
+        </sui-menu>
+        <sui-menu id="newMenu">
+            <button id="createFolderButton" translate>folder</button>
         </sui-menu>
     </body>
 </html>
