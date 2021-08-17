@@ -13,6 +13,13 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
 
+    exports.sortByAttributes = {
+        NAME: 0,
+        CREATED_AT: 1,
+        LAST_MODIFIED: 2,
+        SIZE: 3
+    };
+
     exports.getRootObjectKeyFromProfile = function(token = profiles.getSelectedProfileToken()) {
         var key;
 
@@ -108,6 +115,67 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             return resources.setObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
             return Promise.resolve(newFileKey);
+        });
+    };
+
+    exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, seperateFolders = true) {
+        var listing = [];
+
+        return resources.getObject(folderKey).then(function(data) {
+            if (data?.type != "folder") {
+                return Promise.reject("The requested directory is not a folder");
+            }
+
+            var contents = data.contents || {};
+
+            Object.keys(contents).forEach(function(key) {
+                listing.push({...contents[key], key});
+            });
+
+            return Promise.all(listing.map(function(item) {
+                return resources.getObject(item.key);
+            }));
+        }).then(function(objects) {
+            for (var i = 0; i < listing.length; i++) {
+                listing[i] = {...objects[i], ...listing[i]};
+            }
+
+            var sortMagnitude = sortReverse ? -1 : 1;
+
+            return Promise.resolve(listing.sort(function(a, b) {
+                if (seperateFolders && a.type != b.type) {
+                    if (a.type == "folder") {
+                        return -1;
+                    }
+
+                    if (b.type == "folder") {
+                        return 1;
+                    }
+                }
+
+                switch (sortBy) {
+                    case exports.sortByAttributes.NAME:
+                    default:
+                        if (a.name < b.name) {
+                            return -1 * sortMagnitude;
+                        }
+
+                        if (a.name > b.name) {
+                            return sortMagnitude;
+                        }
+
+                        return 0;
+
+                    case exports.sortByAttributes.CREATED_AT:
+                        return (a.createdAt - b.createdAt) * sortMagnitude;
+
+                    case exports.sortByAttributes.LAST_MODIFIED:
+                        return (a.lastModified - b.lastModified) * sortMagnitude;
+
+                    case exports.sortByAttributes.SIZE:
+                        return (a.size - b.size) * sortMagnitude;
+                }
+            }));
         });
     };
 });

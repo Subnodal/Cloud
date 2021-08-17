@@ -14,14 +14,21 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
+    var fs = require("com.subnodal.cloud.fs");
 
     var accounts = {};
+    var currentFolderKey = null;
+    var currentListing = [];
 
     window.index = exports;
     window.profiles = profiles;
 
     exports.getAccounts = function() {
         return accounts;
+    };
+
+    exports.getCurrentListing = function() {
+        return currentListing;
     };
 
     exports.populateAccounts = function() {
@@ -37,6 +44,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
                 accounts[tokens[i]] = profilesData[i];
             }
+
+            subElements.render();
+        });
+    };
+
+    exports.populateFolderView = function(key = currentFolderKey) {
+        if (key == null) {
+            return;
+        }
+
+        fs.listFolder(key).then(function(listing) {
+            currentListing = listing;
 
             subElements.render();
         });
@@ -77,6 +96,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
             setTimeout(function() {
                 exports.reload();
             }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
+        });
+
+        fs.getRootObjectKeyFromProfile().then(function(key) {
+            currentFolderKey = key;
+
+            exports.populateFolderView();
         });
     });
 });
