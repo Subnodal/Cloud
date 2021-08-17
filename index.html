@@ -77,14 +77,7 @@
         </nav>
         <main sui-stack="column">
             <s-if condition="{{ !index.getListingIsLoading() }}" sui-stack="column" sui-size="grow">
-                <s-if condition="{{ index.getCurrentListing().length == 0 }}">
-                    <div class="screenMessage subtle">
-                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
-                        <h2 sui-mono translate>emptyFolder_title</h2>
-                        <p translate>emptyFolder_description</p>
-                    </div>
-                </s-if>
-                <s-else>
+                <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
                     <ul sui-iconlist sui-size="grow" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <li tabindex="0" data-key="{{ item.key }}">
@@ -94,6 +87,13 @@
                             </li>
                         </s-each>
                     </ul>
+                </s-if>
+                <s-else>
+                    <div class="screenMessage subtle">
+                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                        <h2 sui-mono translate>emptyFolder_title</h2>
+                        <p translate>emptyFolder_description</p>
+                    </div>
                 </s-else>
             </s-if>
             <s-if condition="{{ index.getListingIsLoading() }}">
