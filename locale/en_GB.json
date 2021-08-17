@@ -17,6 +17,8 @@
         "manageAccounts": "Manage accounts",
         "settings": "Settings",
 
+        "rootFolderName": "My files",
+
         "space_bytes": "{space} bytes",
         "space_kb": "{space} KB",
         "space_mb": "{space} MB",

@@ -17,6 +17,8 @@
         "manageAccounts": "Gérer les comptes",
         "settings": "Paramètres",
 
+        "rootFolderName": "Mes dossiers",
+
         "setup_getStarted": "Premiers pas avec Sousnœud Cloud",
         "setup_getStartedDescription": "Nous sommes heureux de vous avoir ici ! Faisons connaissance — quel est ton nom ?",
         "setup_enterName": "Entrez votre nom",

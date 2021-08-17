@@ -17,6 +17,8 @@
         "manageAccounts": "管理帐户",
         "settings": "设置",
 
+        "rootFolderName": "我的文件夹",
+
         "setup_getStarted": "开始使用次结·云",
         "setup_getStartedDescription": "我们很高兴有你在这里！ 让我们认识一下你——你叫什么名字？",
         "setup_enterName": "输入你的名字",
