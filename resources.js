@@ -66,18 +66,6 @@ namespace("com.subnodal.cloud.resources", function(exports) {
 
             return profiles.getUidFromToken(token);
         }).then(function(uid) {
-            console.log({
-                _payload: {
-                    ...(oldData || {}),
-                    ...data,
-                    lastModified: firebase.database.ServerValue.TIMESTAMP
-                },
-                _meta: {
-                    profileToken: token,
-                    uid
-                }
-            });
-
             return firebase.database().ref("objects/" + key).set({
                 _payload: {
                     ...(oldData || {}),
