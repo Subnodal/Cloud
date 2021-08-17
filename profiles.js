@@ -90,6 +90,20 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         return Object.keys(exports.profiles);
     };
 
+    exports.getUidFromToken = function(token) {
+        return new Promise(function(resolve, reject) {
+            var uid = exports.getProfile(token);
+
+            if (typeof(uid) != "string") {
+                return resources.getProfileInfo(token).then(function(info) {
+                    resolve(info.uid);
+                });
+            }
+
+            resolve(uid);
+        });
+    };
+
     exports.checkProfilesState = function() {
         return new Promise(function(resolve, reject) {
             if (Object.keys(exports.listProfiles()).length == 0) {
