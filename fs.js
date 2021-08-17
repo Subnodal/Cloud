@@ -23,6 +23,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     exports.getRootObjectKeyFromProfile = function(token = profiles.getSelectedProfileToken()) {
         var key;
 
+        if (token == null) {
+            return Promise.resolve(null);
+        }
+
         return resources.getProfileInfo(token).then(function(data) {
             key = data?.fsRootObject;
 
