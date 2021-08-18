@@ -30,6 +30,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     window.index = exports;
     window.l10n = l10n;
     window.profiles = profiles;
+    window.fs = fs;
 
     exports.getAccounts = function() {
         return accounts;
@@ -122,12 +123,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.goBack = function(toKey = currentPath[currentPath.length - 2].key) {
+    exports.goBack = function(toKey = currentPath[currentPath.length - 2]?.key) {
         if (typeof(toKey) != "string") {
             return; // Tries to find ancestor of root
         }
 
-        while (currentPath[currentPath.length - 1].key != toKey) {
+        while (currentPath[currentPath.length - 1]?.key != toKey) {
             forwardPath.push(currentPath.pop());
 
             if (currentPath.length <= 1) {
@@ -156,6 +157,21 @@ namespace("com.subnodal.cloud.index", function(exports) {
         }
 
         return null;
+    };
+
+    exports.renameItemByInput = function(input) {
+        var key = input.getAttribute("data-key");
+        var appendExtension = "";
+
+        return resources.getObject(key).then(function(data) {
+            var extensionMatch = (data?.name || "").match(/(\.[a-zA-Z0-9]+)$/);
+
+            if (extensionMatch && data?.type == "file") {
+                appendExtension = extensionMatch[1]; // Add original extension back on if it was hidden
+            }
+
+            return fs.renameItem(key, input.value.trim() + appendExtension, currentFolderKey);
+        });
     };
 
     exports.reload = function() {

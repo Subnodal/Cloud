@@ -82,7 +82,7 @@
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <li tabindex="0" data-key="{{ item.key }}">
                                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add custom file/folder icons -->
-                                <input tabindex="-1" value="{{ item.name }}">
+                                <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);" data-key="{{ item.key }}">
                                 <span>{{ l10n.formatValue(new Date(item.lastModified)) }}</span>
                             </li>
                         </s-each>

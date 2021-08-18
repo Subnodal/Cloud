@@ -52,6 +52,14 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
+    exports.getItemDisplayName = function(item) {
+        if (item.type == "file") {
+            return item.name.replace(/\.[a-zA-Z0-9]+$/, "");
+        }
+
+        return item.name;
+    };
+
     exports.createFolder = function(name, parentFolder, token = profiles.getSelectedProfileToken()) {
         var newFolderKey;
 
@@ -117,6 +125,22 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             return resources.setObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
             return Promise.resolve(newFileKey);
+        });
+    };
+
+    exports.renameItem = function(key, newName, parentFolder, token = profiles.getSelectedProfileToken()) {
+        return resources.getObject(parentFolder).then(function(parentData) {
+            if (parentData?.type != "folder") {
+                return Promise.reject("Expected a folder as the parent, but got a file instead");
+            }
+
+            var parentContents = parentData.contents || {};
+
+            parentContents[key].name = newName;
+
+            return resources.setObject(parentFolder, {contents: parentContents}, token);
+        }).then(function() {
+            return resources.setObject(key, {name: newName}, token);
         });
     };
 
