@@ -144,10 +144,14 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
-    exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, seperateFolders = true) {
+    exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, seperateFolders = true, hardRefresh = false) {
         var listing = [];
 
-        return resources.getObject(folderKey).then(function(data) {
+        return resources.getObject(folderKey, !hardRefresh).then(function(data) {
+            if (data == null) {
+                return Promise.reject("Data is inaccessible; this may be because the device is offline");
+            }
+
             if (data?.type != "folder") {
                 return Promise.reject("The requested directory is not a folder");
             }
@@ -159,7 +163,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             });
 
             return Promise.all(listing.map(function(item) {
-                return resources.getObject(item.key);
+                return resources.getObject(item.key, !hardRefresh);
             }));
         }).then(function(objects) {
             for (var i = 0; i < listing.length; i++) {

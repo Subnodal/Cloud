@@ -19,8 +19,10 @@
         "back": "Back",
         "forward": "Forward",
         "new": "New",
+        "retry": "Retry",
 
         "rootFolderName": "My files",
+        "unknownName": "Unknown",
 
         "folder": "Folder",
 
@@ -53,6 +55,9 @@
         "setup_whyText3": "If you are in a workplace or school, your IT administrator is able to view and change your personal information, as with everything under your Subnodal Account. However, they won't be able to view or modify the details of your personal account.",
 
         "emptyFolder_title": "Nothing here...",
-        "emptyFolder_description": "There are no files in this folder. Go ahead and create one!"
+        "emptyFolder_description": "There are no files in this folder. Go ahead and create one!",
+
+        "offlineFolder_title": "You're offline",
+        "offlineFolder_description": "Connect to the internet to view this folder."
     }
 }

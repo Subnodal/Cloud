@@ -19,8 +19,10 @@
         "back": "后退",
         "forward": "前进",
         "new": "新",
+        "retry": "重试",
 
         "rootFolderName": "我的文件夹",
+        "unknownName": "未知",
 
         "folder": "文件夹",
 
@@ -50,6 +52,9 @@
         "setup_whyText3": "如果您在工作场所或学校，您的IT管理员可以查看和更改您的个人信息，就像您次结·帐户下的所有信息一样。 但是，他们将无法查看或修改您的个人帐户的详细信息。",
 
         "emptyFolder_title": "这里没有什么……",
-        "emptyFolder_description": "此文件夹中没有文件。 来吧，创造一个！"
+        "emptyFolder_description": "此文件夹中没有文件。 来吧，创造一个！",
+
+        "offlineFolder_title": "你离线",
+        "offlineFolder_description": "连接到互联网以查看该文件夹。"
     }
 }

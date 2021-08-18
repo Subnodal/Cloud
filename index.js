@@ -26,6 +26,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var forwardPath = [];
     var currentListing = [];
     var listingIsLoading = true;
+    var dataUnavailableWhileOffline = false;
 
     window.index = exports;
     window.l10n = l10n;
@@ -50,6 +51,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getListingIsLoading = function() {
         return listingIsLoading;
+    };
+
+    exports.getDataUnavailableWhileOffline = function() {
+        return dataUnavailableWhileOffline;
     };
 
     exports.populateAccounts = function() {
@@ -78,6 +83,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
         listingIsLoading = true;
 
         subElements.render();
+
+        if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
+            dataUnavailableWhileOffline = true;
+
+            subElements.render();
+
+            return;
+        } else {
+            dataUnavailableWhileOffline = false;
+        }
 
         fs.listFolder(key).then(function(listing) {
             currentListing = listing;
@@ -186,6 +201,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentFolderKey = key;
 
             exports.navigate(currentFolderKey, true);
+
+            resources.syncOfflineUpdatedObjects().then(function() {
+                exports.populateFolderView(); // Syncing may have caused a few files to change
+            });
         });
 
         listingIsLoading = true;

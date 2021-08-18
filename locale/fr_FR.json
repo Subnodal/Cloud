@@ -19,8 +19,10 @@
         "back": "Retour",
         "forward": "Avant",
         "new": "Nouveau",
+        "retry": "Réessayez",
 
         "rootFolderName": "Mes fichiers",
+        "unknownName": "Inconnu",
 
         "folder": "Dossier",
 
@@ -53,6 +55,9 @@
         "setup_whyText3": "Si vous êtes dans un lieu de travail ou une école, votre administrateur informatique est en mesure d'afficher et de modifier vos informations personnelles, comme pour tout ce qui se trouve sous votre Compte Sousnœud. Cependant, ils ne pourront pas voir ou modifier les détails de votre compte personnel.",
         
         "emptyFolder_title": "Rien ici ...",
-        "emptyFolder_description": "Il n'y a pas de fichiers dans ce dossier. Allez-y et créez-en un !"
+        "emptyFolder_description": "Il n'y a pas de fichiers dans ce dossier. Allez-y et créez-en un !",
+
+        "offlineFolder_title": "Vous n'êtes pas connecté",
+        "offlineFolder_description": "Connectez-vous à internet pour afficher ce dossier."
     }
 }

@@ -96,7 +96,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
 
             if (typeof(uid) != "string") {
                 return resources.getProfileInfo(token).then(function(info) {
-                    resolve(info.uid);
+                    resolve(info?.uid || null);
                 });
             }
 

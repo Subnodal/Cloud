@@ -56,6 +56,9 @@
                     <s-if condition="{{ item.key == index.getRootFolderKey() }}">
                         <s-set var="name" value="_('rootFolderName')"></s-set>
                     </s-if>
+                    <s-if condition="{{ typeof(item.name) != 'string' }}">
+                        <s-set var="name" value="_('unknownName')"></s-set>
+                    </s-if>
                     <li>
                         <s-if condition="{{ i == index.getCurrentPath().length - 1 }}">
                             {{ name }}
@@ -76,7 +79,7 @@
             </button>
         </nav>
         <main sui-stack="column">
-            <s-if condition="{{ !index.getListingIsLoading() }}" sui-stack="column" sui-size="grow">
+            <s-if condition="{{ !index.getListingIsLoading() && !index.getDataUnavailableWhileOffline() }}" sui-stack="column" sui-size="grow">
                 <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
                     <ul sui-iconlist sui-size="grow" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
@@ -96,8 +99,16 @@
                     </div>
                 </s-else>
             </s-if>
-            <s-if condition="{{ index.getListingIsLoading() }}">
+            <s-if condition="{{ index.getListingIsLoading() && !index.getDataUnavailableWhileOffline() }}">
                 <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
+            </s-if>
+            <s-if condition="{{ index.getDataUnavailableWhileOffline() }}">
+                <div class="screenMessage subtle">
+                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                    <h2 sui-mono translate>offlineFolder_title</h2>
+                    <p translate>offlineFolder_description</p>
+                    <button translate>retry</button>
+                </div>
             </s-if>
         </main>
         <nav sui-screen="desktop">
