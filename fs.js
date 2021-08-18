@@ -85,12 +85,11 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
-    exports.createFile = function(name, mimeType, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
+    exports.createFile = function(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
         var newFileKey;
 
         return resources.createObject({
             type: "file",
-            mimeType,
             name,
             size: 0,
             contentsAddress: null,
@@ -112,7 +111,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             parentContents[newFileKey] = {
                 type: "file",
-                mimeType,
                 name
             };
 
