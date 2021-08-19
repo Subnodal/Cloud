@@ -58,6 +58,11 @@
         "offlineFolder_description": "连接到互联网以查看该文件夹。",
 
         "folderNotFound_title": "我们找不到您要找的东西",
-        "folderNotFound_description": "您要查找的文件夹可能已被删除。"
+        "folderNotFound_description": "您要查找的文件夹可能已被删除。",
+
+        "renameDuplicateFolder_title": "无法重命名此文件夹",
+        "renameDuplicateFolder_description": "同一个文件夹中已经有另一个文件同名。",
+        "renameDuplicateFile_title": "无法重命名此文件",
+        "renameDuplicateFile_description": "同一个文件夹中已经有另一个文件同名。"
     }
 }

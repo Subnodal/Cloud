@@ -61,6 +61,11 @@
         "offlineFolder_description": "Connectez-vous à internet pour afficher ce dossier.",
 
         "folderNotFound_title": "Nous ne pouvons pas trouver ce que vous cherchez",
-        "folderNotFound_description": "Le dossier que vous recherchez a peut-être été supprimé."
+        "folderNotFound_description": "Le dossier que vous recherchez a peut-être été supprimé.",
+
+        "renameDuplicateFolder_title": "Impossible de renommer ce dossier",
+        "renameDuplicateFolder_description": "Il y a déjà un autre fichier dans le même dossier avec ce nom.",
+        "renameDuplicateFile_title": "Impossible de renommer ce fichier",
+        "renameDuplicateFile_description": "Il y a déjà un autre fichier dans le même dossier avec ce nom."
     }
 }

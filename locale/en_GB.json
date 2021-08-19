@@ -65,7 +65,6 @@
 
         "renameDuplicateFolder_title": "Can't rename this folder",
         "renameDuplicateFolder_description": "There already is another file in the same folder with this name.",
-
         "renameDuplicateFile_title": "Can't rename this file",
         "renameDuplicateFile_description": "There already is another file in the same folder with this name."
     }
