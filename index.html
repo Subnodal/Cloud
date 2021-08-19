@@ -85,7 +85,7 @@
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <li tabindex="0" data-key="{{ item.key }}">
                                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add custom file/folder icons -->
-                                <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);" data-key="{{ item.key }}">
+                                <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
                                 <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
                             </li>
                         </s-each>
@@ -122,6 +122,19 @@
             <progress value="0"></progress>
             <span><a href="javascript:void(0);" sui-style="integrated">{{ _("spaceLeft", {value: 0, space: "0 bytes"}) }} <sui-icon sui-flippable aria-hidden="true">arrow_right</sui-icon></a></span>
         </nav>
+        <dialog id="renameDuplicateDialog">
+            <s-if condition="{{ index.getRenameDuplicateIsFolder() }}">
+                <h1 translate>renameDuplicateFolder_title</h1>
+                <p translate>renameDuplicateFolder_description</p>
+            </s-if>
+            <s-else>
+                <h1 translate>renameDuplicateFile_title</h1>
+                <p translate>renameDuplicateFile_description</p>
+            </s-else>
+            <sui-buttonrow>
+                <button sui-action="close">OK</button>
+            </sui-buttonrow>
+        </dialog>
         <sui-menu id="mobileMenu">
             <button translate>settings</button>
             <button id="mobileAccountButton" translate>accounts</button>

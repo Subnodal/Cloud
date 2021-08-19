@@ -13,6 +13,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var elements = require("com.subnodal.subui.elements");
     var menus = require("com.subnodal.subui.menus");
     var views = require("com.subnodal.subui.views");
+    var dialogs = require("com.subnodal.subui.dialogs");
 
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
@@ -30,6 +31,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var listingIsLoading = true;
     var dataUnavailableWhileOffline = false;
     var dataNotFound = false;
+    var renameDuplicateIsFolder = false;
 
     window.index = exports;
     window.l10n = l10n;
@@ -70,6 +72,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getListingIsAvailable = function() {
         return !exports.getListingIsLoading() && !exports.getDataUnavailableWhileOffline() && !exports.getDataNotFound();
+    };
+
+    exports.getRenameDuplicateIsFolder = function() {
+        return renameDuplicateIsFolder;
     };
 
     exports.populateAccounts = function() {
@@ -204,14 +210,48 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.renameItemByInput = function(input) {
-        var key = input.getAttribute("data-key");
+        var key = input.closest("li").getAttribute("data-key");
         var appendExtension = "";
 
+        if (input.value.trim() == "") {
+            exports.populateFolderView(); // Revert the rename input
+
+            return;
+        }
+
         return resources.getObject(key).then(function(data) {
+            if (data == null) {
+                exports.populateFolderView(); // Item might have been deleted
+
+                return;
+            }
+
             var extensionMatch = (data?.name || "").match(/(\.[a-zA-Z0-9]+)$/);
 
             if (extensionMatch && data?.type == "file") {
                 appendExtension = extensionMatch[1]; // Add original extension back on if it was hidden
+            }
+
+            var itemAlreadyExists = false;
+
+            currentListing.forEach(function(item) {
+                if (item.key == key) {
+                    return;
+                }
+    
+                if (item.name == input.value.trim() + appendExtension) {
+                    itemAlreadyExists = true;
+                }
+            });
+
+            if (itemAlreadyExists) {
+                renameDuplicateIsFolder = data?.type == "folder";
+
+                dialogs.open(document.querySelector("#renameDuplicateDialog"));
+
+                exports.populateFolderView(); // Revert the rename input
+
+                return Promise.resolve();
             }
 
             return fs.renameItem(key, input.value.trim() + appendExtension, currentFolderKey);

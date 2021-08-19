@@ -61,6 +61,12 @@
         "offlineFolder_description": "Connect to the internet to view this folder.",
 
         "folderNotFound_title": "We can't find what you're looking for",
-        "folderNotFound_description": "The folder you're looking for may have been deleted."
+        "folderNotFound_description": "The folder you're looking for may have been deleted.",
+
+        "renameDuplicateFolder_title": "Can't rename this folder",
+        "renameDuplicateFolder_description": "There already is another file in the same folder with this name.",
+
+        "renameDuplicateFile_title": "Can't rename this file",
+        "renameDuplicateFile_description": "There already is another file in the same folder with this name."
     }
 }

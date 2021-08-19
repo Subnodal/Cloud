@@ -136,6 +136,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var parentContents = parentData.contents || {};
 
+            if (Object.keys(parentContents).map((item) => item.name).includes(newName)) {
+                return Promise.reject("A file with the same name already exists in this folder");
+            }
+
             parentContents[key].name = newName;
 
             return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
