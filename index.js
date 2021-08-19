@@ -18,6 +18,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
     var fs = require("com.subnodal.cloud.fs");
+    var thumbnails = require("com.subnodal.cloud.thumbnails");
 
     const LIVE_REFRESH_INTERVAL = 5 * 1000; // 5 seconds
 
@@ -37,6 +38,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     window.l10n = l10n;
     window.profiles = profiles;
     window.fs = fs;
+    window.thumbnails = thumbnails;
 
     exports.getAccounts = function() {
         return accounts;
@@ -313,6 +315,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     subElements.ready(function() {
         exports.reload();
+
+        thumbnails.startThemeDetection(function() {
+            exports.populateFolderView();
+        });
 
         setInterval(function() {
             exports.performLiveRefresh().then(function(refreshed) {

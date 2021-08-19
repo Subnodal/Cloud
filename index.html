@@ -25,6 +25,7 @@
         <script src="/resources.js"></script>
         <script src="/profiles.js"></script>
         <script src="/fs.js"></script>
+        <script src="/thumbnails.js"></script>
         <script src="/script.js"></script>
         <script src="/index.js"></script>
     </head>
@@ -84,7 +85,7 @@
                     <ul sui-iconlist sui-size="grow" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <li tabindex="0" data-key="{{ item.key }}">
-                                <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add custom file/folder icons -->
+                                <img src="{{ thumbnails.getThumbnailForItem(item) }}">
                                 <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
                                 <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
                             </li>
@@ -159,7 +160,10 @@
             <button><sui-icon></sui-icon> {{ _("manageAccounts") }}</button>
         </sui-menu>
         <sui-menu id="newMenu">
-            <button id="createFolderButton" translate>folder</button>
+            <button id="createFolderButton">
+                <img src="{{ thumbnails.formatUrl('/media/thumbnails/emptyFolder_{theme}.svg') }}" aria-hidden="true">
+                {{ _("folder") }}
+            </button>
         </sui-menu>
     </body>
 </html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2 (1.0.2+r75+1)"
+   sodipodi:docname="emptyFolder.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.94946224"
+     inkscape:cx="206.31879"
+     inkscape:cy="277.74438"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-page="true"
+     inkscape:object-paths="true"
+     inkscape:window-width="1200"
+     inkscape:window-height="742"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g876"
+       transform="matrix(1.2047491,0,0,1.2047491,-13.901764,-13.905836)">
+      <path
+         d="M 56.516688,22.697894 H 22.783524 c -6.184414,0 -11.188167,5.059974 -11.188167,11.244388 l -0.05622,67.466328 c 0,6.18441 5.059974,11.24439 11.244388,11.24439 h 89.955105 c 6.18441,0 11.24439,-5.05998 11.24439,-11.24439 V 45.18667 c 0,-6.184414 -5.05998,-11.244388 -11.24439,-11.244388 H 67.761076 Z"
+         id="path835"
+         style="fill:#e5e5e5;fill-opacity:1;stroke-width:5.62219" />
+      <rect
+         style="fill:#cdcdcd;fill-opacity:1;stroke-width:4.76548"
+         id="rect849"
+         width="112.44388"
+         height="74.923729"
+         x="11.539136"
+         y="37.907291"
+         ry="11.509375" />
+    </g>
+  </g>
+</svg>
