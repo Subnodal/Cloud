@@ -18,6 +18,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
     var fs = require("com.subnodal.cloud.fs");
 
+    const LIVE_REFRESH_INTERVAL = 5 * 1000; // 5 seconds
+
     var firstLoad = true;
     var accounts = {};
     var rootFolderKey = null;
@@ -88,12 +90,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.populateFolderView = function(key = currentFolderKey, hardRefresh = false) {
+    exports.populateFolderView = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
         if (key == null) {
             return Promise.reject("Key is null");
         }
 
-        listingIsLoading = true;
+        listingIsLoading = !refreshInBackground;
 
         subElements.render();
 
@@ -216,6 +218,32 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
+    exports.performLiveRefresh = function() {
+        if (exports.getListingIsLoading() || exports.getListingIsUnavailable()) {
+            return Promise.resolve(false); // Don't interfere with any current loading events
+        }
+
+        var inputFocused = false;
+
+        document.querySelectorAll("#currentFolderView li input").forEach(function(input) {
+            if (document.activeElement.isSameNode(input)) {
+                inputFocused = true;
+            }
+        });
+
+        if (inputFocused) {
+            return Promise.resolve(false); // Don't interfere with renaming
+        }
+
+        if (views.getSelectedListItems(document.querySelector("#currentFolderView")).length > 0) {
+            return Promise.resolve(false); // Don't interfere with user's selection
+        }
+
+        return exports.populateFolderView(currentFolderKey, true, true).then(function() {
+            return Promise.resolve(true);
+        });
+    };
+
     exports.reload = function() {
         exports.populateAccounts();
 
@@ -245,6 +273,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     subElements.ready(function() {
         exports.reload();
+
+        setInterval(function() {
+            exports.performLiveRefresh().then(function(refreshed) {
+                if (refreshed) {
+                    console.log("Live refresh performed");
+                } else {
+                    console.log("Live refresh cancelled");
+                }
+            });
+        }, LIVE_REFRESH_INTERVAL);
 
         document.querySelector("#mobileMenuButton").addEventListener("click", function(event) {
             menus.toggleMenu(document.querySelector("#mobileMenu"), event.target);
