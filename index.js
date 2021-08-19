@@ -219,7 +219,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
     exports.reload = function() {
         exports.populateAccounts();
 
-        fs.getRootObjectKeyFromProfile().then(function(key) {
+        resources.syncOfflineUpdatedObjects().then(function() {
+            return fs.getRootObjectKeyFromProfile();
+        }).then(function(key) {
             if (key == null) {
                 return;
             }
@@ -229,9 +231,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             exports.navigate(currentFolderKey, true);
 
-            resources.syncOfflineUpdatedObjects().then(function() {
-                exports.populateFolderView(); // Syncing may have caused a few files to change
-            });
+            exports.populateFolderView(); // Syncing may have caused a few files to change
         });
 
         listingIsLoading = true;

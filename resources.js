@@ -113,7 +113,7 @@ namespace("com.subnodal.cloud.resources", function(exports) {
                 if (data == null || data.lastModified < cachedObject.lastModified) {
                     console.log(`Setting updated object ${key}`);
 
-                    return exports.setFolderObject(key, cachedObject, token);
+                    return exports.setObject(key, cachedObject, token);
                 } else if (data.type == "folder") {
                     console.log(`Merging updated object ${key} (is folder)`);
 
