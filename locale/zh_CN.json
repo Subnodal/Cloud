@@ -55,6 +55,9 @@
         "emptyFolder_description": "此文件夹中没有文件。 来吧，创造一个！",
 
         "offlineFolder_title": "你离线",
-        "offlineFolder_description": "连接到互联网以查看该文件夹。"
+        "offlineFolder_description": "连接到互联网以查看该文件夹。",
+
+        "folderNotFound_title": "我们找不到您要找的东西",
+        "folderNotFound_description": "您要查找的文件夹可能已被删除。"
     }
 }

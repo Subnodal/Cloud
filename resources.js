@@ -84,7 +84,15 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.addOfflineUpdatedObjectToQueue = function(key) {
-        localStorage.setItem("subnodalCloud_offlineUpdatedObjectsQueue", JSON.stringify([...exports.getOfflineUpdatedObjects, key]));
+        var queue = exports.getOfflineUpdatedObjectsQueue();
+
+        if (queue.includes(key)) {
+            return; // Already queued; so doesn't need to be updated again
+        }
+
+        queue.push(key);
+
+        localStorage.setItem("subnodalCloud_offlineUpdatedObjectsQueue", JSON.stringify(queue));
 
         console.log(`Added offline updated object queue for key ${key}`);
     };
@@ -102,15 +110,18 @@ namespace("com.subnodal.cloud.resources", function(exports) {
             var cachedObject = exports.getObjectCache()[key];
 
             return exports.getObject(key).then(function(data) {
-                if (data != null && data.lastModified < cachedObject.lastModified) {
+                if (data == null || data.lastModified < cachedObject.lastModified) {
                     console.log(`Setting updated object ${key}`);
 
-                    return exports.setObject(key, cachedObject, token);
+                    return exports.setFolderObject(key, cachedObject, token);
+                } else if (data.type == "folder") {
+                    console.log(`Merging updated object ${key} (is folder)`);
+
+                    return exports.setFolderObject(key, cachedObject, token);
                 } else {
                     console.log(`Skipping sync of object ${key} since it's been modified online`);
 
                     return Promise.resolve(); // Online changes are newer than offline, so don't overwrite
-                    // TODO: We might need to merge revisions somehow, which could get tricky
                 }
             });
         })).then(function(outcomes) {
@@ -145,7 +156,11 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     exports.setObject = function(key, data, token = profiles.getSelectedProfileToken()) {
         var oldData;
 
-        exports.setObjectCacheItem(key, {...exports(exports.getObjectCache()[key] || {}), ...data});
+        exports.setObjectCacheItem(key, {
+            ...(exports.getObjectCache()[key] || {}),
+            ...data,
+            lastModified: new Date().getTime()
+        });
 
         if (!navigator.onLine) {
             exports.addOfflineUpdatedObjectToQueue(key); // Can't do it online right now, so leave it for later when we can sync
@@ -174,6 +189,20 @@ namespace("com.subnodal.cloud.resources", function(exports) {
         });
     };
 
+    exports.setFolderObject = function(key, data, token = profiles.getSelectedProfileToken()) {
+        return exports.getObject(key).then(function(oldData) {
+            // We have to merge the folder *contents* to ensure that the folder is up-to-date
+            return exports.setObject(key, {
+                ...(oldData || {}),
+                ...data,
+                contents: {
+                    ...(oldData?.contents || []),
+                    ...(data?.contents || [])
+                }
+            }, token);
+        });
+    };
+
     exports.createObject = function(data, token = profiles.getSelectedProfileToken()) {
         var key = core.generateKey(64);
 
@@ -196,7 +225,7 @@ namespace("com.subnodal.cloud.resources", function(exports) {
             if (!navigator.onLine) {
                 exports.addOfflineUpdatedObjectToQueue(key); // Can't do it online right now, so leave it for later when we can sync
 
-                return Promise.resolve();
+                return Promise.resolve(key);
             }
 
             return exports.setObject(key, {

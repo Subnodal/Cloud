@@ -27,6 +27,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var currentListing = [];
     var listingIsLoading = true;
     var dataUnavailableWhileOffline = false;
+    var dataNotFound = false;
 
     window.index = exports;
     window.l10n = l10n;
@@ -57,6 +58,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return dataUnavailableWhileOffline;
     };
 
+    exports.getDataNotFound = function() {
+        return dataNotFound;
+    };
+
+    exports.getListingIsUnavailable = function() {
+        return !exports.getListingIsLoading() && (exports.getDataUnavailableWhileOffline() || exports.getDataNotFound());
+    };
+
+    exports.getListingIsAvailable = function() {
+        return !exports.getListingIsLoading() && !exports.getDataUnavailableWhileOffline() && !exports.getDataNotFound();
+    };
+
     exports.populateAccounts = function() {
         var tokens = profiles.listProfiles();
 
@@ -75,9 +88,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.populateFolderView = function(key = currentFolderKey) {
+    exports.populateFolderView = function(key = currentFolderKey, hardRefresh = false) {
         if (key == null) {
-            return;
+            return Promise.reject("Key is null");
         }
 
         listingIsLoading = true;
@@ -85,18 +98,30 @@ namespace("com.subnodal.cloud.index", function(exports) {
         subElements.render();
 
         if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
+            listingIsLoading = false;
             dataUnavailableWhileOffline = true;
 
             subElements.render();
 
-            return;
+            return Promise.reject("Data unavailable while offline");
         } else {
             dataUnavailableWhileOffline = false;
         }
 
-        fs.listFolder(key).then(function(listing) {
+        // TODO: Set these args according to user preference (eg. if they want to sort by date)
+        return fs.listFolder(key, undefined, false, true, hardRefresh).then(function(listing) {
+            if (listing == null) {
+                dataNotFound = true;
+                listingIsLoading = false;
+
+                subElements.render();
+
+                return Promise.reject("Data not found");
+            }
+
             currentListing = listing;
             listingIsLoading = false;
+            dataNotFound = false;
 
             subElements.render();
 
@@ -121,6 +146,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     }
                 });
             });
+
+            return Promise.resolve(listing);
         });
     };
 
@@ -252,9 +279,24 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         document.querySelector("#createFolderButton").addEventListener("click", function() {
-            fs.createFolder(`Test ${Math.floor(Math.random() * 1000)}`, currentFolderKey).then(function() {
-                exports.populateFolderView();
+            fs.createFolder(`Test ${Math.floor(Math.random() * 1000)}`, currentFolderKey).then(function(newFolderKey) {
+                exports.populateFolderView(currentFolderKey, true).then(function() {
+                    document.querySelectorAll("#currentFolderView li").forEach(function(element) {
+                        if (element.getAttribute("data-key") != newFolderKey) {
+                            return;
+                        }
+
+                        views.selectListItem(element, views.selectionModes.SINGLE);
+
+                        element.querySelector("input").focus();
+                        element.querySelector("input").select();
+                    });
+                });
             });
+        });
+
+        document.querySelector("#viewOfflineRetryButton").addEventListener("click", function() {
+            exports.populateFolderView(currentFolderKey, true);
         });
 
         elements.attachSelectorEvent("click", "#accountsMenuList button", function(element) {

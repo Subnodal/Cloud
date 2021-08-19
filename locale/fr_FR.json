@@ -58,6 +58,9 @@
         "emptyFolder_description": "Il n'y a pas de fichiers dans ce dossier. Allez-y et créez-en un !",
 
         "offlineFolder_title": "Vous n'êtes pas connecté",
-        "offlineFolder_description": "Connectez-vous à internet pour afficher ce dossier."
+        "offlineFolder_description": "Connectez-vous à internet pour afficher ce dossier.",
+
+        "folderNotFound_title": "Nous ne pouvons pas trouver ce que vous cherchez",
+        "folderNotFound_description": "Le dossier que vous recherchez a peut-être été supprimé."
     }
 }

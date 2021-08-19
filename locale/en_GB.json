@@ -58,6 +58,9 @@
         "emptyFolder_description": "There are no files in this folder. Go ahead and create one!",
 
         "offlineFolder_title": "You're offline",
-        "offlineFolder_description": "Connect to the internet to view this folder."
+        "offlineFolder_description": "Connect to the internet to view this folder.",
+
+        "folderNotFound_title": "We can't find what you're looking for",
+        "folderNotFound_description": "The folder you're looking for may have been deleted."
     }
 }

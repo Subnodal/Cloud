@@ -87,7 +87,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 name
             };
 
-            return resources.setObject(parentFolder, {contents: parentContents}, token);
+            return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
             return Promise.resolve(newFolderKey);
         });
@@ -122,7 +122,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 name
             };
 
-            return resources.setObject(parentFolder, {contents: parentContents}, token);
+            return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
             return Promise.resolve(newFileKey);
         });
@@ -138,9 +138,9 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             parentContents[key].name = newName;
 
-            return resources.setObject(parentFolder, {contents: parentContents}, token);
+            return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
-            return resources.setObject(key, {name: newName}, token);
+            return resources.setObject(key, {name: newName}, token); // Doesn't need to be `setObjectFolder` since we're not manipulating folder contents
         });
     };
 
@@ -148,12 +148,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         var listing = [];
 
         return resources.getObject(folderKey, !hardRefresh).then(function(data) {
-            if (data == null) {
-                return Promise.reject("Data is inaccessible; this may be because the device is offline");
-            }
-
-            if (data?.type != "folder") {
-                return Promise.reject("The requested directory is not a folder");
+            if (data == null || data?.deleted == true || data?.type != "folder") {
+                return Promise.resolve(null);
             }
 
             var contents = data.contents || {};
@@ -166,6 +162,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return resources.getObject(item.key, !hardRefresh);
             }));
         }).then(function(objects) {
+            if (objects == null) {
+                return Promise.resolve(null);
+            }
+
             for (var i = 0; i < listing.length; i++) {
                 listing[i] = {...objects[i], ...listing[i]};
             }
