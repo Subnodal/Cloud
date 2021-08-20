@@ -228,7 +228,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            var extensionMatch = (data?.name || "").match(/(\.[a-zA-Z0-9]+)$/);
+            var extensionMatch = (data?.name || "").match(/(\.[a-zA-Z0-9.]+)$/);
 
             if (extensionMatch && data?.type == "file") {
                 appendExtension = extensionMatch[1]; // Add original extension back on if it was hidden

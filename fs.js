@@ -54,7 +54,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.getItemDisplayName = function(item) {
         if (item.type == "file") {
-            return item.name.replace(/\.[a-zA-Z0-9]+$/, "");
+            return item.name.replace(/\.[a-zA-Z0-9.]+$/, "");
         }
 
         return item.name;

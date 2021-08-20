@@ -8,7 +8,11 @@
 */
 
 namespace("com.subnodal.cloud.thumbnails", function(exports) {
-    var subElements = require("com.subnodal.subelements");
+    var associations = require("com.subnodal.cloud.associations");
+
+    exports.THUMBNAIL_DEFAULT_URL = "/media/thumbnails/default.svg";
+    exports.THUMBNAIL_EMPTY_FOLDER_URL = "/media/thumbnails/emptyFolder_{theme}.svg";
+    exports.THUMBNAIL_FILLED_FOLDER_URL = "/media/thumbnails/filledFolder_{theme}.svg";
 
     exports.getThemeVariant = function() {
         return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -21,13 +25,15 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
     exports.getThumbnailForItem = function(item) {
         if (item.type == "folder") {
             if (Object.keys(item.contents || {}).length > 0) {
-                return exports.formatUrl("/media/thumbnails/filledFolder_{theme}.svg");
+                return exports.formatUrl(exports.THUMBNAIL_FILLED_FOLDER_URL);
             } else {
-                return exports.formatUrl("/media/thumbnails/emptyFolder_{theme}.svg");
+                return exports.formatUrl(exports.THUMBNAIL_EMPTY_FOLDER_URL);
             }
         } else {
-            // TODO: Determine thumbnail to use from file extension
-            return exports.formatUrl("https://cdn.subnodal.com/lib/subui/media/account.svg"); // This is a placeholder for now
+            return exports.formatUrl(
+                associations.findAssociationForFilename(item.name)?.thumbnailUrl ||
+                exports.THUMBNAIL_DEFAULT_URL
+            );
         }
     };
 
