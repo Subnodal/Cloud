@@ -261,6 +261,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.performLiveRefresh = function() {
+        if (!document.hasFocus()) {
+            return; // Minimise bandwidth used for other applications
+        }
+
         if (exports.getListingIsLoading() || exports.getListingIsUnavailable()) {
             return Promise.resolve(false); // Don't interfere with any current loading events
         }
