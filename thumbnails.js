@@ -22,6 +22,10 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
         return url.replace(/{theme}/g, exports.getThemeVariant());
     };
 
+    exports.getThumbnailForAssociation = function(association) {
+        return exports.formatUrl(association?.thumbnailUrl || exports.THUMBNAIL_DEFAULT_URL);
+    };
+
     exports.getThumbnailForItem = function(item) {
         if (item.type == "folder") {
             if (Object.keys(item.contents || {}).length > 0) {
@@ -30,10 +34,7 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
                 return exports.formatUrl(exports.THUMBNAIL_EMPTY_FOLDER_URL);
             }
         } else {
-            return exports.formatUrl(
-                associations.findAssociationForFilename(item.name)?.thumbnailUrl ||
-                exports.THUMBNAIL_DEFAULT_URL
-            );
+            return exports.getThumbnailForAssociation(associations.findAssociationForFilename(item.name));
         }
     };
 

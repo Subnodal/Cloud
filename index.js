@@ -18,6 +18,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
     var fs = require("com.subnodal.cloud.fs");
+    var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
 
     const LIVE_REFRESH_INTERVAL = 5 * 1000; // 5 seconds
@@ -38,6 +39,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     window.l10n = l10n;
     window.profiles = profiles;
     window.fs = fs;
+    window.associations = associations;
     window.thumbnails = thumbnails;
 
     exports.getAccounts = function() {
@@ -154,6 +156,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
         
                         return;
                     }
+
+                    if (item.type == "file") {
+                        var association = associations.findAssociationForFilename(item.name);
+
+                        if (association == null) {
+                            return;
+                        }
+
+                        window.open(association.getOpenUrlForItem(item));
+
+                        return;
+                    }
                 });
             });
 
@@ -211,6 +225,36 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return null;
     };
 
+    exports.nameTaken = function(name, skipKey = null) {
+        for (var i = 0; i < currentListing.length; i++) {
+            if (currentListing[i].key == skipKey) {
+                continue;
+            }
+
+            if (currentListing[i].name == name) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    exports.findNextAvailableName = function(originalName, append = "", skipKey = null) {
+        var copyNumber = 1;
+        var newName = originalName;
+
+        if (!exports.nameTaken(originalName + append, skipKey)) {
+            return originalName;
+        }
+
+        do {
+            copyNumber++;
+            newName = _("duplicateDocumentCopyMark", {name: originalName, number: copyNumber}) + append;
+        } while (exports.nameTaken(newName, skipKey))
+
+        return newName;
+    };
+
     exports.renameItemByInput = function(input) {
         var key = input.closest("li").getAttribute("data-key");
         var appendExtension = "";
@@ -234,19 +278,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 appendExtension = extensionMatch[1]; // Add original extension back on if it was hidden
             }
 
-            var itemAlreadyExists = false;
-
-            currentListing.forEach(function(item) {
-                if (item.key == key) {
-                    return;
-                }
-    
-                if (item.name == input.value.trim() + appendExtension) {
-                    itemAlreadyExists = true;
-                }
-            });
-
-            if (itemAlreadyExists) {
+            if (exports.nameTaken(input.value.trim() + appendExtension, key)) {
                 renameDuplicateIsFolder = data?.type == "folder";
 
                 dialogs.open(document.querySelector("#renameDuplicateDialog"));
@@ -257,6 +289,35 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }
 
             return fs.renameItem(key, input.value.trim() + appendExtension, currentFolderKey);
+        });
+    };
+
+    exports.selectItemForRenaming = function(key) {
+        document.querySelectorAll("#currentFolderView li").forEach(function(element) {
+            if (element.getAttribute("data-key") != key) {
+                return;
+            }
+
+            views.selectListItem(element, views.selectionModes.SINGLE);
+
+            element.querySelector("input").focus();
+            element.querySelector("input").select();
+        });
+    };
+
+    exports.createFileFromNewMenu = function(element) {
+        var extension = element.getAttribute("data-extension");
+        var association = associations.findAssociationForExtension(extension);
+        var newFileKey;
+
+        return fs.createFile(exports.findNextAvailableName(association.documentTypeName, "." + extension), currentFolderKey).then(function(key) {
+            newFileKey = key;
+
+            return exports.populateFolderView(currentFolderKey, true);
+        }).then(function() {
+            exports.selectItemForRenaming(newFileKey);
+
+            return Promise.resolve();
         });
     };
 
@@ -367,19 +428,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         document.querySelector("#createFolderButton").addEventListener("click", function() {
-            fs.createFolder(`Test ${Math.floor(Math.random() * 1000)}`, currentFolderKey).then(function(newFolderKey) {
-                exports.populateFolderView(currentFolderKey, true).then(function() {
-                    document.querySelectorAll("#currentFolderView li").forEach(function(element) {
-                        if (element.getAttribute("data-key") != newFolderKey) {
-                            return;
-                        }
+            var newFolderKey;
 
-                        views.selectListItem(element, views.selectionModes.SINGLE);
-
-                        element.querySelector("input").focus();
-                        element.querySelector("input").select();
-                    });
-                });
+            fs.createFolder(exports.findNextAvailableName(_("newFolderName")), currentFolderKey).then(function(key) {
+                newFolderKey = key;
+    
+                return exports.populateFolderView(currentFolderKey, true);
+            }).then(function() {
+                exports.selectItemForRenaming(newFolderKey);
             });
         });
 

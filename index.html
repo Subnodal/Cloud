@@ -165,6 +165,15 @@
                 <img src="{{ thumbnails.formatUrl('/media/thumbnails/emptyFolder_{theme}.svg') }}" aria-hidden="true">
                 {{ _("folder") }}
             </button>
+            <hr>
+            <s-each in="associations.getList()" valuevar="association">
+                <s-if condition="{{ association.creatable }}">
+                    <button onclick="index.createFileFromNewMenu(this);" data-extension="{{ association.extension }}">
+                        <img src="{{ thumbnails.getThumbnailForAssociation(association) }}" aria-hidden="true">
+                        {{ association.documentTypeName }}
+                    </button>
+                </s-if>
+            </s-each>
         </sui-menu>
     </body>
 </html>

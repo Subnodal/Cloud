@@ -7,6 +7,10 @@
         "cloud": "云",
         "subnodalCloud": "次结·云",
 
+        "subnodalWriter": "次结·写",
+        "subnodalSigma": "次结·西格玛",
+        "subnodalPresenter": "次结·展示",
+
         "loading": "正在加载……",
         "done": "完毕",
         "close": "关",
@@ -23,6 +27,7 @@
 
         "rootFolderName": "我的文件夹",
         "unknownName": "未知",
+        "defaultDocumentTypeName": "{0}文档",
 
         "folder": "文件夹",
 

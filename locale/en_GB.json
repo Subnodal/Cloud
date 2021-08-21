@@ -22,7 +22,10 @@
         "retry": "Retry",
 
         "rootFolderName": "My files",
+        "newFolderName": "New folder",
         "unknownName": "Unknown",
+        "defaultDocumentTypeName": "{app} document",
+        "duplicateDocumentCopyMark": "{name} ({number})",
 
         "folder": "Folder",
 

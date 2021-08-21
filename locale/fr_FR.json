@@ -7,6 +7,10 @@
         "cloud": "Cloud",
         "subnodalCloud": "Sousnœud Cloud",
 
+        "subnodalWriter": "Sousnœud Rédacteur",
+        "subnodalSigma": "Sousnœud Sigma",
+        "subnodalPresenter": "Sousnœud Présentateur",
+
         "loading": "Chargement ...",
         "done": "Terminé",
         "close": "Fermer",
@@ -23,6 +27,7 @@
 
         "rootFolderName": "Mes fichiers",
         "unknownName": "Inconnu",
+        "defaultDocumentTypeName": "Document {0}",
 
         "folder": "Dossier",
 
