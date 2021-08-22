@@ -338,8 +338,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }
         });
 
-        if (inputFocused) {
-            return Promise.resolve(false); // Don't interfere with renaming
+        if (inputFocused || document.activeElement.matches("#currentFolderView li")) {
+            return Promise.resolve(false); // Don't interfere with focus
         }
 
         if (views.getSelectedListItems(document.querySelector("#currentFolderView")).length > 0) {
