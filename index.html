@@ -32,7 +32,7 @@
     </head>
     <body hidden>
         <nav sui-style="thick" sui-screen="desktop">
-            <a href="/" sui-style="integrated">
+            <a href="/" sui-style="integrated" aria-label="{{ _('subnodalCloud') }}">
                 <img src="https://cloud.subnodal.com/media/icon.svg" aria-hidden="true">
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
@@ -87,7 +87,7 @@
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
                                 <li tabindex="0" data-key="{{ item.key }}">
-                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}">
+                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
                                     <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
                                     <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
                                 </li>
@@ -97,7 +97,7 @@
                 </s-if>
                 <s-else>
                     <div class="screenMessage subtle">
-                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
                         <h2 sui-mono translate>emptyFolder_title</h2>
                         <p translate>emptyFolder_description</p>
                     </div>
@@ -108,7 +108,7 @@
             </s-if>
             <s-if condition="{{ index.getListingIsUnavailable() && index.getDataUnavailableWhileOffline() }}">
                 <div class="screenMessage subtle">
-                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
                     <h2 sui-mono translate>offlineFolder_title</h2>
                     <p translate>offlineFolder_description</p>
                     <button translate id="viewOfflineRetryButton">retry</button>
@@ -116,7 +116,7 @@
             </s-if>
             <s-if condition="{{ index.getListingIsUnavailable() && index.getDataNotFound() }}">
                 <div class="screenMessage subtle">
-                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg"> <!-- TODO: Add nice graphic -->
+                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
                     <h2 sui-mono translate>folderNotFound_title</h2>
                     <p translate>folderNotFound_description</p>
                 </div>
