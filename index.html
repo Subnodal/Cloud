@@ -85,11 +85,13 @@
                 <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
                     <ul sui-iconlist sui-size="grow" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
-                            <li tabindex="0" data-key="{{ item.key }}">
-                                <img src="{{ thumbnails.getThumbnailForItem(item) }}">
-                                <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
-                                <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
-                            </li>
+                            <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
+                                <li tabindex="0" data-key="{{ item.key }}">
+                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}">
+                                    <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
+                                    <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
+                                </li>
+                            </s-if>
                         </s-each>
                     </ul>
                 </s-if>
