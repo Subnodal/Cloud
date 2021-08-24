@@ -12,6 +12,8 @@
         "close": "Close",
         "learnMore": "Learn more",
         "openMainMenu": "Open main menu",
+        "viewMenu": "Viewing options",
+        "openViewMenu": "Open viewing options",
         "accounts": "Accounts",
         "addAccount": "Add account",
         "manageAccounts": "Manage accounts",
@@ -46,6 +48,13 @@
             "{value} > 0": "{space} left",
             "{value} == 0": "No space left"
         },
+
+        "view_sortByName": "Sort by name",
+        "view_sortByCreatedAt": "Sort by creation date",
+        "view_sortByLastModified": "Sort by last modification date",
+        "view_sortBySize": "Sort by size",
+        "view_sortReverse": "Reverse sorting order",
+        "view_seperateFolders": "Seperate folders from files",
 
         "setup_getStarted": "Get started with Subnodal Cloud",
         "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",

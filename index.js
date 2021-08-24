@@ -15,8 +15,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var views = require("com.subnodal.subui.views");
     var dialogs = require("com.subnodal.subui.dialogs");
 
-    var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
+    var profiles = require("com.subnodal.cloud.profiles");
+    var config = require("com.subnodal.cloud.config");
     var fs = require("com.subnodal.cloud.fs");
     var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
@@ -38,6 +39,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     window.index = exports;
     window.l10n = l10n;
     window.profiles = profiles;
+    window.config = config;
     window.fs = fs;
     window.associations = associations;
     window.thumbnails = thumbnails;
@@ -120,8 +122,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
             dataUnavailableWhileOffline = false;
         }
 
-        // TODO: Set these args according to user preference (eg. if they want to sort by date)
-        return fs.listFolder(key, undefined, false, true, hardRefresh).then(function(listing) {
+        return fs.listFolder(
+            key,
+            config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME),
+            config.getSetting("cloud_sortReverse", "boolean", false),
+            config.getSetting("cloud_seperateFolders", "boolean", true),
+            hardRefresh
+        ).then(function(listing) {
             if (listing == null) {
                 dataNotFound = true;
                 listingIsLoading = false;
@@ -352,6 +359,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.reload = function() {
+        config.init();
+
         exports.populateAccounts();
 
         resources.syncOfflineUpdatedObjects().then(function() {
@@ -378,6 +387,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
         firstLoad = false;
     };
 
+    exports.setSettingAndRepopulate = function(setting, data) {
+        config.setSetting(setting, data);
+
+        exports.populateFolderView();
+    }
+
     subElements.ready(function() {
         exports.reload();
 
@@ -396,17 +411,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
         }, LIVE_REFRESH_INTERVAL);
 
         document.querySelector("#mobileMenuButton").addEventListener("click", function(event) {
-            menus.toggleMenu(document.querySelector("#mobileMenu"), event.target);
+            menus.toggleMenu(document.querySelector("#mobileMenu"), elements.findAncestor(event.target, "button"));
         });
 
         document.querySelectorAll("#accountButton, #mobileAccountButton").forEach(function(element) {
             element.addEventListener("click", function(event) {
                 menus.toggleMenu(document.querySelector("#accountsMenu"), event.target);
             });
-        });
-
-        document.querySelector("#accountButton").addEventListener("click", function(event) {
-            menus.toggleMenu(document.querySelector("#accountsMenu"), event.target);
         });
 
         document.querySelector("#addAccountButton").addEventListener("click", function() {
@@ -436,6 +447,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return exports.populateFolderView(currentFolderKey, true);
             }).then(function() {
                 exports.selectItemForRenaming(newFolderKey);
+            });
+        });
+
+        document.querySelectorAll("#viewMenuButton, #mobileViewMenuButton").forEach(function(element) {
+            element.addEventListener("click", function(event) {
+                menus.toggleMenu(document.querySelector("#viewMenu"), elements.findAncestor(event.target, "button"), true);
             });
         });
 

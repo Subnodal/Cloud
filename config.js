@@ -1,0 +1,48 @@
+/*
+    Subnodal Cloud
+
+    Copyright (C) Subnodal Technologies. All Rights Reserved.
+
+    https://cloud.subnodal.com
+    Licenced by the Subnodal Open-Source Licence, which can be found at LICENCE.md.
+*/
+
+namespace("com.subnodal.cloud.config", function(exports) {
+    var resources = require("com.subnodal.cloud.resources");
+
+    exports.data = {};
+
+    exports.getSetting = function(setting, requiredType = null, fallback = null) {
+        if (!exports.data.hasOwnProperty(setting) || (requiredType != null && typeof(exports.data[setting]) != requiredType)) {
+            return fallback;
+        }
+
+        return exports.data[setting];
+    };
+
+    exports.setSetting = function(setting, data) {
+        exports.data[setting] = data; // Set immediately
+
+        resources.getProfileInfo().then(function(oldData) {
+            if (typeof(oldData?.config) == "object") {
+                exports.data = oldData.config;
+            }
+
+            exports.data[setting] = data; // Merge with old data when available
+
+            resources.setProfileInfo({
+                config: exports.data
+            });
+        });
+    };
+
+    exports.init = function() {
+        resources.getProfileInfo().then(function(data) {
+            if (typeof(data?.config) != "object") {
+                return;
+            }
+
+            exports.data = data.config;
+        });
+    };
+});

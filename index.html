@@ -24,6 +24,7 @@
         <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-database.js"></script>
         <script src="/resources.js"></script>
         <script src="/profiles.js"></script>
+        <script src="/config.js"></script>
         <script src="/fs.js"></script>
         <script src="/associations.js"></script>
         <script src="/thumbnails.js"></script>
@@ -76,6 +77,10 @@
                 <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
                 <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
+            <button sui-style="flat" sui-screen="desktop" title="{{ _('openViewMenu') }}" aria-label="{{ _('openViewMenu') }}" id="viewMenuButton">
+                <sui-icon>visibility</sui-icon>
+                <sui-icon>arrow_drop_down</sui-icon>
+            </button>
             <button sui-style="flat" sui-screen="mobile" title="{{ _('openMainMenu') }}" aria-label="{{ _('openMainMenu') }}" id="mobileMenuButton">
                 <sui-icon>menu</sui-icon>
             </button>
@@ -95,13 +100,13 @@
                         </s-each>
                     </ul>
                 </s-if>
-                <s-else>
+                <s-if condition="{{ index.getCurrentListing().length == 0 }}">
                     <div class="screenMessage subtle">
                         <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
                         <h2 sui-mono translate>emptyFolder_title</h2>
                         <p translate>emptyFolder_description</p>
                     </div>
-                </s-else>
+                </s-if>
             </s-if>
             <s-if condition="{{ index.getListingIsLoading() && !index.getListingIsUnavailable() }}">
                 <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
@@ -142,12 +147,13 @@
         <sui-menu id="mobileMenu">
             <button translate>settings</button>
             <button id="mobileAccountButton" translate>accounts</button>
+            <button id="mobileViewMenuButton" translate>viewMenu</button>
         </sui-menu>
         <sui-menu id="accountsMenu">
             <div id="accountsMenuList">
                 <s-each in="index.getAccounts()" keyvar="token" valuevar="profile">
                     <button data-token="{{ token }}">
-                        <sui-icon aria-hidden="true">{{ token == profiles.getSelectedProfileToken() ? 'done' : '' }}</sui-icon>
+                        <sui-icon aria-hidden="true">{{ token == profiles.getSelectedProfileToken() ? "done" : "" }}</sui-icon>
                         <strong>{{ profile.name }}</strong>
                         <br>
                         <sui-icon></sui-icon>
@@ -178,6 +184,33 @@
                     </button>
                 </s-if>
             </s-each>
+        </sui-menu>
+        <sui-menu id="viewMenu">
+            <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.NAME);">
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.NAME ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_sortByName") }}
+            </button>
+            <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.CREATED_AT);">
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.CREATED_AT ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_sortByCreatedAt") }}
+            </button>
+            <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.LAST_MODIFIED);">
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.LAST_MODIFIED ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_sortByLastModified") }}
+            </button>
+            <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.SIZE);">
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.SIZE ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_sortBySize") }}
+            </button>
+            <hr>
+            <button onclick="index.setSettingAndRepopulate('cloud_sortReverse', !config.getSetting('cloud_sortReverse', 'boolean', false));">
+                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_sortReverse', 'boolean', false) ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_sortReverse") }}
+            </button>
+            <button onclick="index.setSettingAndRepopulate('cloud_seperateFolders', !config.getSetting('cloud_seperateFolders', 'boolean', true));">
+                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_seperateFolders', 'boolean', true) ? "done" : "&nbsp;" }}</sui-icon>
+                {{ _("view_seperateFolders") }}
+            </button>
         </sui-menu>
     </body>
 </html>

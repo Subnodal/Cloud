@@ -13,6 +13,7 @@ namespace("com.subnodal.cloud", function(exports) {
     var l10n = require("com.subnodal.subelements.l10n");
 
     var profiles = require("com.subnodal.cloud.profiles");
+    var config = require("com.subnodal.cloud.config");
 
     Promise.all([
         requests.getJson("/locale/en_GB.json"),
@@ -39,7 +40,11 @@ namespace("com.subnodal.cloud", function(exports) {
 
                 if (window.location.pathname != "/setup.html") {
                     profiles.checkCurrentProfileState();
+
+                    return;
                 }
+
+                config.init();
             });
         }
     });
