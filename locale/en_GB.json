@@ -7,6 +7,10 @@
         "cloud": "Cloud",
         "subnodalCloud": "Subnodal Cloud",
 
+        "subnodalWriter": "Subnodal Writer",
+        "subnodalSigma": "Subnodal Sigma",
+        "subnodalPresenter": "Subnodal Presenter",
+
         "loading": "Loading...",
         "done": "Done",
         "close": "Close",
@@ -54,7 +58,7 @@
         "view_sortByLastModified": "Sort by last modification date",
         "view_sortBySize": "Sort by size",
         "view_sortReverse": "Reverse sorting order",
-        "view_seperateFolders": "Seperate folders from files",
+        "view_separateFolders": "Separate folders from files",
 
         "setup_getStarted": "Get started with Subnodal Cloud",
         "setup_getStartedDescription": "We're glad to have you here! Let's get to know you — what's your name?",

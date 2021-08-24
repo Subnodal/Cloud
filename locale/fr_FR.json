@@ -16,6 +16,8 @@
         "close": "Fermer",
         "learnMore": "Aide",
         "openMainMenu": "Ouvrir le menu principal",
+        "viewMenu": "Options de visualisation",
+        "openViewMenu": "Ouvrir les options de visualisation",
         "accounts": "Comptes",
         "addAccount": "Ajouter un compte",
         "manageAccounts": "Gérer les comptes",
@@ -26,8 +28,10 @@
         "retry": "Réessayez",
 
         "rootFolderName": "Mes fichiers",
+        "newFolderName": "Nouveau dossier",
         "unknownName": "Inconnu",
         "defaultDocumentTypeName": "Document {0}",
+        "duplicateDocumentCopyMark": "{name} ({number})",
 
         "folder": "Dossier",
 
@@ -48,6 +52,13 @@
             "{value} > 0": "{space} restants",
             "{value} == 0": "Pas d'espace"
         },
+
+        "view_sortByName": "Trier par nom",
+        "view_sortByCreatedAt": "Trier par date de création",
+        "view_sortByLastModified": "Trier par date de dernière modification",
+        "view_sortBySize": "Trier par taille",
+        "view_sortReverse": "Ordre de tri inversé",
+        "view_separateFolders": "Séparer les dossiers des fichiers",
 
         "setup_getStarted": "Premiers pas avec Sousnœud Cloud",
         "setup_getStartedDescription": "Nous sommes heureux de vous avoir ici ! Faisons connaissance — quel est ton nom ?",

@@ -148,7 +148,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
-    exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, seperateFolders = true, hardRefresh = false) {
+    exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, separateFolders = true, hardRefresh = false) {
         var listing = [];
 
         return resources.getObject(folderKey, !hardRefresh).then(function(data) {
@@ -177,7 +177,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             var sortMagnitude = sortReverse ? -1 : 1;
 
             return Promise.resolve(listing.sort(function(a, b) {
-                if (seperateFolders && a.type != b.type) {
+                if (separateFolders && a.type != b.type) {
                     if (a.type == "folder") {
                         return -1;
                     }

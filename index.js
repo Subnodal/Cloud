@@ -126,7 +126,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             key,
             config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME),
             config.getSetting("cloud_sortReverse", "boolean", false),
-            config.getSetting("cloud_seperateFolders", "boolean", true),
+            config.getSetting("cloud_separateFolders", "boolean", true),
             hardRefresh
         ).then(function(listing) {
             if (listing == null) {

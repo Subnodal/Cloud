@@ -16,6 +16,8 @@
         "close": "关",
         "learnMore": "了解更多",
         "openMainMenu": "打开主菜单",
+        "viewMenu": "查看选项",
+        "openViewMenu": "打开查看选项",
         "accounts": "帐户",
         "addAccount": "新增帐户",
         "manageAccounts": "管理帐户",
@@ -26,8 +28,10 @@
         "retry": "重试",
 
         "rootFolderName": "我的文件夹",
+        "newFolderName": "新建文件夹",
         "unknownName": "未知",
         "defaultDocumentTypeName": "{0}文档",
+        "duplicateDocumentCopyMark": "{name}（{number}）",
 
         "folder": "文件夹",
 
@@ -45,6 +49,13 @@
             "{value} > 0": "还剩{space}",
             "{value} == 0": "没有剩余空间"
         },
+
+        "view_sortByName": "按名称排序",
+        "view_sortByCreatedAt": "按创建日期排序",
+        "view_sortByLastModified": "按上次修改日期排序",
+        "view_sortBySize": "按大小排序",
+        "view_sortReverse": "反向排序",
+        "view_separateFolders": "将文件夹与文件分开",
 
         "setup_getStarted": "开始使用次结·云",
         "setup_getStartedDescription": "我们很高兴有你在这里！ 让我们认识一下你——你叫什么名字？",
