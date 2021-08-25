@@ -53,6 +53,8 @@
             "{value} == 0": "Pas d'espace"
         },
 
+        "view_styleThumbnail": "Vue d'icône",
+        "view_styleCompact": "Vue de liste",
         "view_sortByName": "Trier par nom",
         "view_sortByCreatedAt": "Trier par date de création",
         "view_sortByLastModified": "Trier par date de dernière modification",

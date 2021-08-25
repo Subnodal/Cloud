@@ -50,6 +50,8 @@
             "{value} == 0": "没有剩余空间"
         },
 
+        "view_styleThumbnail": "图标视图",
+        "view_styleCompact": "列表视图",
         "view_sortByName": "按名称排序",
         "view_sortByCreatedAt": "按创建日期排序",
         "view_sortByLastModified": "按上次修改日期排序",
