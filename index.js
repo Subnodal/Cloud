@@ -159,7 +159,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     if (item.type == "folder") {
                         isFolderOpening = true;
 
-                        exports.navigate(item.key);
+                        exports.navigate(item.key).then(function() {
+                            document.querySelector("#currentFolderView li")?.focus();
+                        });
         
                         return;
                     }
@@ -189,10 +191,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         currentFolderKey = key;
 
-        resources.getObject(key).then(function(data) {
+        return resources.getObject(key).then(function(data) {
             currentPath.push({...data, key});
 
-            exports.populateFolderView(key);
+            return exports.populateFolderView(key);
         });
     };
 
@@ -211,7 +213,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         currentFolderKey = toKey;
 
-        exports.populateFolderView(toKey);
+        return exports.populateFolderView(toKey);
     };
 
     exports.goForward = function() {
@@ -219,7 +221,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return; // Cannot go forward any further
         }
 
-        exports.navigate(forwardPath.pop().key);
+        return exports.navigate(forwardPath.pop().key);
     };
 
     exports.getItemFromCurrentListing = function(key) {
