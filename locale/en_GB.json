@@ -53,6 +53,8 @@
             "{value} == 0": "No space left"
         },
 
+        "view_styleThumbnail": "Icon view",
+        "view_styleCompact": "List view",
         "view_sortByName": "Sort by name",
         "view_sortByCreatedAt": "Sort by creation date",
         "view_sortByLastModified": "Sort by last modification date",

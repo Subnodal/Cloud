@@ -88,7 +88,7 @@
         <main sui-stack="column">
             <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
                 <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
-                    <ul sui-iconlist sui-size="grow" id="currentFolderView">
+                    <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
                                 <li tabindex="0" data-key="{{ item.key }}">
@@ -186,6 +186,17 @@
             </s-each>
         </sui-menu>
         <sui-menu id="viewMenu">
+            <div sui-screen="desktop">
+                <button onclick="index.setSettingAndRepopulate('cloud_viewStyle', 'thumbnail');">
+                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "thumbnail" ? "done" : "&nbsp;" }}</sui-icon>
+                    {{ _("view_styleThumbnail") }}
+                </button>
+                <button onclick="index.setSettingAndRepopulate('cloud_viewStyle', 'compact');">
+                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "compact" ? "done" : "&nbsp;" }}</sui-icon>
+                    {{ _("view_styleCompact") }}
+                </button>
+                <hr>
+            </div>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.NAME);">
                 <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.NAME ? "done" : "&nbsp;" }}</sui-icon>
                 {{ _("view_sortByName") }}
