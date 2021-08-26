@@ -94,7 +94,7 @@
                                 <li tabindex="0" data-key="{{ item.key }}">
                                     <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
                                     <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
-                                    <span>{{ typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "" }}</span>
+                                    <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
                                 </li>
                             </s-if>
                         </s-each>
@@ -198,19 +198,19 @@
                 <hr>
             </div>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.NAME);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.NAME ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.NAME ? "done" : "&nbsp;" }}</sui-icon>
                 {{ _("view_sortByName") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.CREATED_AT);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.CREATED_AT ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.CREATED_AT ? "done" : "&nbsp;" }}</sui-icon>
                 {{ _("view_sortByCreatedAt") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.LAST_MODIFIED);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.LAST_MODIFIED ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.LAST_MODIFIED ? "done" : "&nbsp;" }}</sui-icon>
                 {{ _("view_sortByLastModified") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.SIZE);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", 0) == fs.sortByAttributes.SIZE ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.SIZE ? "done" : "&nbsp;" }}</sui-icon>
                 {{ _("view_sortBySize") }}
             </button>
             <hr>

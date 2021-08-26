@@ -10,14 +10,63 @@
 namespace("com.subnodal.cloud.fs", function(exports) {
     var core = require("com.subnodal.subelements.core");
 
-    var profiles = require("com.subnodal.cloud.profiles");
     var resources = require("com.subnodal.cloud.resources");
+    var profiles = require("com.subnodal.cloud.profiles");
+    var config = require("com.subnodal.cloud.config");
 
     exports.sortByAttributes = {
         NAME: 0,
         CREATED_AT: 1,
         LAST_MODIFIED: 2,
         SIZE: 3
+    };
+
+    exports.sizeUnits = {
+        METRIC: 0, // SI style; radix 1,000
+        IEC: 1 // IEC style; radix 1,024
+    };
+
+    exports.sizeRadices = {};
+
+    exports.sizeRadices[exports.sizeUnits.METRIC] = 1_000;
+    exports.sizeRadices[exports.sizeUnits.IEC] = 1_024;
+
+    function roundToDecimalPlaces(number, decimalPlaces) {
+        return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+    }
+
+    exports.getSizeAsString = function(size, units = config.getSetting("cloud_sizeUnit", "number", exports.sizeUnits.METRIC), decimalPlaces = 1) {
+        var radix = exports.sizeRadices[units];
+
+        if (size < Math.pow(radix, 1)) {
+            return _("space_bytes", {space: size});
+        }
+
+        if (size < Math.pow(radix, 2)) {
+            return _(
+                units == exports.sizeUnits.METRIC ? "space_kb" : "space_kib",
+                {space: roundToDecimalPlaces(size / Math.pow(radix, 1), decimalPlaces)}
+            );
+        }
+
+        if (size < Math.pow(radix, 3)) {
+            return _(
+                units == exports.sizeUnits.METRIC ? "space_mb" : "space_mib",
+                {space: roundToDecimalPlaces(size / Math.pow(radix, 2), decimalPlaces)}
+            );
+        }
+
+        if (size < Math.pow(radix, 4)) {
+            return _(
+                units == exports.sizeUnits.METRIC ? "space_gb" : "space_gib",
+                {space: roundToDecimalPlaces(size / Math.pow(radix, 3), decimalPlaces)}
+            );
+        }
+
+        return _(
+            units == exports.sizeUnits.METRIC ? "space_tb" : "space_tib",
+            {space: roundToDecimalPlaces(size / Math.pow(radix, 4), decimalPlaces)}
+        );
     };
 
     exports.getRootObjectKeyFromProfile = function(token = profiles.getSelectedProfileToken()) {
@@ -58,6 +107,21 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
 
         return item.name;
+    };
+
+    exports.getItemDetails = function(item, matchSort = exports.sortByAttributes.NAME) {
+        switch (matchSort) {
+            case exports.sortByAttributes.NAME:
+            case exports.sortByAttributes.LAST_MODIFIED:
+            default:
+                return typeof(item.lastModified) == "number" ? l10n.formatValue(new Date(item.lastModified)) : "";
+
+            case exports.sortByAttributes.CREATED_AT:
+                return typeof(item.createdAt) == "number" ? l10n.formatValue(new Date(item.createdAt)) : "";
+
+            case exports.sortByAttributes.SIZE:
+                return typeof(item.size) == "number" ? exports.getSizeAsString(item.size) : "";
+        }
     };
 
     exports.createFolder = function(name, parentFolder, token = profiles.getSelectedProfileToken()) {
