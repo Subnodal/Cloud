@@ -107,6 +107,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return Promise.reject("Key is null");
         }
 
+        views.deselectList(document.querySelector("#currentFolderView"));
+
         listingIsLoading = !refreshInBackground;
 
         subElements.render();
