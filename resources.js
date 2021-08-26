@@ -131,6 +131,13 @@ namespace("com.subnodal.cloud.resources", function(exports) {
         });
     };
 
+    exports.clearAllObjectCaches = function() {
+        shortTermObjectsCache = {};
+
+        localStorage.setItem("subnodalCloud_objectCache", "{}");
+        localStorage.setItem("subnodalCloud_offlineUpdatedObjectsQueue", "[]");
+    };
+
     exports.getObject = function(key, preferShortTermCache = false) {
         if (preferShortTermCache && shortTermObjectsCache.hasOwnProperty(key)) {
             console.log(`Cache hit for short term objects cache with object ${key}`);

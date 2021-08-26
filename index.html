@@ -102,7 +102,7 @@
                 </s-if>
                 <s-if condition="{{ index.getCurrentListing().length == 0 }}">
                     <div class="screenMessage subtle">
-                        <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
+                        <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                         <h2 sui-mono translate>emptyFolder_title</h2>
                         <p translate>emptyFolder_description</p>
                     </div>
@@ -113,7 +113,7 @@
             </s-if>
             <s-if condition="{{ index.getListingIsUnavailable() && index.getDataUnavailableWhileOffline() }}">
                 <div class="screenMessage subtle">
-                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
+                    <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                     <h2 sui-mono translate>offlineFolder_title</h2>
                     <p translate>offlineFolder_description</p>
                     <button translate id="viewOfflineRetryButton">retry</button>
@@ -121,7 +121,7 @@
             </s-if>
             <s-if condition="{{ index.getListingIsUnavailable() && index.getDataNotFound() }}">
                 <div class="screenMessage subtle">
-                    <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" aria-hidden="true"> <!-- TODO: Add nice graphic -->
+                    <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                     <h2 sui-mono translate>folderNotFound_title</h2>
                     <p translate>folderNotFound_description</p>
                 </div>
