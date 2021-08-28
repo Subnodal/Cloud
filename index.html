@@ -223,5 +223,24 @@
                 {{ _("view_separateFolders") }}
             </button>
         </sui-menu>
+        <!-- TODO: Finish translations for context menus -->
+        <!-- TODO: Add full functionality with copy/paste etc. -->
+        <sui-menu id="viewContextMenu">
+            <button><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <hr sui-screen="desktop">
+            <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
+            <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
+        </sui-menu>
+        <sui-menu id="itemContextMenu">
+            <button sui-screen="desktop"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("copy") }}</button>
+            <button sui-screen="desktop"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button sui-screen="mobile"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
+            <button><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
+            <button onclick="index.selectFirstItemForRenaming();"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
+            <button><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
+            <hr sui-screen="desktop">
+            <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
+            <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
+        </sui-menu>
     </body>
 </html>

@@ -236,6 +236,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return null;
     };
 
+    exports.selectAll = function() {
+        document.querySelectorAll("#currentFolderView li").forEach((element) => element.setAttribute("aria-selected", true));
+    };
+
+    exports.invertSelection = function() {
+        document.querySelectorAll("#currentFolderView li").forEach(function(element) {
+            if (element.hasAttribute("aria-selected")) {
+                element.removeAttribute("aria-selected");
+            } else {
+                element.setAttribute("aria-selected", true);
+            }
+        });
+    };
+
     exports.nameTaken = function(name, skipKey = null) {
         for (var i = 0; i < currentListing.length; i++) {
             if (currentListing[i].key == skipKey) {
@@ -255,7 +269,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         var newName = originalName;
 
         if (!exports.nameTaken(originalName + append, skipKey)) {
-            return originalName;
+            return originalName + append;
         }
 
         do {
@@ -311,9 +325,21 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             views.selectListItem(element, views.selectionModes.SINGLE);
 
-            element.querySelector("input").focus();
-            element.querySelector("input").select();
+            setTimeout(function() {
+                element.querySelector("input").focus();
+                element.querySelector("input").select();
+            });
         });
+    };
+
+    exports.selectFirstItemForRenaming = function() {
+        var selectedItem = views.getSelectedListItems(document.querySelector("#currentFolderView"))[0];
+
+        if (!(selectedItem instanceof Node)) {
+            return;
+        }
+
+        exports.selectItemForRenaming(selectedItem.getAttribute("data-key"));
     };
 
     exports.createFileFromNewMenu = function(element) {
@@ -476,6 +502,22 @@ namespace("com.subnodal.cloud.index", function(exports) {
             setTimeout(function() {
                 exports.reload();
             }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
+        });
+
+        elements.attachSelectorEvent("contextmenu", "#currentFolderView", function(element, event) {
+            if (event.target != element) {
+                return;
+            }
+    
+            menus.toggleContextMenu(document.querySelector("#viewContextMenu"), element);
+        });
+
+        elements.attachSelectorEvent("contextmenu", "#currentFolderView li", function(element) {
+            if (element.getAttribute("aria-selected") != "true") {
+                views.selectListItem(element, views.selectionModes.SINGLE);
+            }
+    
+        menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
         });
     });
 });
