@@ -9,6 +9,7 @@
 
 namespace("com.subnodal.cloud.fs", function(exports) {
     var core = require("com.subnodal.subelements.core");
+    var l10n = require("com.subnodal.subelements.l10n");
 
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
@@ -239,6 +240,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             }
 
             var sortMagnitude = sortReverse ? -1 : 1;
+            var collator = new Intl.Collator(l10n.getLocaleCode().split("_")[0], {
+                sensitivity: "base",
+                numeric: true
+            });
 
             return Promise.resolve(listing.sort(function(a, b) {
                 if (separateFolders && a.type != b.type) {
@@ -254,15 +259,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 switch (sortBy) {
                     case exports.sortByAttributes.NAME:
                     default:
-                        if (a.name < b.name) {
-                            return -1 * sortMagnitude;
-                        }
-
-                        if (a.name > b.name) {
-                            return sortMagnitude;
-                        }
-
-                        return 0;
+                        return Math.min(Math.max(collator.compare(a.name, b.name), -1), 1);
 
                     case exports.sortByAttributes.CREATED_AT:
                         return (a.createdAt - b.createdAt) * sortMagnitude;
