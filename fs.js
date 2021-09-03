@@ -102,6 +102,98 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 thisScope.state = exports.fileOperationStates.FINISHED;
                 thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
                 thisScope.bytesProgress = thisScope.bytesTotal;
+
+                return exports.createFile(thisScope.name, thisScope.parentFolder, {
+                    size: thisScope.bytesTotal,
+                    contentsAddress: thisScope.contentsAddress,
+                    encryptionKey: thisScope.encryptionKey
+                }, thisScope.token);
+            }).catch(function(error) {
+                console.error(error);
+
+                thisScope.state = exports.fileOperationStates.FAILED;
+            });
+        }
+
+        cancel() {
+            if (this.abortController == null) {
+                return Promise.reject("Operation is not running");
+            }
+
+            this.abortController.abort();
+
+            this.state = exports.fileOperationStates.CANCELLED;
+            this.abortController = null;
+
+            return Promise.resolve();
+        }
+    };
+
+    exports.IpfsFileDownloadOperation = class extends exports.FileOperation {
+        constructor(objectKey) {
+            this.objectKey = objectKey;
+            this.object = null;
+
+            this.fileData = null;
+            this.abortController = null;
+        }
+
+        static decrypt(fileData, encryptionKey) {
+            if (encryptionKey == null) {
+                return fileData;
+            }
+
+            var wordArray = CryptoJS.lib.WordArray.create(fileData);
+            var decrypted = CryptoJS.AES.decrypt(wordArray, encryptionKey).toString();
+            var blob = new Blob([decrypted]);
+
+            return blob.arrayBuffer();
+        }
+
+        get encryptionKey() {
+            return this.object?.encryptionKey || null;
+        }
+
+        get contentsAddress() {
+            return this.object?.contentsAddress || null;
+        }
+
+        getObject() {
+            var thisScope = this;
+
+            return resources.getObject(this.objectKey).then(function(object) {
+                thisScope.object = object;
+            });
+        }
+
+        start() {
+            this.state = exports.fileOperationStates.RUNNING;
+            this.abortController = new AbortController();
+            this.bytesProgress = 0;
+            this.bytesTotal = 0;
+
+            var thisScope = this;
+
+            return this.getObject().then(function() {
+                return exports.ipfsNode.stat(this.contentsAddress);
+            }).then(async function(statData) {
+                var array = new Uint8Array(statData.size);
+
+                thisScope.bytesTotal = statData.size;
+
+                for await (var chunk of exports.ipfsNode.cat(this.contentsAddress, {
+                    signal: this.abortController.signal
+                })) {
+                    for (var i = 0; i < chunk.length; i++) {
+                        array[thisScope.bytesProgress++] = chunk[i];
+                    }
+                }
+
+                this.state = exports.fileOperationStates.FINISHED;
+                thisScope.bytesProgress = statData.size;
+                thisScope.fileData = thisScope.constructor.decryot(array.buffer, thisScope.encryptionKey);
+
+                return Promise.resolve(thisScope.fileData);
             }).catch(function(error) {
                 console.error(error);
 
@@ -126,6 +218,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     function roundToDecimalPlaces(number, decimalPlaces) {
         return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
     }
+
+    exports.getIpfsNode = function() {
+        return exports.ipfsNode;
+    };
 
     exports.getSizeAsString = function(size, units = config.getSetting("cloud_sizeUnit", "number", exports.sizeUnits.METRIC), decimalPlaces = 1) {
         var radix = exports.sizeRadices[units];
@@ -249,7 +345,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
-    exports.createFile = function(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
+    exports.createFile = function(name, parentFolder, data = {encryptionKey: core.generateKey(64)}, token = profiles.getSelectedProfileToken()) {
         var newFileKey;
 
         return resources.createObject({
@@ -257,7 +353,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             name,
             size: 0,
             contentsAddress: null,
-            encryptionKey
+            ...data
         }, token).then(function(key) {
             newFileKey = key;
 
