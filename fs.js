@@ -32,6 +32,97 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     exports.sizeRadices[exports.sizeUnits.METRIC] = 1_000;
     exports.sizeRadices[exports.sizeUnits.IEC] = 1_024;
 
+    exports.fileOperationStates = {
+        NOT_STARTED: 0,
+        FINISHED: 1,
+        RUNNING: 2,
+        CANCELLED: 3,
+        FAILED: -1
+    };
+
+    exports.ipfsNode = null;
+
+    exports.FileOperation = class {
+        constructor() {
+            this.state = exports.fileOperationStates.NOT_STARTED;
+            this.bytesProgress = 0;
+            this.bytesTotal = 0;
+        }
+
+        start() {
+            return Promise.reject("Operation not implemented on base class");
+        }
+        
+        cancel() {
+            return Promise.reject("Operation not implemented on base class");
+        }
+    };
+
+    exports.IpfsFileUploadOperation = class extends exports.FileOperation {
+        constructor(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
+            super();
+
+            this.name = name;
+            this.parentFolder = parentFolder;
+            this.encryptionKey = encryptionKey;
+            this.token = token;
+
+            this.fileData = null;
+            this.contentsAddress = null;
+            this.abortController = null;
+        }
+
+        static encrypt(fileData, encryptionKey) {
+            if (encryptionKey == null) {
+                return fileData;
+            }
+
+            var wordArray = CryptoJS.lib.WordArray.create(fileData);
+            var encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey).toString();
+            var blob = new Blob([encrypted]);
+
+            return blob.arrayBuffer();
+        }
+
+        start(fileData) {
+            this.state = exports.fileOperationStates.RUNNING;
+            this.fileData = fileData;
+            this.abortController = new AbortController();
+            this.bytesProgress = 0;
+            this.bytesTotal = fileData.byteLength;
+
+            var thisScope = this;
+
+            return exports.ipfsNode.add(this.constructor.encrypt(fileData, this.encryptionKey), {
+                progress: function(bytesProgress) {
+                    thisScope.bytesProgress = bytesProgress;
+                },
+                signal: this.abortController.signal
+            }).then(function(result) {
+                thisScope.state = exports.fileOperationStates.FINISHED;
+                thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
+                thisScope.bytesProgress = thisScope.bytesTotal;
+            }).catch(function(error) {
+                console.error(error);
+
+                thisScope.state = exports.fileOperationStates.FAILED;
+            });
+        }
+
+        cancel() {
+            if (this.abortController == null) {
+                return Promise.reject("Operation is not running");
+            }
+
+            this.abortController.abort();
+
+            this.state = exports.fileOperationStates.CANCELLED;
+            this.abortController = null;
+
+            return Promise.resolve();
+        }
+    };
+
     function roundToDecimalPlaces(number, decimalPlaces) {
         return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
     }
@@ -273,4 +364,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             }));
         });
     };
+
+    Ipfs.create().then(function(node) {
+        exports.ipfsNode = node;
+    });
 });
