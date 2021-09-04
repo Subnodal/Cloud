@@ -79,6 +79,10 @@
                 <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
                 <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
+            <button sui-style="flat" sui-screen="desktop" title="{{ _('upload') }}" aria-label="{{ _('upload') }}" id="uploadButton">
+                <sui-icon aria-hidden="true">upload</sui-icon>
+                {{ _("upload") }}
+            </button>
             <button sui-style="flat" sui-screen="desktop" title="{{ _('openViewMenu') }}" aria-label="{{ _('openViewMenu') }}" id="viewMenuButton">
                 <sui-icon aria-hidden="true">visibility</sui-icon>
                 <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
@@ -130,8 +134,11 @@
             </s-if>
         </main>
         <nav sui-screen="desktop">
-            <progress value="0"></progress>
-            <span><a href="javascript:void(0);" sui-style="integrated">{{ _("spaceLeft", {value: 0, space: "0 bytes"}) }} <sui-icon sui-flippable aria-hidden="true">arrow_right</sui-icon></a></span>
+            <s-set var="progress" value="fs.getFileOperationsQueueProgress()"></s-set>
+            <progress value="{{ progress.bytesTotal > 0 ? (progress.bytesProgress / progress.bytesTotal) : 0 }}"></progress>
+            <span>
+                <a href="javascript:void(0);" sui-style="integrated">{{ progress.bytesTotal > 0 ? _("operationsProgress", progress) : _("spaceLeft", {value: 0, space: "0 bytes"}) }} <sui-icon sui-flippable aria-hidden="true">arrow_right</sui-icon></a>
+            </span>
         </nav>
         <dialog id="renameDuplicateDialog">
             <s-if condition="{{ index.getRenameDuplicateIsFolder() }}">
@@ -245,5 +252,6 @@
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
         </sui-menu>
+        <input type="file" hidden id="fileUpload">
     </body>
 </html>

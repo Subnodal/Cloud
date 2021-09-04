@@ -9,8 +9,8 @@
 
 namespace("com.subnodal.cloud.index", function(exports) {
     var subElements = require("com.subnodal.subelements");
+    var elements = require("com.subnodal.subelements.elements");
     var l10n = require("com.subnodal.subelements.l10n");
-    var elements = require("com.subnodal.subui.elements");
     var menus = require("com.subnodal.subui.menus");
     var views = require("com.subnodal.subui.views");
     var dialogs = require("com.subnodal.subui.dialogs");
@@ -357,6 +357,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return Promise.resolve();
         });
     };
+
+    exports.requestFileToUpload = function() {
+        document.querySelector("#fileUpload").click();
+    };
+
+    exports.uploadSelectedFile = function() {};
 
     exports.performLiveRefresh = function() {
         if (!document.hasFocus()) {

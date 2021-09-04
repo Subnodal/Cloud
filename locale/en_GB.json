@@ -26,6 +26,7 @@
         "forward": "Forward",
         "new": "New",
         "retry": "Retry",
+        "upload": "Upload",
         "download": "Download",
         "copy": "Copy",
         "paste": "Paste",
@@ -60,6 +61,12 @@
         "spaceLeft": {
             "{value} > 0": "{space} left",
             "{value} == 0": "No space left"
+        },
+
+        "operationsProgress": {
+            "{containsUpload} == `true` && {containsDownload} == `false`": "{filesProgress} of {filesTotal} files uploaded",
+            "{containsDownload} == `true` && {containsUpload} == `false`": "{filesProgress} of {filesTotal} files downloaded",
+            "{containsDownload} == `false` && {containsUpload} == `false`": "{filesProgress} of {filesTotal} files done"
         },
 
         "view_styleThumbnail": "Icon view",

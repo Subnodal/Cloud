@@ -42,6 +42,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.ipfsNode = null;
 
+    exports.fileOperationsQueue = [];
+
     exports.FileOperation = class {
         constructor() {
             this.state = exports.fileOperationStates.NOT_STARTED;
@@ -370,6 +372,67 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             case exports.sortByAttributes.SIZE:
                 return typeof(item.size) == "number" ? exports.getSizeAsString(item.size) : "";
         }
+    };
+
+    exports.getFileOperationsQueue = function() {
+        return exports.fileOperationsQueue;
+    };
+
+    exports.addToFileOperationsQueue = function(operation) {        
+        exports.fileOperationsQueue.push(operation);
+    };
+
+    exports.cleanUpFileOperationsQueue = function() {
+        exports.fileOperationsQueue = exports.fileOperationsQueue.filter(function(operation) {
+            if ([
+                exports.fileOperationStates.FINISHED,
+                exports.fileOperationStates.CANCELLED,
+                exports.fileOperationStates.FAILED
+            ].includes(operation.state)) {
+                return false;
+            }
+
+            return true;
+        });
+    };
+
+    exports.getFileOperationsQueueProgress = function() {
+        var progress = {
+            bytesProgress: 0,
+            bytesTotal: 0,
+            filesProgress: 0,
+            filesTotal: 0,
+            containsUpload: false,
+            containsDownload: false
+        };
+
+        exports.fileOperationsQueue.forEach(function(operation) {
+            if ([
+                exports.fileOperationStates.CANCELLED,
+                exports.fileOperationStates.FAILED
+            ].includes(operation.state)) {
+                return;
+            }
+
+            progress.bytesProgress += operation.bytesProgress;
+            progress.bytesTotal += operation.bytesTotal;
+
+            if (operation.state == exports.fileOperationStates.FINISHED) {
+                progress.filesProgress++;
+            }
+
+            progress.filesTotal++;
+
+            if (operation instanceof exports.IpfsFileUploadOperation) {
+                progress.containsUpload = true;
+            }
+
+            if (operation instanceof exports.IpfsFileDownloadOperation) {
+                progress.containsDownload = true;
+            }
+        });
+
+        return progress;
     };
 
     exports.createFolder = function(name, parentFolder, token = profiles.getSelectedProfileToken()) {
