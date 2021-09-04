@@ -67,6 +67,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             this.encryptionKey = encryptionKey;
             this.token = token;
 
+            this.objectKey = null;
             this.fileData = null;
             this.contentsAddress = null;
             this.abortController = null;
@@ -79,35 +80,62 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var wordArray = CryptoJS.lib.WordArray.create(fileData);
             var encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey).toString();
-            var blob = new Blob([encrypted]);
 
-            return blob.arrayBuffer();
+            return Uint8Array.from(atob(encrypted), (char) => char.charCodeAt(0)).buffer;
         }
 
-        start(fileData) {
+        upload(element, useUploadedFilename = true) {
+            var thisScope = this;
+            var file = element.files[0];
+            var reader = new FileReader();
+
+            if (useUploadedFilename) {
+                this.name = file.name;
+            }
+
+            return new Promise(function(resolve, reject) {
+                reader.addEventListener("loadend", function(event) {
+                    thisScope.fileData = event.target.result;
+
+                    resolve();
+                });
+    
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        start() {
+            if (this.fileData == null) {
+                return Promise.reject("No file has been added");
+            }
+
             this.state = exports.fileOperationStates.RUNNING;
-            this.fileData = fileData;
             this.abortController = new AbortController();
             this.bytesProgress = 0;
-            this.bytesTotal = fileData.byteLength;
+            this.bytesTotal = this.fileData.byteLength;
 
             var thisScope = this;
+            var encryptedData = this.constructor.encrypt(this.fileData, this.encryptionKey);
 
-            return exports.ipfsNode.add(this.constructor.encrypt(fileData, this.encryptionKey), {
+            return exports.ipfsNode.add(encryptedData, {
                 progress: function(bytesProgress) {
                     thisScope.bytesProgress = bytesProgress;
                 },
-                signal: this.abortController.signal
+                signal: thisScope.abortController.signal
             }).then(function(result) {
-                thisScope.state = exports.fileOperationStates.FINISHED;
                 thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
                 thisScope.bytesProgress = thisScope.bytesTotal;
 
                 return exports.createFile(thisScope.name, thisScope.parentFolder, {
-                    size: thisScope.bytesTotal,
+                    size: encryptedData.byteLength,
                     contentsAddress: thisScope.contentsAddress,
                     encryptionKey: thisScope.encryptionKey
                 }, thisScope.token);
+            }).then(function(key) {
+                thisScope.state = exports.fileOperationStates.FINISHED;
+                thisScope.objectKey = key;
+
+                return Promise.resolve(key);
             }).catch(function(error) {
                 console.error(error);
 
@@ -131,6 +159,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.IpfsFileDownloadOperation = class extends exports.FileOperation {
         constructor(objectKey) {
+            super();
+
             this.objectKey = objectKey;
             this.object = null;
 
@@ -143,11 +173,14 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return fileData;
             }
 
-            var wordArray = CryptoJS.lib.WordArray.create(fileData);
-            var decrypted = CryptoJS.AES.decrypt(wordArray, encryptionKey).toString();
-            var blob = new Blob([decrypted]);
+            var encoded = btoa(String.fromCharCode(...new Uint8Array(fileData)));
+            var decrypted = CryptoJS.AES.decrypt(encoded, encryptionKey).toString(CryptoJS.enc.Base64);
 
-            return blob.arrayBuffer();
+            return Uint8Array.from(atob(decrypted), (char) => char.charCodeAt(0)).buffer;
+        }
+
+        get name() {
+            return this.object?.name || null;
         }
 
         get encryptionKey() {
@@ -174,24 +207,37 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var thisScope = this;
 
-            return this.getObject().then(function() {
-                return exports.ipfsNode.stat(this.contentsAddress);
-            }).then(async function(statData) {
-                var array = new Uint8Array(statData.size);
+            return this.getObject().then(async function() {
+                thisScope.bytesTotal = thisScope.object.size;
 
-                thisScope.bytesTotal = statData.size;
+                if (thisScope.object.size == 0) {
+                    thisScope.state = exports.fileOperationStates.FINISHED;
+                    thisScope.fileData = new Uint8Array(0).buffer;
 
-                for await (var chunk of exports.ipfsNode.cat(this.contentsAddress, {
-                    signal: this.abortController.signal
+                    return Promise.resolve(thisScope.fileData);
+                }
+
+                if (!thisScope.contentsAddress.match(/^ipfs:(.+)/)) {
+                    return Promise.reject("File is not available on IPFS");
+                }
+
+                var array = new Uint8Array(thisScope.bytesTotal);
+
+                for await (var chunk of exports.ipfsNode.cat(thisScope.contentsAddress.match(/ipfs:(.+)/)[1], {
+                    signal: thisScope.abortController.signal
                 })) {
                     for (var i = 0; i < chunk.length; i++) {
                         array[thisScope.bytesProgress++] = chunk[i];
+
+                        if (thisScope.bytesProgress > thisScope.bytesTotal) {
+                            thisScope.bytesTotal = thisScope.bytesProgress;
+                        }
                     }
                 }
 
-                this.state = exports.fileOperationStates.FINISHED;
-                thisScope.bytesProgress = statData.size;
-                thisScope.fileData = thisScope.constructor.decryot(array.buffer, thisScope.encryptionKey);
+                thisScope.state = exports.fileOperationStates.FINISHED;
+                thisScope.bytesProgress = thisScope.bytesTotal;
+                thisScope.fileData = thisScope.constructor.decrypt(array.buffer, thisScope.encryptionKey);
 
                 return Promise.resolve(thisScope.fileData);
             }).catch(function(error) {
@@ -199,6 +245,20 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 thisScope.state = exports.fileOperationStates.FAILED;
             });
+        }
+
+        download() {
+            if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
+                throw new TypeError("File data is not yet available");
+            }
+
+            var blob = new Blob([this.fileData]);
+            var link = document.createElement("a");
+
+            link.href = URL.createObjectURL(blob);
+            link.download = this.name;
+
+            link.click();
         }
 
         cancel() {
