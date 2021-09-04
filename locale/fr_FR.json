@@ -26,6 +26,7 @@
         "forward": "Avant",
         "new": "Nouveau",
         "retry": "Réessayez",
+        "upload": "Télécharger",
         "download": "Télécharger",
         "copy": "Copier",
         "paste": "Coller",
@@ -60,6 +61,13 @@
         "spaceLeft": {
             "{value} > 0": "{space} restants",
             "{value} == 0": "Pas d'espace"
+        },
+
+        "operationsProgress": {
+            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} == 1": "Téléchargement ...",
+            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} == 1": "Chargement ...",
+            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
+            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
         },
 
         "view_styleThumbnail": "Vue d'icône",

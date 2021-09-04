@@ -64,9 +64,11 @@
         },
 
         "operationsProgress": {
-            "{containsUpload} == `true` && {containsDownload} == `false`": "{filesProgress} of {filesTotal} files uploaded",
-            "{containsDownload} == `true` && {containsUpload} == `false`": "{filesProgress} of {filesTotal} files downloaded",
-            "{containsDownload} == `false` && {containsUpload} == `false`": "{filesProgress} of {filesTotal} files done"
+            "{containsUpload} == `true` && {containsDownload} == `false` && {filesTotal} == 1": "Uploading...",
+            "{containsDownload} == `true` && {containsUpload} == `false` && {filesTotal} == 1": "Downloading...",
+            "{containsUpload} == `true` && {containsDownload} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files uploaded",
+            "{containsDownload} == `true` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files downloaded",
+            "{containsUpload} == `false` && {containsDownload} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files done"
         },
 
         "view_styleThumbnail": "Icon view",

@@ -79,7 +79,7 @@
                 <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
                 <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
-            <button sui-style="flat" sui-screen="desktop" title="{{ _('upload') }}" aria-label="{{ _('upload') }}" id="uploadButton">
+            <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('upload') }}" id="uploadButton">
                 <sui-icon aria-hidden="true">upload</sui-icon>
                 {{ _("upload") }}
             </button>
@@ -178,6 +178,11 @@
             <button><sui-icon></sui-icon> {{ _("manageAccounts") }}</button>
         </sui-menu>
         <sui-menu id="newMenu">
+            <button sui-screen="mobile" id="mobileUploadButton">
+                <sui-icon aria-hidden="true">upload</sui-icon>
+                {{ _("upload") }}
+            </button>
+            <hr sui-screen="mobile">
             <button id="createFolderButton">
                 <img src="{{ thumbnails.formatUrl('/media/thumbnails/emptyFolder_{theme}.svg') }}" aria-hidden="true">
                 {{ _("folder") }}
