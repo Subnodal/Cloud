@@ -128,7 +128,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
                 thisScope.bytesProgress = thisScope.bytesTotal;
 
-                return exports.createFile(thisScope.name, thisScope.parentFolder, {
+                return exports.createFile(thisScope.name, thisScope.parentFolder, { // FIXME: Check if filename is already in use before uploading
                     size: encryptedData.byteLength,
                     contentsAddress: thisScope.contentsAddress,
                     encryptionKey: thisScope.encryptionKey
