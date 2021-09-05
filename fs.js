@@ -80,10 +80,17 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return fileData;
             }
 
-            var wordArray = CryptoJS.lib.WordArray.create(fileData);
-            var encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey).toString();
+            return new Promise(function(resolve, reject) {
+                var worker = new Worker("/workers/encryption.js");
 
-            return Uint8Array.from(atob(encrypted), (char) => char.charCodeAt(0)).buffer;
+                worker.addEventListener("message", function(event) {
+                    worker.terminate();
+
+                    resolve(event.data.data);
+                });
+
+                worker.postMessage({operation: "encrypt", args: [fileData, encryptionKey]});
+            });
         }
 
         upload(element, useUploadedFilename = true) {
@@ -117,18 +124,22 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             this.bytesTotal = this.fileData.byteLength;
 
             var thisScope = this;
-            var encryptedData = this.constructor.encrypt(this.fileData, this.encryptionKey);
+            var encryptedData;
 
-            return exports.ipfsNode.add(encryptedData, {
-                progress: function(bytesProgress) {
-                    thisScope.bytesProgress = bytesProgress;
-                },
-                signal: thisScope.abortController.signal
+            return this.constructor.encrypt(this.fileData, this.encryptionKey).then(function(data) {
+                encryptedData = data;
+
+                return exports.ipfsNode.add(encryptedData, {
+                    progress: function(bytesProgress) {
+                        thisScope.bytesProgress = bytesProgress;
+                    },
+                    signal: thisScope.abortController.signal
+                });
             }).then(function(result) {
                 thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
                 thisScope.bytesProgress = thisScope.bytesTotal;
 
-                return exports.createFile(thisScope.name, thisScope.parentFolder, { // FIXME: Check if filename is already in use before uploading
+                return exports.createFile(thisScope.name, thisScope.parentFolder, {
                     size: encryptedData.byteLength,
                     contentsAddress: thisScope.contentsAddress,
                     encryptionKey: thisScope.encryptionKey
@@ -175,10 +186,17 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return fileData;
             }
 
-            var encoded = btoa(String.fromCharCode(...new Uint8Array(fileData)));
-            var decrypted = CryptoJS.AES.decrypt(encoded, encryptionKey).toString(CryptoJS.enc.Base64);
+            return new Promise(function(resolve, reject) {
+                var worker = new Worker("/workers/encryption.js");
 
-            return Uint8Array.from(atob(decrypted), (char) => char.charCodeAt(0)).buffer;
+                worker.addEventListener("message", function(event) {
+                    worker.terminate();
+
+                    resolve(event.data.data);
+                });
+
+                worker.postMessage({operation: "decrypt", args: [fileData, encryptionKey]});
+            });
         }
 
         get name() {
@@ -239,9 +257,12 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 thisScope.state = exports.fileOperationStates.FINISHED;
                 thisScope.bytesProgress = thisScope.bytesTotal;
-                thisScope.fileData = thisScope.constructor.decrypt(array.buffer, thisScope.encryptionKey);
 
-                return Promise.resolve(thisScope.fileData);
+                return thisScope.constructor.decrypt(array.buffer, thisScope.encryptionKey);
+            }).then(function(data) {
+                thisScope.fileData = data;
+
+                return Promise.resolve(data);
             }).catch(function(error) {
                 console.error(error);
 
