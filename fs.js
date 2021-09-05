@@ -93,24 +93,28 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             });
         }
 
-        upload(element, useUploadedFilename = true) {
+        setFile(file, useUploadedFilenames = true) {
             var thisScope = this;
-            var file = element.files[0];
             var reader = new FileReader();
 
-            if (useUploadedFilename) {
+            if (useUploadedFilenames) {
                 this.name = file.name;
             }
 
             return new Promise(function(resolve, reject) {
                 reader.addEventListener("loadend", function(event) {
                     thisScope.fileData = event.target.result;
+                    thisScope.bytesTotal = thisScope.fileData.byteLength;
 
                     resolve();
                 });
     
                 reader.readAsArrayBuffer(file);
             });
+        }
+
+        upload(element, useUploadedFilename = true) {
+            return this.setFile(element.files[0], useUploadedFilename);
         }
 
         start() {
@@ -399,7 +403,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         return exports.fileOperationsQueue;
     };
 
-    exports.addToFileOperationsQueue = function(operation) {        
+    exports.addToFileOperationsQueue = function(operation) {
         exports.fileOperationsQueue.push(operation);
     };
 

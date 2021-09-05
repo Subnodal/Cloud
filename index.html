@@ -132,7 +132,7 @@
                 </div>
             </s-if>
         </main>
-        <nav sui-screen="desktop">
+        <nav sui-screen="desktop" id="progressInfo">
             <s-set var="progress" value="fs.getFileOperationsQueueProgress()"></s-set>
             <progress value="{{ progress.bytesTotal > 0 ? (progress.bytesProgress / progress.bytesTotal) : 0 }}"></progress>
             <span>
@@ -256,6 +256,6 @@
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
         </sui-menu>
-        <input type="file" hidden id="fileUpload">
+        <input type="file" multiple hidden id="fileUpload">
     </body>
 </html>

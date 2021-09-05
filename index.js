@@ -22,7 +22,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
 
-    const LIVE_REFRESH_INTERVAL = 5 * 1000; // 5 seconds
+    const LIVE_REFRESH_INTERVAL = 5 * 1_000; // 5 seconds
+    const OPERATIONS_PROGRESS_INFO_UPDATE = 100; // 100 milliseconds
+    const POST_UPLOAD_CLEANUP_DELAY = 5 * 1_000; // 5 seconds
 
     var firstLoad = true;
     var accounts = {};
@@ -35,6 +37,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var dataUnavailableWhileOffline = false;
     var dataNotFound = false;
     var renameDuplicateIsFolder = false;
+    var cleanUpDelayStarted = false;
 
     window.index = exports;
     window.l10n = l10n;
@@ -250,7 +253,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.nameTaken = function(name, skipKey = null) {
+    exports.nameTaken = function(name, skipKey = null, extraNames = []) {
+        if (extraNames.includes(name)) {
+            return true;
+        }
+
         for (var i = 0; i < currentListing.length; i++) {
             if (currentListing[i].key == skipKey) {
                 continue;
@@ -264,18 +271,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return false;
     };
 
-    exports.findNextAvailableName = function(originalName, append = "", skipKey = null) {
+    exports.findNextAvailableName = function(originalName, append = "", skipKey = null, extraNames = []) {
         var copyNumber = 1;
         var newName = originalName;
 
-        if (!exports.nameTaken(originalName + append, skipKey)) {
+        if (!exports.nameTaken(originalName + append, skipKey, extraNames)) {
             return originalName + append;
         }
 
         do {
             copyNumber++;
             newName = _("duplicateDocumentCopyMark", {name: originalName, number: copyNumber}) + append;
-        } while (exports.nameTaken(newName, skipKey))
+        } while (exports.nameTaken(newName, skipKey, extraNames))
 
         return newName;
     };
@@ -362,7 +369,39 @@ namespace("com.subnodal.cloud.index", function(exports) {
         document.querySelector("#fileUpload").click();
     };
 
-    exports.uploadSelectedFile = function() {};
+    exports.uploadChosenFiles = function() {
+        var otherNames = [];
+        var operations = [];
+        var promiseChain = Promise.resolve();
+
+        [...document.querySelector("#fileUpload").files].forEach(function(file) {
+            var operation = new fs.IpfsFileUploadOperation(exports.findNextAvailableName(
+                file.name.replace(/(\.[a-zA-Z0-9.]+)$/, ""),
+                file.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
+                null,
+                otherNames
+            ), currentFolderKey);
+
+            fs.addToFileOperationsQueue(operation);
+            operations.push(operation);
+
+            operation.setFile(file, false).then(function() {
+                promiseChain = promiseChain.then(function() {
+                    subElements.render();
+
+                    return operation.start();
+                });
+            });
+
+            otherNames.push(operation.name);
+        });
+
+        promiseChain.then(function() {
+            exports.populateFolderView(currentFolderKey, true, true);
+        });
+
+        return operations;
+    };
 
     exports.performLiveRefresh = function() {
         if (!document.hasFocus()) {
@@ -446,6 +485,24 @@ namespace("com.subnodal.cloud.index", function(exports) {
             });
         }, LIVE_REFRESH_INTERVAL);
 
+        setInterval(function() {
+            subElements.render(document.querySelector("#progressInfo"));
+
+            if (
+                fs.getFileOperationsQueueProgress().bytesTotal > 0 &&
+                fs.getFileOperationsQueueProgress().bytesProgress == fs.getFileOperationsQueueProgress().bytesTotal &&
+                !cleanUpDelayStarted
+            ) {
+                cleanUpDelayStarted = true;
+
+                setTimeout(function() {
+                    fs.cleanUpFileOperationsQueue();
+
+                    cleanUpDelayStarted = false;
+                }, POST_UPLOAD_CLEANUP_DELAY);
+            }
+        }, OPERATIONS_PROGRESS_INFO_UPDATE);
+
         document.querySelector("#mobileMenuButton").addEventListener("click", function(event) {
             menus.toggleMenu(document.querySelector("#mobileMenu"), elements.findAncestor(event.target, "button"));
         });
@@ -486,6 +543,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
             });
         });
 
+        document.querySelectorAll("#uploadButton, #mobileUploadButton").forEach(function(element) {
+            element.addEventListener("click", function() {
+                document.querySelector("#fileUpload").value = ""; // Clear first to allow for repeatedly uploading same file
+
+                document.querySelector("#fileUpload").click();
+            });
+        });
+
         document.querySelectorAll("#viewMenuButton, #mobileViewMenuButton").forEach(function(element) {
             element.addEventListener("click", function(event) {
                 menus.toggleMenu(document.querySelector("#viewMenu"), elements.findAncestor(event.target, "button"), true);
@@ -522,8 +587,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
             if (element.getAttribute("aria-selected") != "true") {
                 views.selectListItem(element, views.selectionModes.SINGLE);
             }
-    
-        menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
+
+            menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
+        });
+
+        document.querySelector("#fileUpload").addEventListener("change", function() {
+            exports.uploadChosenFiles();
         });
     });
 });
