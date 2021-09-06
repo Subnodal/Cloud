@@ -376,7 +376,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         [...document.querySelector("#fileUpload").files].forEach(function(file) {
             var operation = new fs.IpfsFileUploadOperation(exports.findNextAvailableName(
-                file.name.replace(/(\.[a-zA-Z0-9.]+)$/, ""),
+                file.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
                 file.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
                 null,
                 otherNames
@@ -401,6 +401,73 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         return operations;
+    };
+
+    exports.getItemToDownload = function(key, type) {
+        var operation = null;
+
+        console.log(key);
+
+        if (type == "file") {
+            operation = new fs.IpfsFileDownloadOperation(key);
+        }
+
+        if (type == "folder") {
+            operation = new fs.FolderDownloadOperation(key);
+        }
+
+        if (operation == null) {
+            return Promise.reject("Item has an unknown type");
+        }
+
+        fs.addToFileOperationsQueue(operation);
+
+        return operation.start().then(function() {
+            return Promise.resolve(operation);
+        });
+    };
+
+    exports.downloadSelectedItems = function() {
+        var selectedItems = views.getSelectedListItems(document.querySelector("#currentFolderView"));
+
+        if (selectedItems.length == 0) {
+            return Promise.resolve();
+        }
+
+        if (selectedItems.length == 1) {
+            return exports.getItemToDownload(
+                selectedItems[0].getAttribute("data-key"),
+                selectedItems[0].getAttribute("data-type")
+            ).then(function(operation) {
+                return operation.download();
+            });
+        }
+
+        var promises = [];
+
+        selectedItems.forEach(function(selectedItem) {
+            promises.push(exports.getItemToDownload(
+                selectedItem.getAttribute("data-key"),
+                selectedItem.getAttribute("data-type")
+            ));
+        });
+
+        var zip = new JSZip();
+
+        Promise.all(promises).then(function(operations) {
+            operations.forEach(function(operation) {
+                operation.zip(zip);
+            });
+
+            return zip.generateAsync({type: "blob"}).then(function(blob) {
+                var link = document.createElement("a");
+
+                link.href = URL.createObjectURL(blob);
+                link.download = operations[0].name.replace(/\.[a-zA-Z0-9.]+$/, "") + ".zip";
+
+                link.click();
+            });
+        });
     };
 
     exports.performLiveRefresh = function() {
@@ -549,6 +616,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
                 document.querySelector("#fileUpload").click();
             });
+        });
+
+        document.querySelector("#downloadButton").addEventListener("click", function() {
+            exports.downloadSelectedItems();
         });
 
         document.querySelectorAll("#viewMenuButton, #mobileViewMenuButton").forEach(function(element) {

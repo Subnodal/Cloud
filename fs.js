@@ -149,14 +149,23 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                     encryptionKey: thisScope.encryptionKey
                 }, thisScope.token);
             }).then(function(key) {
-                thisScope.state = exports.fileOperationStates.FINISHED;
+                if (thisScope.state != exports.fileOperationStates.CANCELLED) {
+                    thisScope.state = exports.fileOperationStates.FINISHED;
+                }
+
                 thisScope.objectKey = key;
 
                 return Promise.resolve(key);
             }).catch(function(error) {
+                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                    return Promise.resolve();
+                }
+
                 console.error(error);
 
                 thisScope.state = exports.fileOperationStates.FAILED;
+
+                return Promise.reject(error);
             });
         }
 
@@ -263,6 +272,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                     }
                 }
 
+                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                    return Promise.reject();
+                }
+
                 thisScope.state = exports.fileOperationStates.FINISHED;
                 thisScope.bytesProgress = thisScope.bytesTotal;
 
@@ -272,15 +285,29 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 return Promise.resolve(data);
             }).catch(function(error) {
+                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                    return Promise.resolve();
+                }
+
                 console.error(error);
 
                 thisScope.state = exports.fileOperationStates.FAILED;
+
+                return Promise.reject(error);
             });
+        }
+
+        zip(zipParent) {
+            if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
+                return Promise.reject("File data is not yet available");
+            }
+
+            zipParent.file(this.name, this.fileData);
         }
 
         download() {
             if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
-                throw new TypeError("File data is not yet available");
+                return Promise.reject("File data is not yet available");
             }
 
             var blob = new Blob([this.fileData]);
@@ -290,6 +317,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             link.download = this.name;
 
             link.click();
+
+            return Promise.resolve();
         }
 
         cancel() {
@@ -313,8 +342,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             this.objectKey = objectKey;
             this.object = null;
             this.subOperations = [];
-
-            this.fileData = null;
         }
 
         get name() {
@@ -384,28 +411,40 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 return Promise.all(promises);
             }).then(function() {
+                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                    return Promise.reject();
+                }
+
                 thisScope.state = exports.fileOperationStates.FINISHED;
 
                 return Promise.resolve();
             }).catch(function(error) {
+                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                    return Promise.resolve();
+                }
+
                 console.error(error);
 
                 thisScope.state = exports.fileOperationStates.FAILED;
 
-                return Promise.resolve();
+                return Promise.reject(error);
             });
         }
 
-        makeZipFolder(zipParent) {
+        zip(zipParent) {
+            if (this.state != exports.fileOperationStates.FINISHED) {
+                return Promise.reject("Folder data is not yet available");
+            }
+
             this.subOperations.forEach(function(subOperation) {
                 if (subOperation instanceof exports.IpfsFileDownloadOperation) {
-                    zipParent.file(subOperation.name, subOperation.fileData);
+                    subOperation.zip(zipParent);
 
                     return;
                 }
 
                 if (subOperation instanceof exports.FolderDownloadOperation) {
-                    subOperation.makeZipFolder(zipParent.folder(subOperation.name));
+                    subOperation.zip(zipParent.folder(subOperation.name));
 
                     return;
                 }
@@ -414,13 +453,13 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
         download() {
             if (this.state != exports.fileOperationStates.FINISHED) {
-                throw new TypeError("Folder data is not yet available");
+                return Promise.reject("Folder data is not yet available");
             }
 
             var thisScope = this;
             var zip = new JSZip();
 
-            this.makeZipFolder(zip);
+            this.zip(zip);
 
             return zip.generateAsync({type: "blob"}).then(function(blob) {
                 var link = document.createElement("a");
@@ -433,13 +472,11 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
 
         cancel() {
-            this.subOperations.forEach(function(subOperation) {
-                subOperation.cancel();
-            });
-
             this.state = exports.fileOperationStates.CANCELLED;
 
-            return Promise.resolve();
+            return Promise.all(this.subOperations.map(function(subOperation) {
+                return subOperation.cancel();
+            }));
         }
     };
 
