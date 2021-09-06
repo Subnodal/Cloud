@@ -17,7 +17,7 @@ function encrypt(data, encryptionKey) {
 }
 
 function decrypt(data, encryptionKey) {
-    var encoded = btoa(String.fromCharCode(...new Uint8Array(data)));
+    var encoded = btoa(new Uint8Array(data).reduce((data, char) => data + String.fromCharCode(char), ""));
     var decrypted = CryptoJS.AES.decrypt(encoded, encryptionKey).toString(CryptoJS.enc.Base64);
 
     return Uint8Array.from(atob(decrypted), (char) => char.charCodeAt(0)).buffer;
