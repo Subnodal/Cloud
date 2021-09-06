@@ -219,6 +219,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             var thisScope = this;
 
             return resources.getObject(this.objectKey).then(function(object) {
+                if (object.type != "file") {
+                    return Promise.reject("Expected a file, but got something else instead");
+                }
+
                 thisScope.object = object;
             });
         }
@@ -297,6 +301,143 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             this.state = exports.fileOperationStates.CANCELLED;
             this.abortController = null;
+
+            return Promise.resolve();
+        }
+    };
+
+    exports.FolderDownloadOperation = class extends exports.FileOperation {
+        constructor(objectKey) {
+            super();
+
+            this.objectKey = objectKey;
+            this.object = null;
+            this.subOperations = [];
+
+            this.fileData = null;
+        }
+
+        get name() {
+            return this.object?.name || null;
+        }
+
+        get contentsAddress() {
+            return this.object?.contentsAddress || null;
+        }
+
+        getObject() {
+            var thisScope = this;
+
+            return resources.getObject(this.objectKey).then(function(object) {
+                if (object.type != "folder") {
+                    return Promise.reject("Expected a folder, but got something else instead");
+                }
+
+                thisScope.object = object;
+                thisScope.subOperations = [];
+
+                Object.keys(thisScope.object.contents || []).forEach(function(subObjectKey) {
+                    var subObject = thisScope.object.contents[subObjectKey];
+
+                    if (subObject.type == "file") {
+                        thisScope.subOperations.push(new exports.IpfsFileDownloadOperation(subObjectKey));
+
+                        return;
+                    }
+
+                    if (subObject.type == "folder") {
+                        thisScope.subOperations.push(new exports.FolderDownloadOperation(subObjectKey));
+
+                        return;
+                    }
+                });
+            });
+        }
+
+        start() {
+            this.state = exports.fileOperationStates.RUNNING;
+            this.bytesProgress = 0;
+            this.bytesTotal = 0;
+
+            var thisScope = this;
+
+            setInterval(function progressCheck() {
+                if (thisScope.state != exports.fileOperationStates.RUNNING) {
+                    clearInterval(progressCheck);
+                }
+
+                thisScope.bytesProgress = 0;
+                thisScope.bytesTotal = 0;
+
+                thisScope.subOperations.forEach(function(subOperation) {
+                    thisScope.bytesProgress += subOperation.bytesProgress;
+                    thisScope.bytesTotal += subOperation.bytesTotal;
+                });
+            });
+
+            return this.getObject().then(function() {
+                var promises = [];
+
+                thisScope.subOperations.forEach(function(subOperation) {
+                    promises.push(subOperation.start());
+                });
+
+                return Promise.all(promises);
+            }).then(function() {
+                thisScope.state = exports.fileOperationStates.FINISHED;
+
+                return Promise.resolve();
+            }).catch(function(error) {
+                console.error(error);
+
+                thisScope.state = exports.fileOperationStates.FAILED;
+
+                return Promise.resolve();
+            });
+        }
+
+        makeZipFolder(zipParent) {
+            this.subOperations.forEach(function(subOperation) {
+                if (subOperation instanceof exports.IpfsFileDownloadOperation) {
+                    zipParent.file(subOperation.name, subOperation.fileData);
+
+                    return;
+                }
+
+                if (subOperation instanceof exports.FolderDownloadOperation) {
+                    subOperation.makeZipFolder(zipParent.folder(subOperation.name));
+
+                    return;
+                }
+            });
+        }
+
+        download() {
+            if (this.state != exports.fileOperationStates.FINISHED) {
+                throw new TypeError("Folder data is not yet available");
+            }
+
+            var thisScope = this;
+            var zip = new JSZip();
+
+            this.makeZipFolder(zip);
+
+            return zip.generateAsync({type: "blob"}).then(function(blob) {
+                var link = document.createElement("a");
+
+                link.href = URL.createObjectURL(blob);
+                link.download = thisScope.name;
+
+                link.click();
+            });
+        }
+
+        cancel() {
+            this.subOperations.forEach(function(subOperation) {
+                subOperation.cancel();
+            });
+
+            this.state = exports.fileOperationStates.CANCELLED;
 
             return Promise.resolve();
         }
@@ -473,7 +614,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             return resources.getObject(parentFolder);
         }).then(function(parentData) {
             if (parentData?.type != "folder") {
-                return Promise.reject("Expected a folder as the parent, but got a file instead");
+                return Promise.reject("Expected a folder as the parent, but got something else instead");
             }
 
             var parentContents = parentData.contents || {};
@@ -531,7 +672,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     exports.renameItem = function(key, newName, parentFolder, token = profiles.getSelectedProfileToken()) {
         return resources.getObject(parentFolder).then(function(parentData) {
             if (parentData?.type != "folder") {
-                return Promise.reject("Expected a folder as the parent, but got a file instead");
+                return Promise.reject("Expected a folder as the parent, but got something else instead");
             }
 
             var parentContents = parentData.contents || {};
