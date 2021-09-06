@@ -11,7 +11,7 @@
         "subnodalSigma": "Sousnœud Sigma",
         "subnodalPresenter": "Sousnœud Présentateur",
 
-        "loading": "Chargement ...",
+        "loading": "Chargement...",
         "done": "Terminé",
         "close": "Fermer",
         "learnMore": "Aide",
@@ -30,8 +30,8 @@
         "download": "Télécharger",
         "copy": "Copier",
         "paste": "Coller",
-        "makeCopy": "Faire une copie ...",
-        "moveTo": "Déménager à ...",
+        "makeCopy": "Faire une copie...",
+        "moveTo": "Déménager à...",
         "rename": "Renommer",
         "delete": "Effacer",
         "selectAll": "Tout sélectionner",
@@ -64,8 +64,8 @@
         },
 
         "operationsProgress": {
-            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} == 1": "Téléchargement ...",
-            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} == 1": "Chargement ...",
+            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} == 1": "Téléchargement...",
+            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} == 1": "Chargement...",
             "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
             "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
         },
@@ -89,7 +89,7 @@
         "setup_whyText2": "Bien que nous vous recommandons d'entrer votre vrai nom pour permettre aux autres de vous identifier plus facilement lors de la collaboration, vous pouvez également utiliser un surnom ou un alias à la place si vous préférez.",
         "setup_whyText3": "Si vous êtes dans un lieu de travail ou une école, votre administrateur informatique est en mesure d'afficher et de modifier vos informations personnelles, comme pour tout ce qui se trouve sous votre Compte Sousnœud. Cependant, ils ne pourront pas voir ou modifier les détails de votre compte personnel.",
         
-        "emptyFolder_title": "Rien ici ...",
+        "emptyFolder_title": "Rien ici...",
         "emptyFolder_description": "Il n'y a pas de fichiers dans ce dossier. Allez-y et créez-en un !",
 
         "offlineFolder_title": "Vous n'êtes pas connecté",
