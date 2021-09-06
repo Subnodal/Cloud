@@ -593,7 +593,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 progress.containsUpload = true;
             }
 
-            if (operation instanceof exports.IpfsFileDownloadOperation) {
+            if (operation instanceof exports.IpfsFileDownloadOperation || operation instanceof exports.FolderDownloadOperation) {
                 progress.containsDownload = true;
             }
         });
