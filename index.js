@@ -505,6 +505,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         exports.populateAccounts();
 
+        fs.cancelAndClearFileOperationsQueue();
+
         resources.syncOfflineUpdatedObjects().then(function() {
             return fs.getRootObjectKeyFromProfile();
         }).then(function(key) {

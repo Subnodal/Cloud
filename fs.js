@@ -599,6 +599,12 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         });
     };
 
+    exports.cancelAndClearFileOperationsQueue = function() {
+        return Promise.all(exports.fileOperationsQueue.map((operation) => operation.cancel())).then(function() {
+            exports.fileOperationsQueue = [];
+        });
+    };
+
     exports.getFileOperationsQueueProgress = function() {
         var progress = {
             bytesProgress: 0,
