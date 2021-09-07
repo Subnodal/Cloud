@@ -185,6 +185,32 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 });
             });
 
+            currentListing.forEach(function(item) {
+                if (thumbnails.findImageThumbnailMimeType(item.name) != null) {
+                    if (item.size > thumbnails.IMAGE_THUMBNAIL_SIZE_LIMIT) {
+                        return;
+                    }
+
+                    thumbnails.getImageThumbnail(item.key, !hardRefresh).then(function(url) {
+                        var element = [...document.querySelectorAll("#currentFolderView li")].find((foundElement) => foundElement.getAttribute("data-key") == item.key);
+
+                        if (!element) {
+                            return;
+                        }
+
+                        var thumbnail = element.querySelector("img");
+
+                        thumbnail.addEventListener("error", function() {
+                            thumbnail.setAttribute("src", thumbnails.THUMBNAIL_GENERIC_IMAGE);
+
+                            thumbnails.markImageThumbnailAsInvalid(item.key);
+                        });
+
+                        thumbnail.setAttribute("src", url);
+                    });
+                }
+            });
+
             return Promise.resolve(listing);
         });
     };

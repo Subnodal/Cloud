@@ -102,7 +102,72 @@ namespace("com.subnodal.cloud.associations", function(exports) {
                 "zh_CN": "展示演示文稿"
             },
             fallbackLocaleCode: "en_GB"
-        }, "/media/thumbnails/presenter.svg")
+        }, "/media/thumbnails/presenter.svg"),
+        new exports.Association("png", "https://subnodal.com/?app=photos&objectKey={objectKey}", {
+            appName: {
+                "en_GB": "Photos",
+                "fr_FR": "Photos",
+                "zh_CN": "照片"
+            },
+            documentTypeName: {
+                "en_GB": "PNG photo",
+                "fr_FR": "Photo PNG",
+                "zh_CN": "PNG照片"
+            },
+            fallbackLocaleCode: "en_GB"
+        }, "/media/thumbnails/photo.svg", false),
+        new exports.Association("jpeg", "https://subnodal.com/?app=photos&objectKey={objectKey}", {
+            appName: {
+                "en_GB": "Photos",
+                "fr_FR": "Photos",
+                "zh_CN": "照片"
+            },
+            documentTypeName: {
+                "en_GB": "JPEG photo",
+                "fr_FR": "Photo JPEG",
+                "zh_CN": "JPEG照片"
+            },
+            fallbackLocaleCode: "en_GB"
+        }, "/media/thumbnails/photo.svg", false),
+        new exports.Association("jpg", "https://subnodal.com/?app=photos&objectKey={objectKey}", {
+            appName: {
+                "en_GB": "Photos",
+                "fr_FR": "Photos",
+                "zh_CN": "照片"
+            },
+            documentTypeName: {
+                "en_GB": "JPEG photo",
+                "fr_FR": "Photo JPEG",
+                "zh_CN": "JPEG照片"
+            },
+            fallbackLocaleCode: "en_GB"
+        }, "/media/thumbnails/photo.svg", false),
+        new exports.Association("svg", "https://subnodal.com/?app=photos&objectKey={objectKey}", {
+            appName: {
+                "en_GB": "Photos",
+                "fr_FR": "Photos",
+                "zh_CN": "照片"
+            },
+            documentTypeName: {
+                "en_GB": "SVG photo",
+                "fr_FR": "Graphique SVG",
+                "zh_CN": "SVG图形"
+            },
+            fallbackLocaleCode: "en_GB"
+        }, "/media/thumbnails/photo.svg", false),
+        new exports.Association("gif", "https://subnodal.com/?app=photos&objectKey={objectKey}", {
+            appName: {
+                "en_GB": "Photos",
+                "fr_FR": "Photos",
+                "zh_CN": "照片"
+            },
+            documentTypeName: {
+                "en_GB": "GIF animation",
+                "fr_FR": "Animation GIF",
+                "zh_CN": "GIF动画"
+            },
+            fallbackLocaleCode: "en_GB"
+        }, "/media/thumbnails/photo.svg", false)
     ];
 
     exports.getList = function() {
