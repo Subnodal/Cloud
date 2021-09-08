@@ -54,7 +54,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         start() {
             return Promise.reject("Operation not implemented on base class");
         }
-        
+
         cancel() {
             return Promise.reject("Operation not implemented on base class");
         }
@@ -108,7 +108,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                     resolve();
                 });
-    
+
                 reader.readAsArrayBuffer(file);
             });
         }
