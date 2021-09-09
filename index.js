@@ -192,6 +192,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     }
 
                     thumbnails.getImageThumbnail(item.key, !hardRefresh).then(function(url) {
+                        if (url == null) {
+                            return;
+                        }
+
                         var element = [...document.querySelectorAll("#currentFolderView li")].find((foundElement) => foundElement.getAttribute("data-key") == item.key);
 
                         if (!element) {

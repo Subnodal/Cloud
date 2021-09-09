@@ -64,6 +64,10 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
             return Promise.resolve(cachedThumbnail);
         }
 
+        if (!navigator.onLine) {
+            return Promise.resolve(null);
+        }
+
         var operation = new fs.IpfsFileDownloadOperation(key);
 
         return operation.start().then(function() {
@@ -83,6 +87,8 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
             exports.cacheImageThumbnail(key, url);
 
             return Promise.resolve(url);
+        }).catch(function() {
+            return Promise.resolve(null);
         });
     };
 
