@@ -93,6 +93,9 @@
         "emptyFolder_title": "这里没有什么……",
         "emptyFolder_description": "此文件夹中没有文件。 来吧，创造一个！",
 
+        "searchNoResults_title": "未找到结果",
+        "searchNoResults_description": "我们找不到您要找的东西。 尝试寻找不同的东西。",
+
         "offlineFolder_title": "你离线",
         "offlineFolder_description": "连接到互联网以查看该文件夹。",
 

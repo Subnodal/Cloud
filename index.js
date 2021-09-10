@@ -187,8 +187,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.populateCurrentFolder = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
-        if (key == null) {
-            return Promise.reject("Key is null");
+        if (key == null || key.startsWith(".")) {
+            currentFolderKey = key;
+            key = rootFolderKey;
         }
 
         views.deselectList(document.querySelector("#currentFolderView"));
@@ -247,20 +248,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         listingIsLoading = true;
         listingIsSearchResults = true;
+        dataUnavailableWhileOffline = false;
         forwardPath = [];
 
         subElements.render();
-
-        if (!navigator.onLine) {
-            listingIsLoading = false;
-            dataUnavailableWhileOffline = true;
-
-            subElements.render();
-
-            return Promise.reject("Data unavailable while offline");
-        } else {
-            dataUnavailableWhileOffline = false;
-        }
 
         var results;
 

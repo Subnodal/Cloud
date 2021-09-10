@@ -96,6 +96,9 @@
         "emptyFolder_title": "Nothing here...",
         "emptyFolder_description": "There are no files in this folder. Go ahead and create one!",
 
+        "searchNoResults_title": "No results found",
+        "searchNoResults_description": "We couldn't find what you were looking for. Try searching for something different.",
+
         "offlineFolder_title": "You're offline",
         "offlineFolder_description": "Connect to the internet to view this folder.",
 

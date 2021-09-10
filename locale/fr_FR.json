@@ -95,6 +95,9 @@
         "emptyFolder_title": "Rien ici...",
         "emptyFolder_description": "Il n'y a pas de fichiers dans ce dossier. Allez-y et créez-en un !",
 
+        "searchNoResults_title": "Aucun résultat trouvé",
+        "searchNoResults_description": "Nous n'avons pas pu trouver ce que vous cherchiez. Essayez de chercher quelque chose de différent.",
+
         "offlineFolder_title": "Vous n'êtes pas connecté",
         "offlineFolder_description": "Connectez-vous à internet pour afficher ce dossier.",
 

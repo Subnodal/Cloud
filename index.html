@@ -110,11 +110,18 @@
                         </s-each>
                     </ul>
                 </s-if>
-                <s-if condition="{{ index.getCurrentListing().length == 0 }}">
+                <s-if condition="{{ index.getCurrentListing().length == 0 && !index.getListingIsSearchResults() }}">
                     <div class="screenMessage subtle">
                         <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                         <h2 sui-mono translate>emptyFolder_title</h2>
                         <p translate>emptyFolder_description</p>
+                    </div>
+                </s-if>
+                <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() }}">
+                    <div class="screenMessage subtle">
+                        <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                        <h2 sui-mono translate>searchNoResults_title</h2>
+                        <p translate>searchNoResults_description</p>
                     </div>
                 </s-if>
             </s-if>
