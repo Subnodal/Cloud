@@ -45,6 +45,9 @@
 
         "folder": "Folder",
 
+        "searchForFiles": "Search for files",
+        "searchResults": "Search results",
+
         "space_bytes": {
             "{space} == 1": "{space} byte",
             "{space} != 1": "{space} bytes"

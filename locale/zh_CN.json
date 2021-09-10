@@ -45,6 +45,9 @@
 
         "folder": "文件夹",
 
+        "searchForFiles": "搜索文件",
+        "searchResults": "搜索结果",
+
         "space_bytes": "{space}字节",
         "space_kb": "{space} KB",
         "space_mb": "{space} MB",

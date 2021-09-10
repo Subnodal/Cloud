@@ -14,9 +14,15 @@ namespace("com.subnodal.cloud.search", function(exports) {
     exports.RE_MATCH_WORD = /[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[^ .,:;!?()\[\]\{\}<>/\\&*_||@#~"“”„‟‧…‹›«»。，、！？；：（ ）［］【 】「」﹁﹂《》﹏——～]+/;
     exports.DELTA_SCORE_NAME = 10;
 
+    exports.normaliseToken = function(token) {
+        return token.toLocaleLowerCase().normalize().trim();
+    };
+
     exports.getPhraseTokens = function(phrase) {
-        console.log(phrase);
-        return [...phrase.matchAll(new RegExp(exports.RE_MATCH_WORD, "g"))].map((match) => match[0].toLocaleLowerCase());
+        return [...phrase.matchAll(new RegExp(exports.RE_MATCH_WORD, "g"))]
+            .map((match) => match[0].toLocaleLowerCase())
+            .filter((token) => token.trim() != "")
+        ;
     };
 
     exports.getPhraseTokensFiltering = function(phrase) {
@@ -77,7 +83,7 @@ namespace("com.subnodal.cloud.search", function(exports) {
                 });
             });
 
-            return Promise.resolve(candidateObjects.sort((a, b) => a.score - b.score));
+            return Promise.resolve(candidateObjects.sort((a, b) => b.score - a.score).filter((result) => result.score != 0));
         });
     };
 

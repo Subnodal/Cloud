@@ -45,6 +45,9 @@
 
         "folder": "Dossier",
 
+        "searchForFiles": "Rechercher des fichiers",
+        "searchResults": "Résultats de recherche",
+
         "space_bytes": {
             "{space} == 1": "{space} octet",
             "{space} != 1": "{space} octets"

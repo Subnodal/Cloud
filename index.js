@@ -21,6 +21,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var fs = require("com.subnodal.cloud.fs");
     var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
+    var search = require("com.subnodal.cloud.search");
 
     const LIVE_REFRESH_INTERVAL = 5 * 1_000; // 5 seconds
     const OPERATIONS_PROGRESS_INFO_UPDATE = 100; // 100 milliseconds
@@ -32,8 +33,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var currentFolderKey = null;
     var currentPath = [];
     var forwardPath = [];
+    var preSearchPath = [];
     var currentListing = [];
     var listingIsLoading = true;
+    var listingIsSearchResults = false;
     var dataUnavailableWhileOffline = false;
     var dataNotFound = false;
     var renameDuplicateIsFolder = false;
@@ -67,6 +70,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return listingIsLoading;
     };
 
+    exports.getListingIsSearchResults = function() {
+        return listingIsSearchResults;
+    };
+
     exports.getDataUnavailableWhileOffline = function() {
         return dataUnavailableWhileOffline;
     };
@@ -87,6 +94,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return renameDuplicateIsFolder;
     };
 
+    exports.getSearchQuery = function() {
+        return document.querySelector("#searchInput").value;
+    };
+
     exports.populateAccounts = function() {
         var tokens = profiles.listProfiles();
 
@@ -105,7 +116,77 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.populateFolderView = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
+    exports.attachListItemOpenEvents = function(list) {
+        var isFolderOpening = false;
+
+        list.querySelectorAll("li").forEach(function(element) {
+            views.attachListItemOpenEvent(element, function() {
+                var item = exports.getItemFromCurrentListing(element.getAttribute("data-key"));
+    
+                if (item == null || isFolderOpening) {
+                    return;
+                }
+
+                forwardPath = [];
+    
+                if (item.type == "folder") {
+                    isFolderOpening = true;
+
+                    exports.navigate(item.key).then(function() {
+                        list.querySelector("li")?.focus();
+                    });
+    
+                    return;
+                }
+
+                if (item.type == "file") {
+                    var association = associations.findAssociationForFilename(item.name);
+
+                    if (association == null) {
+                        return;
+                    }
+
+                    window.open(association.getOpenUrlForItem(item));
+
+                    return;
+                }
+            });
+        });
+    };
+
+    exports.applyImageThumbnails = function(list, hardRefresh) {
+        currentListing.forEach(function(item) {
+            if (thumbnails.findImageThumbnailMimeType(item.name) != null) {
+                if (item.size > thumbnails.IMAGE_THUMBNAIL_SIZE_LIMIT) {
+                    return;
+                }
+
+                thumbnails.getImageThumbnail(item.key, !hardRefresh).then(function(url) {
+                    if (url == null) {
+                        return;
+                    }
+
+                    var element = [...list.querySelectorAll("li")].find((foundElement) => foundElement.getAttribute("data-key") == item.key);
+
+                    if (!element) {
+                        return;
+                    }
+
+                    var thumbnail = element.querySelector("img");
+
+                    thumbnail.addEventListener("error", function() {
+                        thumbnail.setAttribute("src", thumbnails.THUMBNAIL_GENERIC_IMAGE);
+
+                        thumbnails.markImageThumbnailAsInvalid(item.key);
+                    });
+
+                    thumbnail.setAttribute("src", url);
+                });
+            }
+        });
+    };
+
+    exports.populateCurrentFolder = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
         if (key == null) {
             return Promise.reject("Key is null");
         }
@@ -113,6 +194,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         views.deselectList(document.querySelector("#currentFolderView"));
 
         listingIsLoading = !refreshInBackground;
+        listingIsSearchResults = false;
 
         subElements.render();
 
@@ -149,74 +231,77 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             subElements.render();
 
-            var isFolderOpening = false;
-
-            document.querySelectorAll("ul#currentFolderView li").forEach(function(element) {
-                views.attachListItemOpenEvent(element, function() {
-                    var item = exports.getItemFromCurrentListing(element.getAttribute("data-key"));
-        
-                    if (item == null || isFolderOpening) {
-                        return;
-                    }
-
-                    forwardPath = [];
-        
-                    if (item.type == "folder") {
-                        isFolderOpening = true;
-
-                        exports.navigate(item.key).then(function() {
-                            document.querySelector("#currentFolderView li")?.focus();
-                        });
-        
-                        return;
-                    }
-
-                    if (item.type == "file") {
-                        var association = associations.findAssociationForFilename(item.name);
-
-                        if (association == null) {
-                            return;
-                        }
-
-                        window.open(association.getOpenUrlForItem(item));
-
-                        return;
-                    }
-                });
-            });
-
-            currentListing.forEach(function(item) {
-                if (thumbnails.findImageThumbnailMimeType(item.name) != null) {
-                    if (item.size > thumbnails.IMAGE_THUMBNAIL_SIZE_LIMIT) {
-                        return;
-                    }
-
-                    thumbnails.getImageThumbnail(item.key, !hardRefresh).then(function(url) {
-                        if (url == null) {
-                            return;
-                        }
-
-                        var element = [...document.querySelectorAll("#currentFolderView li")].find((foundElement) => foundElement.getAttribute("data-key") == item.key);
-
-                        if (!element) {
-                            return;
-                        }
-
-                        var thumbnail = element.querySelector("img");
-
-                        thumbnail.addEventListener("error", function() {
-                            thumbnail.setAttribute("src", thumbnails.THUMBNAIL_GENERIC_IMAGE);
-
-                            thumbnails.markImageThumbnailAsInvalid(item.key);
-                        });
-
-                        thumbnail.setAttribute("src", url);
-                    });
-                }
-            });
+            exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
+            exports.applyImageThumbnails(document.querySelector("#currentFolderView"), hardRefresh);
 
             return Promise.resolve(listing);
         });
+    };
+
+    exports.populateSearchResults = function(phrase, token = profiles.getSelectedProfileToken()) {
+        views.deselectList(document.querySelector("#currentFolderView"));
+
+        if (!listingIsSearchResults) {
+            preSearchPath = currentPath;
+        }
+
+        listingIsLoading = true;
+        listingIsSearchResults = true;
+        forwardPath = [];
+
+        subElements.render();
+
+        if (!navigator.onLine) {
+            listingIsLoading = false;
+            dataUnavailableWhileOffline = true;
+
+            subElements.render();
+
+            return Promise.reject("Data unavailable while offline");
+        } else {
+            dataUnavailableWhileOffline = false;
+        }
+
+        var results;
+
+        return search.searchForPhrase(phrase, token).then(function(resultsData) {
+            results = resultsData;
+
+            return Promise.all(results.map(function(result) {
+                return resources.getObject(result.key);
+            }));
+        }).then(function(objects) {
+            for (var i = 0; i < objects.length; i++) {
+                objects[i] = {
+                    ...objects[i],
+                    key: results[i].key,
+                    score: results[i].score
+                };
+            }
+
+            currentListing = objects;
+            currentPath = [{
+                key: ".searchResults",
+                name: _("searchResults")
+            }];
+            listingIsLoading = false;
+            dataNotFound = false;
+
+            subElements.render();
+
+            exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
+            exports.applyImageThumbnails(document.querySelector("#currentFolderView"));
+
+            return Promise.resolve(objects);
+        });
+    };
+
+    exports.populateFolderView = function(hardRefresh = false) {
+        if (listingIsSearchResults) {
+            return exports.populateSearchResults(exports.getSearchQuery());
+        }
+
+        return exports.populateFolderView(currentFolderKey, hardRefresh);
     };
 
     exports.navigate = function(key, replaceRoot = false) {
@@ -224,12 +309,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentPath = [];
         }
 
+        if (key == ".searchResults") {
+            return exports.populateSearchResults(exports.getSearchQuery());
+        }
+
         currentFolderKey = key;
 
         return resources.getObject(key).then(function(data) {
             currentPath.push({...data, key});
 
-            return exports.populateFolderView(key);
+            return exports.populateCurrentFolder(key);
         });
     };
 
@@ -246,9 +335,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }
         }
 
+        if (toKey == ".searchResults") {
+            return exports.populateSearchResults(exports.getSearchQuery());
+        }
+
         currentFolderKey = toKey;
 
-        return exports.populateFolderView(toKey);
+        return exports.populateCurrentFolder(toKey);
     };
 
     exports.goForward = function() {
@@ -387,7 +480,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return fs.createFile(exports.findNextAvailableName(association.documentTypeName, "." + extension), currentFolderKey).then(function(key) {
             newFileKey = key;
 
-            return exports.populateFolderView(currentFolderKey, true);
+            return exports.populateCurrentFolder(currentFolderKey, true);
         }).then(function() {
             exports.selectItemForRenaming(newFileKey);
 
@@ -427,7 +520,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         promiseChain.then(function() {
-            exports.populateFolderView(currentFolderKey, true, true);
+            exports.populateCurrentFolder(currentFolderKey, true, true);
         });
 
         return operations;
@@ -501,6 +594,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.performLiveRefresh = function() {
+        if (listingIsSearchResults) {
+            return Promise.resolve(false); // Don't live refresh search results
+        }
+
         if (!document.hasFocus()) {
             return Promise.resolve(false); // Minimise bandwidth used for other applications
         }
@@ -525,7 +622,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return Promise.resolve(false); // Don't interfere with user's selection
         }
 
-        return exports.populateFolderView(currentFolderKey, true, true).then(function() {
+        return exports.populateCurrentFolder(currentFolderKey, true, true).then(function() {
             return Promise.resolve(true);
         });
     };
@@ -549,10 +646,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             exports.navigate(currentFolderKey, true);
 
-            exports.populateFolderView(); // Syncing may have caused a few files to change
+            exports.populateCurrentFolder(); // Syncing may have caused a few files to change
         });
 
         listingIsLoading = true;
+        listingIsSearchResults = false;
 
         if (!firstLoad) {
             subElements.render();
@@ -636,10 +734,23 @@ namespace("com.subnodal.cloud.index", function(exports) {
             fs.createFolder(exports.findNextAvailableName(_("newFolderName")), currentFolderKey).then(function(key) {
                 newFolderKey = key;
     
-                return exports.populateFolderView(currentFolderKey, true);
+                return exports.populateCurrentFolder(currentFolderKey, true);
             }).then(function() {
                 exports.selectItemForRenaming(newFolderKey);
             });
+        });
+
+        document.querySelector("#searchInput").addEventListener("onsearch" in window ? "search" : "change", function() { // Firefox doesn't yet support `"search"` event
+            if (exports.getSearchQuery().trim() != "") {
+                exports.populateSearchResults(exports.getSearchQuery());
+            } else {
+                currentPath = preSearchPath;
+                currentFolderKey = currentPath[currentPath.length - 1]?.key || rootFolderKey;
+                preSearchPath = [];
+
+                exports.populateCurrentFolder();
+                subElements.render();
+            }
         });
 
         document.querySelectorAll("#uploadButton, #mobileUploadButton").forEach(function(element) {
@@ -661,7 +772,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         document.querySelector("#viewOfflineRetryButton").addEventListener("click", function() {
-            exports.populateFolderView(currentFolderKey, true);
+            exports.populateFolderView(true);
         });
 
         elements.attachSelectorEvent("click", "#accountsMenuList button", function(element) {
