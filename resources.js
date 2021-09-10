@@ -83,7 +83,7 @@ namespace("com.subnodal.cloud.resources", function(exports) {
 
         cache[token][hash].push({
             key: objectKey,
-            score: (oldScore + deltaScore) || undefined
+            score: Math.max(oldScore + deltaScore, 0) || undefined
         });
 
         localStorage.setItem("subnodalCloud_searchIndexCache", JSON.stringify(cache));
