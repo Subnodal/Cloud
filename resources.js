@@ -102,15 +102,15 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.setSearchIndexObject = function(objectKey, hash, deltaScore, token = profiles.getSelectedProfileToken()) {
-        return exports.setSearchIndexCacheObject(objectKey, hash, deltaScore, token).then(function() {
-            if (!navigator.onLine) {
-                return Promise.resolve();
-            }
+        exports.setSearchIndexCacheObject(objectKey, hash, deltaScore, token);
 
-            return exports.getSearchIndexCacheObjects(hash, token).then(function(objects) {
-                return firebase.database().ref("searchIndices/" + token + "/" + hash).set(objects);
-            });
-        });
+        if (!navigator.onLine) {
+            return Promise.resolve();
+        }
+
+        var objects = exports.getSearchIndexCacheObjects(hash, token);
+
+        return firebase.database().ref("searchIndices/" + token + "/" + hash).set(objects);
     };
 
     exports.getObjectCache = function() {

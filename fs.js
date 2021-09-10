@@ -14,6 +14,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
     var config = require("com.subnodal.cloud.config");
+    var search = require("com.subnodal.cloud.search");
 
     exports.sortByAttributes = {
         NAME: 0,
@@ -662,7 +663,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var parentContents = parentData.contents || {};
 
-            if (Object.keys(parentContents).map((item) => item.name).includes(name)) {
+            if (Object.keys(parentContents).map((key) => parentContents[key].name).includes(name)) {
                 return Promise.reject("A file with the same name already exists in this folder");
             }
 
@@ -672,6 +673,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             };
 
             return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
+        }).then(function() {
+            return search.indexCreatedItem(newFolderKey, name, token);
         }).then(function() {
             return Promise.resolve(newFolderKey);
         });
@@ -697,7 +700,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var parentContents = parentData.contents || {};
 
-            if (Object.keys(parentContents).map((item) => item.name).includes(name)) {
+            if (Object.keys(parentContents).map((key) => parentContents[key].name).includes(name)) {
                 return Promise.reject("A file with the same name already exists in this folder");
             }
 
@@ -708,11 +711,15 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
+            return search.indexCreatedItem(newFileKey, name, token);
+        }).then(function() {
             return Promise.resolve(newFileKey);
         });
     };
 
     exports.renameItem = function(key, newName, parentFolder, token = profiles.getSelectedProfileToken()) {
+        var oldName;
+
         return resources.getObject(parentFolder).then(function(parentData) {
             if (parentData?.type != "folder") {
                 return Promise.reject("Expected a folder as the parent, but got something else instead");
@@ -720,7 +727,9 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             var parentContents = parentData.contents || {};
 
-            if (Object.keys(parentContents).map((item) => item.name).includes(newName)) {
+            oldName = parentContents[key]?.name || "";
+
+            if (Object.keys(parentContents).map((key) => parentContents[key].name).includes(newName)) {
                 return Promise.reject("A file with the same name already exists in this folder");
             }
 
@@ -729,6 +738,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
             return resources.setObject(key, {name: newName}, token); // Doesn't need to be `setObjectFolder` since we're not manipulating folder contents
+        }).then(function() {
+            return search.indexRenamedItem(key, oldName, newName, token);
         });
     };
 
