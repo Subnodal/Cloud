@@ -52,6 +52,67 @@ namespace("com.subnodal.cloud.resources", function(exports) {
         }));
     };
 
+    exports.getSearchIndexCacheObjects = function(hash, token = profiles.getSelectedProfileToken()) {
+        var cache = {};
+
+        try {
+            cache = JSON.parse(localStorage.getItem("subnodalCloud_searchIndexCache") || "{}");
+        } catch (e) {}
+
+        return (cache[token] || {})[hash] || [];
+    };
+
+    exports.setSearchIndexCacheObject = function(objectKey, hash, deltaScore, token = profiles.getSelectedProfileToken()) {
+        var cache = {};
+
+        try {
+            cache = JSON.parse(localStorage.getItem("subnodalCloud_searchIndexCache") || "{}");
+        } catch (e) {}
+
+        if (!cache.hasOwnProperty(token)) {
+            cache[token] = {};
+        }
+
+        if (!cache[token].hasOwnProperty(hash)) {
+            cache[token][hash] = [];
+        }
+
+        var oldScore = cache[token][hash].find((objectData) => objectData.key == objectKey)?.score || 0;
+
+        cache[token][hash] = cache[token][hash].filter((objectData) => objectData.key != objectKey);
+
+        cache[token][hash].push({
+            key: objectKey,
+            score: (oldScore + deltaScore) || undefined
+        });
+
+        localStorage.setItem("subnodalCloud_searchIndexCache", JSON.stringify(cache));
+    };
+
+    exports.getSearchIndexObjects = function(hash, token = profiles.getSelectedProfileToken()) {
+        if (!navigator.onLine) {
+            return Promise.resolve(exports.getSearchIndexCacheObjects(hash, token));
+        }
+
+        return new Promise(function(resolve, reject) {
+            firebase.database().ref("searchIndices/" + token + "/" + hash).once("value", function(snapshot) {
+                resolve(snapshot.val() || []);
+            });
+        });
+    };
+
+    exports.setSearchIndexObject = function(objectKey, hash, deltaScore, token = profiles.getSelectedProfileToken()) {
+        return exports.setSearchIndexCacheObject(objectKey, hash, deltaScore, token).then(function() {
+            if (!navigator.onLine) {
+                return Promise.resolve();
+            }
+
+            return exports.getSearchIndexCacheObjects(hash, token).then(function(objects) {
+                return firebase.database().ref("searchIndices/" + token + "/" + hash).set(objects);
+            });
+        });
+    };
+
     exports.getObjectCache = function() {
         try {
             return JSON.parse(localStorage.getItem("subnodalCloud_objectCache") || "{}");
