@@ -95,7 +95,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.getSearchQuery = function() {
-        return document.querySelector("#searchInput").value;
+        return document.querySelector("#mobileSearchInput").value.trim() || document.querySelector("#searchInput").value.trim();
     };
 
     exports.populateAccounts = function() {
@@ -292,7 +292,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return exports.populateSearchResults(exports.getSearchQuery());
         }
 
-        return exports.populateFolderView(currentFolderKey, hardRefresh);
+        return exports.populateCurrentFolder(currentFolderKey, hardRefresh);
+    };
+
+    exports.exitSearch = function() {
+        document.querySelector("#searchInput").value = "";
+        document.querySelector("#mobileSearchInput").value = "";
+        document.querySelector("#mobileSearch").hidden = true;
+        document.querySelector("#mainNavigation").hidden = false;
+
+        currentPath = preSearchPath;
+        currentFolderKey = currentPath[currentPath.length - 1]?.key || rootFolderKey;
+        preSearchPath = [];
+
+        return exports.populateCurrentFolder();
     };
 
     exports.navigate = function(key, replaceRoot = false) {
@@ -314,6 +327,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.goBack = function(toKey = currentPath[currentPath.length - 2]?.key) {
+        if (exports.getListingIsSearchResults()) {
+            return exports.exitSearch();
+        }
+
         if (typeof(toKey) != "string") {
             return; // Tries to find ancestor of root
         }
@@ -731,17 +748,31 @@ namespace("com.subnodal.cloud.index", function(exports) {
             });
         });
 
+        document.querySelector("#mobileSearchButton").addEventListener("click", function() {
+            document.querySelector("#mainNavigation").hidden = true;
+            document.querySelector("#mobileSearch").hidden = false;
+
+            exports.populateSearchResults(""); // Produce blank area
+        });
+
+        document.querySelector("#mobileSearchBackButton").addEventListener("click", function() {
+            if (exports.getListingIsSearchResults()) {
+                exports.exitSearch();
+            } else {
+                exports.goBack();
+            }
+        });
+
         document.querySelector("#searchInput").addEventListener("onsearch" in window ? "search" : "change", function() { // Firefox doesn't yet support `"search"` event
-            if (exports.getSearchQuery().trim() != "") {
+            if (exports.getSearchQuery() != "") {
                 exports.populateSearchResults(exports.getSearchQuery());
             } else {
-                currentPath = preSearchPath;
-                currentFolderKey = currentPath[currentPath.length - 1]?.key || rootFolderKey;
-                preSearchPath = [];
-
-                exports.populateCurrentFolder();
-                subElements.render();
+                exports.exitSearch();
             }
+        });
+
+        document.querySelector("#mobileSearchInput").addEventListener("onsearch" in window ? "search" : "change", function() { // Firefox doesn't yet support `"search"` event
+            exports.populateSearchResults(exports.getSearchQuery());
         });
 
         document.querySelectorAll("#uploadButton, #mobileUploadButton").forEach(function(element) {

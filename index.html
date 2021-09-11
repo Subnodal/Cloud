@@ -42,19 +42,19 @@
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
             <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon sui-mirrorable aria-hidden="true">settings</sui-icon></button>
+            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon aria-hidden="true">settings</sui-icon></button>
             <button sui-style="thick flat circular" title="{{ _('accounts') }}" id="accountButton">
                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
             </button>
         </nav>
-        <nav>
+        <nav id="mainNavigation">
             <button sui-style="flat" title="{{ _('back') }}" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
             <button sui-style="flat" sui-screen="desktop" title="{{ _('forward') }}" aria-label="{{ _('forward') }}" id="forwardButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_forward</sui-icon></button>
             <sui-spacer></sui-spacer>
             <button sui-screen="desktop" id="newButton">
-                <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
+                <sui-icon aria-hidden="true">add</sui-icon>
                 {{ _("new") }}
-                <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
+                <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
             <sui-spacer></sui-spacer>
             <ol sui-style="breadcrumbs" sui-size="grow">
@@ -78,11 +78,14 @@
             </ol>
             <sui-spacer></sui-spacer>
             <button sui-screen="mobile" title="{{ _('new') }}" aria-label="{{ _('new') }}" id="mobileNewButton">
-                <sui-icon sui-mirrorable aria-hidden="true">add</sui-icon>
-                <sui-icon sui-mirrorable aria-hidden="true">arrow_drop_down</sui-icon>
+                <sui-icon aria-hidden="true">add</sui-icon>
+                <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
+            </button>
+            <button sui-style="flat" sui-screen="narrow" title="{{ _('search') }}" aria-label="{{ _('search') }}" id="mobileSearchButton">
+                <sui-icon aria-hidden="true">search</sui-icon>
             </button>
             <input type="search" placeholder="{{ _('searchForFiles') }}" sui-screen="wide" sui-size="smallest" id="searchInput">
-            <sui-spacer></sui-spacer>
+            <sui-spacer sui-screen="wide"></sui-spacer>
             <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('upload') }}" id="uploadButton">
                 <sui-icon aria-hidden="true">upload</sui-icon>
                 {{ _("upload") }}
@@ -94,6 +97,12 @@
             <button sui-style="flat" sui-screen="mobile" title="{{ _('openMainMenu') }}" aria-label="{{ _('openMainMenu') }}" id="mobileMenuButton">
                 <sui-icon aria-hidden="true">menu</sui-icon>
             </button>
+        </nav>
+        <nav hidden id="mobileSearch">
+            <button sui-style="flat" title="{{ _('back') }}" aria-label="{{ _('back') }}" id="mobileSearchBackButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
+            <sui-spacer sui-screen="desktop" sui-size="grow"></sui-spacer>
+            <input type="search" sui-size="grow" id="mobileSearchInput">
+            <sui-spacer sui-screen="desktop" sui-size="grow"></sui-spacer>
         </nav>
         <main sui-stack="column">
             <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
@@ -117,7 +126,7 @@
                         <p translate>emptyFolder_description</p>
                     </div>
                 </s-if>
-                <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() }}">
+                <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() && index.getSearchQuery() != '' }}">
                     <div class="screenMessage subtle">
                         <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                         <h2 sui-mono translate>searchNoResults_title</h2>
