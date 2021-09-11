@@ -128,7 +128,7 @@
                 </s-if>
                 <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() && index.getSearchQuery() != '' }}">
                     <div class="screenMessage subtle">
-                        <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                        <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                         <h2 sui-mono translate>searchNoResults_title</h2>
                         <p translate>searchNoResults_description</p>
                     </div>
