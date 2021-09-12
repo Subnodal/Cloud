@@ -32,6 +32,7 @@
         <script src="/associations.js"></script>
         <script src="/thumbnails.js"></script>
         <script src="/search.js"></script>
+        <script src="/folderviews.js"></script>
         <script src="/script.js"></script>
         <script src="/index.js"></script>
     </head>
@@ -171,6 +172,50 @@
             </s-else>
             <sui-buttonrow>
                 <button sui-action="close">OK</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="moveCopyDialog">
+            <h1>Move to folder</h1> <!-- TODO: Translate dialog -->
+            <div sui-stack="column">
+                <div sui-stack="row middle">
+                    <button onclick="index.getMoveCopyFolderView()?.goBack();" title="{{ _('back') }}" aria-label="{{ _('back') }}"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
+                    <ol sui-style="breadcrumbs" sui-size="grow">
+                        <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
+                            <s-set var="name" value="item.name"></s-set>
+                            <s-if condition="{{ item.key == index.getRootFolderKey() }}">
+                                <s-set var="name" value="_('rootFolderName')"></s-set>
+                            </s-if>
+                            <s-if condition="{{ typeof(item.name) != 'string' }}">
+                                <s-set var="name" value="_('unknownName')"></s-set>
+                            </s-if>
+                            <li>
+                                <s-if condition="{{ i == index.getCurrentPath().length - 1 }}">
+                                    {{ name }}
+                                </s-if>
+                                <s-else>
+                                    <a href="javascript:index.goBack(`{{ item.key }}`);">{{ name }}</a>
+                                </s-else>
+                            </li>
+                        </s-each>
+                    </ol>
+                </div>
+                <sui-workarea>
+                    <ul sui-iconlist sui-style="linear" id="moveCopyFolderView">
+                        <s-each in="index.getMoveCopyFolderView()?.listing || []" valuevar="item">
+                            <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
+                                <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
+                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                    <span>{{ fs.getItemDisplayName(item) }}</span>
+                                    <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                </li>
+                            </s-if>
+                        </s-each>
+                    </ul>
+                </sui-workarea>
+            </div>
+            <sui-buttonrow>
+                <button>Move</button>
+                <button sui-style="flat" sui-action="close">Cancel</button>
             </sui-buttonrow>
         </dialog>
         <sui-menu id="mobileMenu">

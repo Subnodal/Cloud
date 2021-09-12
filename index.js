@@ -22,6 +22,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
     var search = require("com.subnodal.cloud.search");
+    var folderViews = require("com.subnodal.cloud.folderviews");
 
     const LIVE_REFRESH_INTERVAL = 5 * 1_000; // 5 seconds
     const OPERATIONS_PROGRESS_INFO_UPDATE = 100; // 100 milliseconds
@@ -41,6 +42,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var dataNotFound = false;
     var renameDuplicateIsFolder = false;
     var cleanUpDelayStarted = false;
+    var moveCopyFolderView = null;
 
     window.index = exports;
     window.l10n = l10n;
@@ -96,6 +98,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getSearchQuery = function() {
         return document.querySelector("#mobileSearchInput").value.trim() || document.querySelector("#searchInput").value.trim();
+    };
+
+    exports.getMoveCopyFolderView = function() {
+        return moveCopyFolderView;
     };
 
     exports.populateAccounts = function() {
@@ -217,9 +223,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
             config.getSetting("cloud_separateFolders", "boolean", true),
             hardRefresh
         ).then(function(listing) {
+            listingIsLoading = false;
+
             if (listing == null) {
                 dataNotFound = true;
-                listingIsLoading = false;
 
                 subElements.render();
 
@@ -227,7 +234,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }
 
             currentListing = listing;
-            listingIsLoading = false;
             dataNotFound = false;
 
             subElements.render();
@@ -653,6 +659,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentFolderKey = key;
 
             exports.navigate(currentFolderKey, true);
+            moveCopyFolderView.navigate(currentFolderKey, true);
 
             exports.populateCurrentFolder(); // Syncing may have caused a few files to change
         });
@@ -830,5 +837,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         document.querySelector("#fileUpload").addEventListener("change", function() {
             exports.uploadChosenFiles();
         });
+
+        moveCopyFolderView = new folderViews.FolderView(document.querySelector("#moveCopyFolderView"));
     });
 });
