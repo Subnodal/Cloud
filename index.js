@@ -607,6 +607,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
+    exports.openMoveCopyDialog = function() {
+        moveCopyFolderView.navigate(currentFolderKey, true);
+
+        dialogs.open(document.querySelector("#moveCopyDialog"));
+    };
+
     exports.performLiveRefresh = function() {
         if (listingIsSearchResults) {
             return Promise.resolve(false); // Don't live refresh search results
@@ -618,6 +624,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         if (exports.getListingIsLoading() || exports.getListingIsUnavailable()) {
             return Promise.resolve(false); // Don't interfere with any current loading events
+        }
+
+        if (dialogs.isOpen(document.querySelector("#moveCopyDialog"))) {
+            return Promise.resolve(false); // Don't interfere with dialogs that contain file views
         }
 
         var inputFocused = false;
@@ -659,7 +669,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentFolderKey = key;
 
             exports.navigate(currentFolderKey, true);
-            moveCopyFolderView.navigate(currentFolderKey, true);
 
             exports.populateCurrentFolder(); // Syncing may have caused a few files to change
         });

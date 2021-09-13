@@ -16,8 +16,8 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
     var fs = require("com.subnodal.cloud.fs");
 
     exports.FolderView = class {
-        constructor(listElement) {
-            this.listElement = listElement;
+        constructor(viewElement) {
+            this.viewElement = viewElement;
 
             this.listingIsLoading = false;
             this.dataUnavailableWhileOffline = false;
@@ -34,7 +34,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             return this.path[this.path.length - 1]?.key || null;
         }
 
-        getItemFromListing = function() {
+        getItemFromListing(key) {
             for (var i = 0; i < this.listing.length; i++) {
                 if (this.listing[i].key == key) {
                     return this.listing[i];
@@ -50,11 +50,9 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             var thisScope = this;
             var isFolderOpening = false;
 
-            this.listElement.querySelectorAll("li").forEach(function(listItem) {
+            this.viewElement.querySelectorAll("li").forEach(function(listItem) {
                 views.attachListItemOpenEvent(listItem, function() {
                     var item = thisScope.getItemFromListing(listItem.getAttribute("data-key"));
-
-                    // FIXME: Live refresh needs to be cancelled, otherwise events are cleared
         
                     if (item == null || isFolderOpening) {
                         return;
@@ -64,7 +62,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                         isFolderOpening = true;
 
                         thisScope.navigate(item.key).then(function() {
-                            thisScope.listElement.querySelector("li")?.focus();
+                            thisScope.viewElement.querySelector("li")?.focus();
                         });
         
                         return;
@@ -84,17 +82,17 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 return;
             }
 
-            views.deselectList(this.listElement);
+            views.deselectList(this.viewElement);
 
             this.listingIsLoading = true;
 
-            subElements.render();
+            subElements.render(this.viewElement);
 
             if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
                 this.listingIsLoading = false;
                 this.dataUnavailableWhileOffline = true;
 
-                subElements.render();
+                subElements.render(this.viewElement);
 
                 return Promise.reject("Data unavailable while offline");
             } else {
@@ -107,7 +105,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 if (listing == null) {
                     thisScope.dataNotFound = true;
 
-                    subElements.render();
+                    subElements.render(thisScope.viewElement);
 
                     return Promise.reject("Data not found");
                 }
@@ -115,7 +113,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 thisScope.listing = listing;
                 thisScope.dataNotFound = false;
 
-                subElements.render();
+                subElements.render(thisScope.viewElement);
 
                 thisScope.attachListItemOpenEvents();
 
@@ -138,12 +136,14 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
         }
 
         goBack(toKey = this.path[this.path.length - 2]?.key) {    
+            var thisScope = this;
+
             if (typeof(toKey) != "string") {
                 return; // Tries to find ancestor of root
             }
     
             while (this.currentFolderKey != toKey) {
-                forwardPath.push(this.path.pop());
+                this.path.pop();
     
                 if (this.path.length <= 1) {
                     break;
