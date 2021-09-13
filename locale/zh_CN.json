@@ -14,6 +14,8 @@
         "loading": "正在加载……",
         "done": "完毕",
         "close": "关",
+        "ok": "确定",
+        "cancel": "取消",
         "learnMore": "了解更多",
         "openMainMenu": "打开主菜单",
         "viewMenu": "查看选项",
@@ -30,6 +32,7 @@
         "download": "下载",
         "copy": "复制",
         "paste": "粘贴",
+        "move": "移动",
         "makeCopy": "复制一份……",
         "moveTo": "搬去……",
         "rename": "重命名……",
@@ -106,6 +109,14 @@
         "renameDuplicateFolder_title": "无法重命名此文件夹",
         "renameDuplicateFolder_description": "同一个文件夹中已经有另一个文件同名。",
         "renameDuplicateFile_title": "无法重命名此文件",
-        "renameDuplicateFile_description": "同一个文件夹中已经有另一个文件同名。"
+        "renameDuplicateFile_description": "同一个文件夹中已经有另一个文件同名。",
+
+        "moveCopy_moveToFolder": "移至文件夹",
+        "moveCopy_copyToFolder": "复制到文件夹",
+        "moveCopy_emptyFolder": "空文件夹",
+        "moveCopy_offlineFolder": "离线时不可用",
+        "moveCopy_folderNotFound": "找不到文件夹",
+        "moveCopy_moveHere": "移至这",
+        "moveCopy_copyHere": "复制到这"
     }
 }

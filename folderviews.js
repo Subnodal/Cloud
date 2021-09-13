@@ -16,8 +16,9 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
     var fs = require("com.subnodal.cloud.fs");
 
     exports.FolderView = class {
-        constructor(viewElement) {
+        constructor(viewElement, containerElement = null) {
             this.viewElement = viewElement;
+            this.containerElement = containerElement;
 
             this.listingIsLoading = false;
             this.dataUnavailableWhileOffline = false;
@@ -34,6 +35,22 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             return this.path[this.path.length - 1]?.key || null;
         }
 
+        get isAvailable() {
+            return !this.listingIsLoading && !this.dataUnavailableWhileOffline && !this.dataNotFound;
+        }
+
+        get isUnavailable() {
+            return !this.getListingIsLoading && (this.dataUnavailableWhileOffline || this.dataNotFound);
+        }
+
+        render() {
+            subElements.render(this.containerElement || this.viewElement);
+
+            this.postRender();
+        }
+
+        postRender() {}
+
         getItemFromListing(key) {
             for (var i = 0; i < this.listing.length; i++) {
                 if (this.listing[i].key == key) {
@@ -46,21 +63,20 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
 
         handleFileOpen(item) {}
 
+        handleFileSelect(item) {}
+
         attachListItemOpenEvents() {
             var thisScope = this;
-            var isFolderOpening = false;
 
             this.viewElement.querySelectorAll("li").forEach(function(listItem) {
                 views.attachListItemOpenEvent(listItem, function() {
                     var item = thisScope.getItemFromListing(listItem.getAttribute("data-key"));
         
-                    if (item == null || isFolderOpening) {
+                    if (item == null) {
                         return;
                     }
         
                     if (item.type == "folder") {
-                        isFolderOpening = true;
-
                         thisScope.navigate(item.key).then(function() {
                             thisScope.viewElement.querySelector("li")?.focus();
                         });
@@ -68,9 +84,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                         return;
                     }
 
-                    if (item.type == "file") {
-                        thisScope.handleFileOpen(item);
-                    }
+                    thisScope.handleFileOpen(item);
                 });
             });
         }
@@ -86,13 +100,13 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
 
             this.listingIsLoading = true;
 
-            subElements.render(this.viewElement);
+            this.render()
 
             if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
                 this.listingIsLoading = false;
                 this.dataUnavailableWhileOffline = true;
 
-                subElements.render(this.viewElement);
+                this.render()
 
                 return Promise.reject("Data unavailable while offline");
             } else {
@@ -105,15 +119,17 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 if (listing == null) {
                     thisScope.dataNotFound = true;
 
-                    subElements.render(thisScope.viewElement);
+                    thisScope.render();
 
                     return Promise.reject("Data not found");
                 }
 
                 thisScope.listing = listing;
+                thisScope.listingIsLoading = false;
+                thisScope.dataUnavailableWhileOffline = false;
                 thisScope.dataNotFound = false;
 
-                subElements.render(thisScope.viewElement);
+                thisScope.render();
 
                 thisScope.attachListItemOpenEvents();
 
@@ -127,10 +143,16 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             if (replaceRoot) {
                 this.path = [];
             }
+
+            this.listingIsLoading = true;
+
+            this.render();
     
             return resources.getObject(key).then(function(data) {
-                thisScope.path.push({...data, key});
-    
+                if (thisScope.path[thisScope.path.length - 1]?.key != key) {
+                    thisScope.path.push({...data, key});
+                }
+
                 return thisScope.populate(key);
             });
         }

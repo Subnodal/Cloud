@@ -58,7 +58,7 @@
                 <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
             <sui-spacer></sui-spacer>
-            <ol sui-style="breadcrumbs" sui-size="grow">
+            <ol sui-style="breadcrumbs" sui-size="grow" id="folderBreadcrumbs">
                 <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
                     <s-set var="name" value="item.name"></s-set>
                     <s-if condition="{{ item.key == index.getRootFolderKey() }}">
@@ -105,7 +105,7 @@
             <input type="search" sui-size="grow" id="mobileSearchInput">
             <sui-spacer sui-screen="desktop" sui-size="grow"></sui-spacer>
         </nav>
-        <main sui-stack="column">
+        <main sui-stack="column" id="folderArea">
             <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
                 <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
                     <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
@@ -171,16 +171,16 @@
                 <p translate>renameDuplicateFile_description</p>
             </s-else>
             <sui-buttonrow>
-                <button sui-action="close">OK</button> <!-- TODO: Translate -->
+                <button sui-action="close" translate>ok</button>
             </sui-buttonrow>
         </dialog>
         <dialog id="moveCopyDialog">
-            <h1>Move to folder</h1> <!-- TODO: Translate dialog -->
+            <h1>{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyToFolder") : _("moveCopy_moveToFolder") }}</h1>
             <div sui-stack="column">
                 <div sui-stack="row middle">
                     <button onclick="index.getMoveCopyFolderView()?.goBack();" title="{{ _('back') }}" aria-label="{{ _('back') }}"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
                     <ol sui-style="breadcrumbs" sui-size="grow">
-                        <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
+                        <s-each in="index.getMoveCopyFolderView()?.path" keyvar="i" valuevar="item">
                             <s-set var="name" value="item.name"></s-set>
                             <s-if condition="{{ item.key == index.getRootFolderKey() }}">
                                 <s-set var="name" value="_('rootFolderName')"></s-set>
@@ -189,33 +189,56 @@
                                 <s-set var="name" value="_('unknownName')"></s-set>
                             </s-if>
                             <li>
-                                <s-if condition="{{ i == index.getCurrentPath().length - 1 }}">
+                                <s-if condition="{{ i == index.getMoveCopyFolderView()?.path.length - 1 }}">
                                     {{ name }}
                                 </s-if>
                                 <s-else>
-                                    <a href="javascript:index.goBack(`{{ item.key }}`);">{{ name }}</a>
+                                    <a href="javascript:index.getMoveCopyFolderView()?.goBack(`{{ item.key }}`);">{{ name }}</a>
                                 </s-else>
                             </li>
                         </s-each>
                     </ol>
                 </div>
                 <sui-workarea>
-                    <ul sui-iconlist sui-style="linear" id="moveCopyFolderView">
-                        <s-each in="index.getMoveCopyFolderView()?.listing || []" valuevar="item">
-                            <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
-                                <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
-                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
-                                    <span>{{ fs.getItemDisplayName(item) }}</span>
-                                    <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
-                                </li>
-                            </s-if>
-                        </s-each>
-                    </ul>
+                    <s-if condition="{{ index.getMoveCopyFolderView()?.isAvailable }}">
+                        <ul sui-iconlist sui-mode="single" sui-style="linear" id="moveCopyFolderView">
+                            <s-each in="index.getMoveCopyFolderView()?.listing || []" valuevar="item">
+                                <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
+                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
+                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                        <span>{{ fs.getItemDisplayName(item) }}</span>
+                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                    </li>
+                                </s-if>
+                            </s-each>
+                        </ul>
+                        <s-if condition="{{ index.getMoveCopyFolderView()?.listing.length == 0 }}">
+                            <div class="screenMessage subtle">
+                                <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                                <h2 sui-mono translate>moveCopy_emptyFolder</h2>
+                            </div>
+                        </s-if>
+                    </s-if>
+                    <s-if condition="{{ index.getMoveCopyFolderView()?.listingIsLoading }}">
+                        <sui-loader aria-label="{{ _('loading') }}"></sui-loader>
+                    </s-if>
+                    <s-if condition="{{index.getMoveCopyFolderView()?.isUnavailable && index.getMoveCopyFolderView()?.dataUnavailableWhileOffline }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>moveCopy_offlineFolder</h2>
+                        </div>
+                    </s-if>
+                    <s-if condition="{{ index.getMoveCopyFolderView()?.isUnavailable && index.getMoveCopyFolderView()?.dataNotFound }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>moveCopy_folderNotFound</h2>
+                        </div>
+                    </s-if>
                 </sui-workarea>
             </div>
             <sui-buttonrow>
-                <button>Move</button>
-                <button sui-style="flat" sui-action="close">Cancel</button>
+                <button>{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyHere") : _("moveCopy_moveHere") }}</button>
+                <button sui-style="flat" sui-action="close">{{ _("cancel") }}</button>
             </sui-buttonrow>
         </dialog>
         <sui-menu id="mobileMenu">
@@ -314,8 +337,8 @@
             <hr>
             <button sui-screen="desktop"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("copy") }}</button>
             <button sui-screen="desktop"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
-            <button sui-screen="mobile"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
-            <button><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
+            <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
+            <button onclick="index.openMoveCopyDialog(false);"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
             <button onclick="index.selectFirstItemForRenaming();"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
             <button><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
             <hr sui-screen="desktop">

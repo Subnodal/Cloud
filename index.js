@@ -43,6 +43,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var renameDuplicateIsFolder = false;
     var cleanUpDelayStarted = false;
     var moveCopyFolderView = null;
+    var moveCopyIsCopy = false;
 
     window.index = exports;
     window.l10n = l10n;
@@ -102,6 +103,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getMoveCopyFolderView = function() {
         return moveCopyFolderView;
+    };
+
+    exports.getMoveCopyIsCopy = function() {
+        return moveCopyIsCopy;
     };
 
     exports.populateAccounts = function() {
@@ -192,6 +197,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
+    exports.renderFolderArea = function() {
+        subElements.render(document.querySelector("#folderArea"));
+        subElements.render(document.querySelector("#folderBreadcrumbs"));
+    };
+
     exports.populateCurrentFolder = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
         if (key == null || key.startsWith(".")) {
             currentFolderKey = key;
@@ -203,13 +213,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
         listingIsLoading = !refreshInBackground;
         listingIsSearchResults = false;
 
-        subElements.render();
+        exports.renderFolderArea();
 
         if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
             listingIsLoading = false;
             dataUnavailableWhileOffline = true;
 
-            subElements.render();
+            exports.renderFolderArea();
 
             return Promise.reject("Data unavailable while offline");
         } else {
@@ -236,7 +246,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentListing = listing;
             dataNotFound = false;
 
-            subElements.render();
+            exports.renderFolderArea();
 
             exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"), hardRefresh);
@@ -257,7 +267,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         dataUnavailableWhileOffline = false;
         forwardPath = [];
 
-        subElements.render();
+        exports.renderFolderArea();
 
         var results;
 
@@ -284,7 +294,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             listingIsLoading = false;
             dataNotFound = false;
 
-            subElements.render();
+            exports.renderFolderArea();
 
             exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"));
@@ -607,9 +617,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.openMoveCopyDialog = function() {
+    exports.openMoveCopyDialog = function(isCopy = false) {
+        moveCopyIsCopy = isCopy;
+
         moveCopyFolderView.navigate(currentFolderKey, true);
 
+        moveCopyFolderView.path = [...currentPath];
+
+        subElements.render();
         dialogs.open(document.querySelector("#moveCopyDialog"));
     };
 
@@ -769,6 +784,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             document.querySelector("#mobileSearch").hidden = false;
 
             exports.populateSearchResults(""); // Produce blank area
+
+            document.querySelector("#mobileSearchInput").focus();
         });
 
         document.querySelector("#mobileSearchBackButton").addEventListener("click", function() {
@@ -805,6 +822,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         document.querySelectorAll("#viewMenuButton, #mobileViewMenuButton").forEach(function(element) {
             element.addEventListener("click", function(event) {
+                subElements.render(document.querySelector("#viewMenu"));
+
                 menus.toggleMenu(document.querySelector("#viewMenu"), elements.findAncestor(event.target, "button"), true);
             });
         });
@@ -847,6 +866,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
             exports.uploadChosenFiles();
         });
 
-        moveCopyFolderView = new folderViews.FolderView(document.querySelector("#moveCopyFolderView"));
+        moveCopyFolderView = new folderViews.FolderView(
+            document.querySelector("#moveCopyFolderView"),
+            document.querySelector("#moveCopyDialog")
+        );
+
+        moveCopyFolderView.postRender = function() {
+            exports.populateFolderView();
+        };
     });
 });

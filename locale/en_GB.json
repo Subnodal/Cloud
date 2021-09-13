@@ -14,6 +14,8 @@
         "loading": "Loading...",
         "done": "Done",
         "close": "Close",
+        "ok": "OK",
+        "cancel": "Cancel",
         "learnMore": "Learn more",
         "openMainMenu": "Open main menu",
         "viewMenu": "Viewing options",
@@ -30,6 +32,7 @@
         "download": "Download",
         "copy": "Copy",
         "paste": "Paste",
+        "move": "Move",
         "makeCopy": "Make a copy...",
         "moveTo": "Move to...",
         "rename": "Rename",
@@ -109,6 +112,14 @@
         "renameDuplicateFolder_title": "Can't rename this folder",
         "renameDuplicateFolder_description": "There already is another file in the same folder with this name.",
         "renameDuplicateFile_title": "Can't rename this file",
-        "renameDuplicateFile_description": "There already is another file in the same folder with this name."
+        "renameDuplicateFile_description": "There already is another file in the same folder with this name.",
+
+        "moveCopy_moveToFolder": "Move to folder",
+        "moveCopy_copyToFolder": "Copy to folder",
+        "moveCopy_emptyFolder": "Empty folder",
+        "moveCopy_offlineFolder": "Unavailable while offline",
+        "moveCopy_folderNotFound": "Folder not found",
+        "moveCopy_moveHere": "Move here",
+        "moveCopy_copyHere": "Copy here"
     }
 }

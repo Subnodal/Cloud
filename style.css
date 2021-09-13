@@ -50,6 +50,12 @@ main.setup sui-buttonrow button {
     color: var(--foregroundSubtle);
 }
 
+dialog .screenMessage {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
 #accountsMenuList button {
     height: unset;
 }
