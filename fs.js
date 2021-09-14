@@ -745,7 +745,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.moveItem = function(key, oldParentFolder, newParentFolder, newName = null, token = profiles.getSelectedProfileToken()) {
         var oldParentContents = {};
+        var oldName;
         var newParentContents = {};
+
+        console.log("==== move", key); // TODO: Remove
 
         if (oldParentFolder == newParentFolder) {
             return Promise.resolve();
@@ -758,19 +761,21 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return Promise.reject("The item does not exist in the old parent folder");
             }
 
-            if (newName == oldParentContents[key].name) {
+            oldName = oldParentContents[key].name;
+
+            if (newName == oldName) {
                 newName = null;
             }
 
             return resources.getObject(newParentFolder);
         }).then(function(newParentData) {
-            if (parentData?.type != "folder") {
+            if (newParentData?.type != "folder") {
                 return Promise.reject("Expected a folder as the new parent, but got something else instead");
             }
 
             newParentContents = newParentData.contents || {};
 
-            if (Object.keys(newParentContents).map((key) => newParentContents[key].name).includes(newName || oldParentContents[key].name)) {
+            if (Object.keys(newParentContents).map((key) => newParentContents[key].name).includes(newName || oldName)) {
                 return Promise.reject("A file with the same name already exists in this folder");
             }
 
@@ -780,12 +785,13 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 newParentContents[key].name = newName;
             }
 
-            delete oldParentContents[key];
+            oldParentContents[key] = null;
 
             return resources.setFolderObject(oldParentFolder, {contents: oldParentContents}, token);
         }).then(function() {
             return resources.setFolderObject(newParentFolder, {contents: newParentContents}, token);
         }).then(function() {
+            console.log("done", key); // TODO: Remove
             if (newName == null) {
                 return Promise.resolve();
             }

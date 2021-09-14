@@ -624,8 +624,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.openMoveCopyDialog = function(isCopy = false) {
-        var selectedItems = exports.getItemsFromCurrentSelection();
-
         moveCopyIsCopy = isCopy;
 
         moveCopyFolderView.navigate(currentFolderKey, true);
@@ -647,8 +645,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         return fs.listFolder(newParentFolder).then(function(parentFolderListing) {
             var otherNames = [];
+            var promiseChain = Promise.resolve();
 
-            return Promise.all(items.map(function(item) {
+            items.forEach(function(item) {
                 var newName = exports.findNextAvailableName(
                     item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
                     item.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
@@ -657,8 +656,15 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     parentFolderListing
                 );
 
-                return action(item.key, oldParentFolder, newParentFolder, newName);
-            }));
+                promiseChain = promiseChain.then(function() {
+                    console.log("call", item.key);
+                    return action(item.key, oldParentFolder, newParentFolder, newName).then(function() {
+                        console.log("!done", item.key);
+                    });
+                });
+            });
+
+            return promiseChain;
         });
     };
 
