@@ -530,7 +530,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         [...document.querySelector("#fileUpload").files].forEach(function(file) {
             var operation = new fs.IpfsFileUploadOperation(exports.findNextAvailableName(
                 file.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                file.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
+                (file.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
                 null,
                 otherNames
             ), currentFolderKey);
@@ -558,8 +558,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getItemToDownload = function(key, type) {
         var operation = null;
-
-        console.log(key);
 
         if (type == "file") {
             operation = new fs.IpfsFileDownloadOperation(key);
@@ -650,17 +648,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
             items.forEach(function(item) {
                 var newName = exports.findNextAvailableName(
                     item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                    item.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
+                    (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
                     null,
                     otherNames,
                     parentFolderListing
                 );
 
                 promiseChain = promiseChain.then(function() {
-                    console.log("call", item.key);
-                    return action(item.key, oldParentFolder, newParentFolder, newName).then(function() {
-                        console.log("!done", item.key);
-                    });
+                    return action(item.key, oldParentFolder, newParentFolder, newName);
                 });
             });
 
@@ -766,6 +761,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         thumbnails.startThemeDetection(function() {
             exports.populateFolderView();
+        });
+
+        window.addEventListener("online", function() {
+            resources.syncOfflineUpdatedObjects();
         });
 
         setInterval(function() {

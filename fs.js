@@ -748,8 +748,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         var oldName;
         var newParentContents = {};
 
-        console.log("==== move", key); // TODO: Remove
-
         if (oldParentFolder == newParentFolder) {
             return Promise.resolve();
         }
@@ -791,7 +789,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }).then(function() {
             return resources.setFolderObject(newParentFolder, {contents: newParentContents}, token);
         }).then(function() {
-            console.log("done", key); // TODO: Remove
             if (newName == null) {
                 return Promise.resolve();
             }

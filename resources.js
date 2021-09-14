@@ -128,6 +128,24 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     exports.setObjectCacheItem = function(key, data) {
         var cache = exports.getObjectCache();
 
+        function objectReplaceNull(object) {
+            Object.keys(object).forEach(function(key) {
+                if (object[key] == null) {
+                    delete object[key];
+
+                    return;
+                }
+
+                if (typeof(object[key]) == "object") {
+                    objectReplaceNull(object[key]);
+                }
+            });
+        };
+
+        if (data != null && typeof(data) == "object") {
+            objectReplaceNull(data);
+        }
+
         cache[key] = data;
         shortTermObjectsCache[key] = data;
 
@@ -260,12 +278,13 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     exports.setFolderObject = function(key, data, token = profiles.getSelectedProfileToken()) {
         return exports.getObject(key).then(function(oldData) {
             // We have to merge the folder *contents* to ensure that the folder is up-to-date
+
             return exports.setObject(key, {
                 ...(oldData || {}),
                 ...data,
                 contents: {
-                    ...(oldData?.contents || []),
-                    ...(data?.contents || [])
+                    ...(oldData?.contents || {}),
+                    ...(data?.contents || {})
                 }
             }, token);
         });
