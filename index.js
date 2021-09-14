@@ -255,7 +255,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.populateSearchResults = function(phrase, token = profiles.getSelectedProfileToken()) {
+    exports.populateSearchResults = function(phrase) {
         views.deselectList(document.querySelector("#currentFolderView"));
 
         if (!listingIsSearchResults) {
@@ -271,7 +271,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         var results;
 
-        return search.searchForPhrase(phrase, token).then(function(resultsData) {
+        return search.searchForPhrase(phrase).then(function(resultsData) {
             results = resultsData;
 
             return Promise.all(results.map(function(result) {
@@ -386,6 +386,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return null;
     };
 
+    exports.getItemsFromCurrentSelection = function() {
+        return views.getSelectedListItems(document.querySelector("#currentFolderView")).map(function(element) {
+            return exports.getItemFromCurrentListing(element.getAttribute("data-key"));
+        });
+    };
+
     exports.selectAll = function() {
         document.querySelectorAll("#currentFolderView li").forEach((element) => element.setAttribute("aria-selected", true));
     };
@@ -400,17 +406,17 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.nameTaken = function(name, skipKey = null, extraNames = []) {
+    exports.nameTaken = function(name, skipKey = null, extraNames = [], listing = currentListing) {
         if (extraNames.includes(name)) {
             return true;
         }
 
-        for (var i = 0; i < currentListing.length; i++) {
-            if (currentListing[i].key == skipKey) {
+        for (var i = 0; i < listing.length; i++) {
+            if (listing[i].key == skipKey) {
                 continue;
             }
 
-            if (currentListing[i].name == name) {
+            if (listing[i].name == name) {
                 return true;
             }
         }
@@ -418,18 +424,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return false;
     };
 
-    exports.findNextAvailableName = function(originalName, append = "", skipKey = null, extraNames = []) {
+    exports.findNextAvailableName = function(originalName, append = "", skipKey = null, extraNames = [], listing = currentListing) {
         var copyNumber = 1;
         var newName = originalName;
 
-        if (!exports.nameTaken(originalName + append, skipKey, extraNames)) {
+        if (!exports.nameTaken(originalName + append, skipKey, extraNames, listing)) {
             return originalName + append;
         }
 
         do {
             copyNumber++;
             newName = _("duplicateDocumentCopyMark", {name: originalName, number: copyNumber}) + append;
-        } while (exports.nameTaken(newName, skipKey, extraNames))
+        } while (exports.nameTaken(newName, skipKey, extraNames, listing))
 
         return newName;
     };
@@ -618,14 +624,59 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.openMoveCopyDialog = function(isCopy = false) {
+        var selectedItems = exports.getItemsFromCurrentSelection();
+
         moveCopyIsCopy = isCopy;
 
         moveCopyFolderView.navigate(currentFolderKey, true);
 
         moveCopyFolderView.path = [...currentPath];
 
-        subElements.render();
+        moveCopyFolderView.render();
         dialogs.open(document.querySelector("#moveCopyDialog"));
+    };
+
+    exports.bulkMoveCopyItems = function(items, oldParentFolder, newParentFolder, action) {
+        if (oldParentFolder == newParentFolder) {
+            return Promise.resolve();
+        }
+
+        if (newParentFolder == null) {
+            return Promise.reject("No parent folder was chosen");
+        }
+
+        return fs.listFolder(newParentFolder).then(function(parentFolderListing) {
+            var otherNames = [];
+
+            return Promise.all(items.map(function(item) {
+                var newName = exports.findNextAvailableName(
+                    item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
+                    item.name.match(/(\.[a-zA-Z0-9.]+)$/)[1] || "",
+                    null,
+                    otherNames,
+                    parentFolderListing
+                );
+
+                return action(item.key, oldParentFolder, newParentFolder, newName);
+            }));
+        });
+    };
+
+    exports.performMoveCopy = function() {
+        dialogs.close(document.querySelector("#moveCopyDialog"));
+
+        if (moveCopyIsCopy) {
+            return Promise.resolve(); // TODO: Implement copying
+        }
+
+        return exports.bulkMoveCopyItems(
+            exports.getItemsFromCurrentSelection(),
+            currentFolderKey,
+            index.getMoveCopyFolderView().currentFolderKey,
+            fs.moveItem
+        ).then(function() {
+            return exports.populateFolderView(true);
+        });
     };
 
     exports.performLiveRefresh = function() {
@@ -870,9 +921,5 @@ namespace("com.subnodal.cloud.index", function(exports) {
             document.querySelector("#moveCopyFolderView"),
             document.querySelector("#moveCopyDialog")
         );
-
-        moveCopyFolderView.postRender = function() {
-            exports.populateFolderView();
-        };
     });
 });

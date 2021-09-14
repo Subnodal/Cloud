@@ -237,7 +237,7 @@
                 </sui-workarea>
             </div>
             <sui-buttonrow>
-                <button>{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyHere") : _("moveCopy_moveHere") }}</button>
+                <button onclick="index.performMoveCopy();">{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyHere") : _("moveCopy_moveHere") }}</button>
                 <button sui-style="flat" sui-action="close">{{ _("cancel") }}</button>
             </sui-buttonrow>
         </dialog>

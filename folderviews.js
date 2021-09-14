@@ -45,11 +45,7 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
 
         render() {
             subElements.render(this.containerElement || this.viewElement);
-
-            this.postRender();
         }
-
-        postRender() {}
 
         getItemFromListing(key) {
             for (var i = 0; i < this.listing.length; i++) {

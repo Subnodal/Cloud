@@ -737,9 +737,62 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             return resources.setFolderObject(parentFolder, {contents: parentContents}, token);
         }).then(function() {
-            return resources.setObject(key, {name: newName}, token); // Doesn't need to be `setObjectFolder` since we're not manipulating folder contents
+            return resources.setObject(key, {name: newName}, token);
         }).then(function() {
             return search.indexRenamedItem(key, oldName, newName, token);
+        });
+    };
+
+    exports.moveItem = function(key, oldParentFolder, newParentFolder, newName = null, token = profiles.getSelectedProfileToken()) {
+        var oldParentContents = {};
+        var newParentContents = {};
+
+        if (oldParentFolder == newParentFolder) {
+            return Promise.resolve();
+        }
+
+        return resources.getObject(oldParentFolder).then(function(oldParentData) {
+            oldParentContents = oldParentData.contents || {};
+
+            if (!Object.keys(oldParentContents).includes(key)) {
+                return Promise.reject("The item does not exist in the old parent folder");
+            }
+
+            if (newName == oldParentContents[key].name) {
+                newName = null;
+            }
+
+            return resources.getObject(newParentFolder);
+        }).then(function(newParentData) {
+            if (parentData?.type != "folder") {
+                return Promise.reject("Expected a folder as the new parent, but got something else instead");
+            }
+
+            newParentContents = newParentData.contents || {};
+
+            if (Object.keys(newParentContents).map((key) => newParentContents[key].name).includes(newName || oldParentContents[key].name)) {
+                return Promise.reject("A file with the same name already exists in this folder");
+            }
+
+            newParentContents[key] = {...oldParentContents[key]};
+
+            if (newName != null) {
+                newParentContents[key].name = newName;
+            }
+
+            delete oldParentContents[key];
+
+            return resources.setFolderObject(oldParentFolder, {contents: oldParentContents}, token);
+        }).then(function() {
+            return resources.setFolderObject(newParentFolder, {contents: newParentContents}, token);
+        }).then(function() {
+            if (newName == null) {
+                return Promise.resolve();
+            }
+
+            return resources.setObject(key, {name: newName}, token).then(function() {
+                return search.indexRenamedItem(key, oldName, newName, token);
+            });
         });
     };
 
