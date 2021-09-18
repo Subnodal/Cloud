@@ -71,10 +71,15 @@
         },
 
         "operationsProgress": {
-            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} == 1": "Téléchargement...",
-            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} == 1": "Chargement...",
-            "{containsUpload} == `true` || {containsDownload} == `true` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
-            "{containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
+            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Téléchargement...",
+            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Téléchargé avec succès",
+            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
+            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Copie...",
+            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Copié avec succès",
+            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers copiés",
+            "{containsDownload} == `false` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Chargement...",
+            "{containsDownload} == `false` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Chargé avec succès",
+            "{filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
         },
 
         "view_styleThumbnail": "Vue d'icône",

@@ -632,8 +632,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
         dialogs.open(document.querySelector("#moveCopyDialog"));
     };
 
-    exports.bulkMoveCopyItems = function(items, oldParentFolder, newParentFolder, action) {
-        if (oldParentFolder == newParentFolder) {
+    exports.bulkMoveCopyItems = function(items, oldParentFolder, newParentFolder, copy = false) {
+        if (oldParentFolder == newParentFolder && !copy) {
             return Promise.resolve();
         }
 
@@ -655,26 +655,26 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 );
 
                 promiseChain = promiseChain.then(function() {
-                    return action(item.key, oldParentFolder, newParentFolder, newName);
+                    if (copy) {
+                        return fs.copyItem(item.key, newParentFolder, newName);
+                    } else {
+                        return fs.moveItem(item.key, oldParentFolder, newParentFolder, newName);
+                    }
                 });
             });
 
             return promiseChain;
         });
-    };
+    }
 
     exports.performMoveCopy = function() {
         dialogs.close(document.querySelector("#moveCopyDialog"));
-
-        if (moveCopyIsCopy) {
-            return Promise.resolve(); // TODO: Implement copying
-        }
 
         return exports.bulkMoveCopyItems(
             exports.getItemsFromCurrentSelection(),
             currentFolderKey,
             index.getMoveCopyFolderView().currentFolderKey,
-            fs.moveItem
+            moveCopyIsCopy
         ).then(function() {
             return exports.populateFolderView(true);
         });
@@ -782,7 +782,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             if (
                 fs.getFileOperationsQueueProgress().bytesTotal > 0 &&
-                fs.getFileOperationsQueueProgress().bytesProgress == fs.getFileOperationsQueueProgress().bytesTotal &&
+                fs.getFileOperationsQueueProgress().filesProgress == fs.getFileOperationsQueueProgress().filesTotal &&
                 !cleanUpDelayStarted
             ) {
                 cleanUpDelayStarted = true;

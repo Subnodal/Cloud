@@ -172,7 +172,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
         cancel() {
             if (this.abortController == null) {
-                return Promise.reject("Operation is not running");
+                return Promise.resolve();
             }
 
             this.abortController.abort();
@@ -324,7 +324,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
         cancel() {
             if (this.abortController == null) {
-                return Promise.reject("Operation is not running");
+                return Promise.resolve();
             }
 
             this.abortController.abort();
@@ -481,6 +481,137 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
     };
 
+    exports.CopyOperation = class extends exports.FileOperation {
+        constructor(objectKey, parentFolder, newName = null, token = profiles.getSelectedProfileToken()) {
+            super();
+
+            this.objectKey = objectKey;
+            this.parentFolder = parentFolder;
+            this.newName = newName;
+            this.token = token;
+
+            this.object = null;
+            this.progressInterval = null;
+        }
+
+        get defaultName() {
+            return this.object?.name || null;
+        }
+
+        get name() {
+            return this.newName || this.defaultName;
+        }
+
+        getObject() {
+            var thisScope = this;
+
+            return resources.getObject(this.objectKey).then(function(object) {
+                thisScope.object = object;
+            });
+        }
+
+        start() {
+            var thisScope = this;
+
+            this.state = exports.fileOperationStates.RUNNING;
+            this.bytesProgress = 0;
+            this.bytesTotal = 0;
+
+            return this.getObject().then(function() {
+                if (thisScope.object.type == "file") {
+                    var fileDownloadOperation = new exports.IpfsFileDownloadOperation(thisScope.objectKey);
+
+                    var fileUploadOperation = new exports.IpfsFileUploadOperation(
+                        thisScope.name,
+                        thisScope.parentFolder,
+                        thisScope.token
+                    );
+
+                    thisScope.progressInterval = setInterval(function() {
+                        thisScope.bytesProgress = fileDownloadOperation.bytesProgress + fileUploadOperation.bytesProgress;
+                        thisScope.bytesTotal = fileDownloadOperation.bytesProgress * 2; // Upload will be same as download, but upload has no value yet, so multiply by 2
+
+                        if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                            fileUploadOperation.cancel();
+                            fileDownloadOperation.cancel();
+
+                            clearInterval(thisScope.progressInterval);
+                        }
+                    });
+
+                    return fileDownloadOperation.start().then(function(data) {
+                        fileUploadOperation.fileData = data;
+
+                        return fileUploadOperation.start();
+                    }).then(function(key) {
+                        clearInterval(thisScope.progressInterval);
+
+                        return Promise.resolve(key);
+                    });
+                }
+
+                if (thisScope.object.type == "folder") {
+                    var copyOperations = [];
+
+                    return exports.createFolder(thisScope.name, thisScope.parentFolder, thisScope.token).then(function(parentFolderKey) {
+                        var promiseChain = Promise.resolve();
+
+                        thisScope.progressInterval = setInterval(function() {
+                            thisScope.bytesProgress = copyOperations.reduce(function(accumulator, item) {
+                                return accumulator + item.bytesProgress
+                            }, 0);
+
+                            thisScope.bytesTotal = copyOperations.reduce(function(accumulator, item) {
+                                return accumulator + item.bytesTotal
+                            }, 0);
+
+                            if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                                copyOperations.forEach((operation) => operation.cancel());
+    
+                                clearInterval(thisScope.progressInterval);
+                            }
+                        });
+
+                        Object.keys(thisScope.object.contents || []).forEach(function(objectKey) {
+                            var operation = new exports.CopyOperation(
+                                objectKey,
+                                parentFolderKey,
+                                null,
+                                thisScope.token
+                            );
+                            
+                            copyOperations.push(operation);
+
+                            operation.getObject(); // So that we can find a `bytesTotal` value for the root `CopyOperation`
+
+                            promiseChain = promiseChain.then(function() {
+                                if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                                    return Promise.reject("Operation was cancelled");
+                                }
+
+                                return operation.start();
+                            });
+                        });
+
+                        return promiseChain.then(function() {
+                            return Promise.resolve(parentFolderKey);
+                        });
+                    });
+                }
+            }).then(function(key) {
+                thisScope.state = exports.fileOperationStates.FINISHED;
+
+                return Promise.resolve(key);
+            });
+        }
+
+        cancel() {
+            this.state = exprots.fileOperationStates.CANCELLED;
+
+            return Promise.resolve();
+        }
+    };
+
     function roundToDecimalPlaces(number, decimalPlaces) {
         return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
     }
@@ -613,7 +744,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             filesProgress: 0,
             filesTotal: 0,
             containsUpload: false,
-            containsDownload: false
+            containsDownload: false,
+            containsCopy: false
         };
 
         exports.fileOperationsQueue.forEach(function(operation) {
@@ -639,6 +771,10 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             if (operation instanceof exports.IpfsFileDownloadOperation || operation instanceof exports.FolderDownloadOperation) {
                 progress.containsDownload = true;
+            }
+
+            if (operation instanceof exports.CopyOperation) {
+                progress.containsCopy = true;
             }
         });
 
@@ -797,6 +933,14 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 return search.indexRenamedItem(key, oldName, newName, token);
             });
         });
+    };
+
+    exports.copyItem = function(key, newParentFolder, newName = null, token = profiles.getSelectedProfileToken()) {
+        var operation = new exports.CopyOperation(key, newParentFolder, newName, token);
+
+        exports.addToFileOperationsQueue(operation);
+
+        return operation.start();
     };
 
     exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, separateFolders = true, hardRefresh = false) {
