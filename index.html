@@ -29,6 +29,7 @@
         <script src="/profiles.js"></script>
         <script src="/config.js"></script>
         <script src="/fs.js"></script>
+        <script src="/urls.js"></script>
         <script src="/associations.js"></script>
         <script src="/thumbnails.js"></script>
         <script src="/search.js"></script>
@@ -335,7 +336,7 @@
         <sui-menu id="itemContextMenu">
             <button id="downloadButton"><sui-icon aria-hidden="true">download</sui-icon> {{ _("download") }}</button>
             <hr>
-            <button sui-screen="desktop"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("copy") }}</button>
+            <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("copy") }}</button>
             <button sui-screen="desktop"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
             <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
             <button onclick="index.openMoveCopyDialog(false);"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>

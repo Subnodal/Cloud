@@ -19,6 +19,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
     var config = require("com.subnodal.cloud.config");
     var fs = require("com.subnodal.cloud.fs");
+    var urls = require("com.subnodal.cloud.urls");
     var associations = require("com.subnodal.cloud.associations");
     var thumbnails = require("com.subnodal.cloud.thumbnails");
     var search = require("com.subnodal.cloud.search");
@@ -386,9 +387,15 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return null;
     };
 
-    exports.getItemsFromCurrentSelection = function() {
+    exports.getItemKeysFromCurrentSelection = function() {
         return views.getSelectedListItems(document.querySelector("#currentFolderView")).map(function(element) {
-            return exports.getItemFromCurrentListing(element.getAttribute("data-key"));
+            return element.getAttribute("data-key");
+        });
+    };
+
+    exports.getItemsFromCurrentSelection = function() {
+        return exports.getItemKeysFromCurrentSelection().map(function(key) {
+            return exports.getItemFromCurrentListing(key);
         });
     };
 
@@ -680,6 +687,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
+    exports.copySelectionToClipboard = function() {
+        return navigator.clipboard.writeText(urls.encodeItem(exports.getItemKeysFromCurrentSelection()));
+    };
+
     exports.performLiveRefresh = function() {
         if (listingIsSearchResults) {
             return Promise.resolve(false); // Don't live refresh search results
@@ -754,7 +765,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         config.setSetting(setting, data);
 
         exports.populateFolderView();
-    }
+    };
 
     subElements.ready(function() {
         exports.reload();
