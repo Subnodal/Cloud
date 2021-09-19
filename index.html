@@ -336,8 +336,8 @@
         <sui-menu id="itemContextMenu">
             <button id="downloadButton"><sui-icon aria-hidden="true">download</sui-icon> {{ _("download") }}</button>
             <hr>
-            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop"><sui-icon aria-hidden="true">file_cut</sui-icon> {{ _("cut") }}</button>
-            <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("copy") }}</button>
+            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
+            <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">content_copy</sui-icon> {{ _("copy") }}</button>
             <button sui-screen="desktop"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
             <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
             <button onclick="index.openMoveCopyDialog(false);"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>

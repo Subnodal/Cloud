@@ -30,6 +30,7 @@
         "retry": "Retry",
         "upload": "Upload",
         "download": "Download",
+        "cut": "Cut",
         "copy": "Copy",
         "paste": "Paste",
         "move": "Move",
