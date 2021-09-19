@@ -929,6 +929,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
             menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
         });
 
+        elements.attachSelectorEvent("keydown", "#currentFolderView", function() {
+            if (exports.getItemsFromCurrentSelection().length == 0) {
+                return;
+            }
+    
+            exports.copySelectionToClipboard();
+        });
+
         document.querySelector("#fileUpload").addEventListener("change", function() {
             exports.uploadChosenFiles();
         });
