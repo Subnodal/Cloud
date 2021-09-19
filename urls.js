@@ -8,10 +8,10 @@
 */
 
 namespace("com.subnodal.cloud.urls", function(exports) {
-    exports.encodeItem = function(items) {
+    exports.encodeItem = function(items, cut = false) {
         var itemsValue = items.map((key) => encodeURIComponent(key)).join(",");
 
-        return `${window.location.href.split("?")[0]}?action=open&items=${itemsValue}`;
+        return `${window.location.href.split("?")[0]}?action=open&items=${itemsValue}&cut=${cut ? "true" : "false"}`;
     };
 
     exports.encodeSelection = function(items, path) {

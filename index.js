@@ -687,8 +687,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
     };
 
-    exports.copySelectionToClipboard = function() {
-        return navigator.clipboard.writeText(urls.encodeItem(exports.getItemKeysFromCurrentSelection()));
+    exports.copySelectionToClipboard = function(cut = false) {
+        return navigator.clipboard.writeText(urls.encodeItem(exports.getItemKeysFromCurrentSelection(), cut));
     };
 
     exports.performLiveRefresh = function() {
@@ -929,12 +929,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
             menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
         });
 
-        elements.attachSelectorEvent("keydown", "#currentFolderView", function() {
+        elements.attachSelectorEvent("keydown", "#currentFolderView", function(element, event) {
             if (exports.getItemsFromCurrentSelection().length == 0) {
                 return;
             }
-    
-            exports.copySelectionToClipboard();
+
+            if (event.key == "x" && event.ctrlKey) {
+                exports.copySelectionToClipboard(true);
+            }
+
+            if (event.key == "c" && event.ctrlKey) {
+                exports.copySelectionToClipboard();
+            }
         });
 
         document.querySelector("#fileUpload").addEventListener("change", function() {
