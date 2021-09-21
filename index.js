@@ -677,9 +677,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
     exports.openMoveCopyDialog = function(isCopy = false) {
         moveCopyIsCopy = isCopy;
 
-        moveCopyFolderView.navigate(currentFolderKey, true);
+        if (!listingIsSearchResults) {
+            moveCopyFolderView.navigate(currentFolderKey, true);
 
-        moveCopyFolderView.path = [...currentPath];
+            moveCopyFolderView.path = [...currentPath];
+        } else {
+            moveCopyFolderView.navigate(rootFolderKey, true);
+        }
 
         moveCopyFolderView.render();
         dialogs.open(document.querySelector("#moveCopyDialog"));
