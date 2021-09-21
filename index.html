@@ -44,16 +44,17 @@
                 <span sui-brand>{<strong>{{ _("subnodal").toLocaleLowerCase() }}</strong>} {{ _("cloud").toLocaleLowerCase() }}</span>
             </a>
             <sui-spacer sui-size="grow"></sui-spacer>
-            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}"><sui-icon aria-hidden="true">settings</sui-icon></button>
-            <button sui-style="thick flat circular" title="{{ _('accounts') }}" id="accountButton">
+            <button sui-style="flat" title="{{ _('settings') }}" aria-label="{{ _('settings') }}" class="accountRequired"><sui-icon aria-hidden="true">settings</sui-icon></button>
+            <button sui-style="thick flat circular" title="{{ _('accounts') }}" class="accountRequired" id="accountButton">
                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
             </button>
+            <button sui-style="mobile" class="guestMode" id="signInButton" hidden translate>signIn</button>
         </nav>
         <nav id="mainNavigation">
             <button sui-style="flat" title="{{ _('back') }}" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
             <button sui-style="flat" sui-screen="desktop" title="{{ _('forward') }}" aria-label="{{ _('forward') }}" id="forwardButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_forward</sui-icon></button>
-            <sui-spacer></sui-spacer>
-            <button sui-screen="desktop" id="newButton">
+            <sui-spacer class="accountRequired"></sui-spacer>
+            <button sui-screen="desktop" class="accountRequired" id="newButton">
                 <sui-icon aria-hidden="true">add</sui-icon>
                 {{ _("new") }}
                 <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
@@ -62,7 +63,7 @@
             <ol sui-style="breadcrumbs" sui-size="grow" id="folderBreadcrumbs">
                 <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
                     <s-set var="name" value="item.name"></s-set>
-                    <s-if condition="{{ item.key == index.getRootFolderKey() }}">
+                    <s-if condition="{{ item.key == index.getRootFolderKey() && !index.getListingIsSharedLink() }}">
                         <s-set var="name" value="_('rootFolderName')"></s-set>
                     </s-if>
                     <s-if condition="{{ typeof(item.name) != 'string' }}">
@@ -79,16 +80,16 @@
                 </s-each>
             </ol>
             <sui-spacer></sui-spacer>
-            <button sui-screen="mobile" title="{{ _('new') }}" aria-label="{{ _('new') }}" id="mobileNewButton">
+            <button sui-screen="mobile" title="{{ _('new') }}" aria-label="{{ _('new') }}" class="writePermissionRequired" id="mobileNewButton">
                 <sui-icon aria-hidden="true">add</sui-icon>
                 <sui-icon aria-hidden="true">arrow_drop_down</sui-icon>
             </button>
-            <button sui-style="flat" sui-screen="narrow" title="{{ _('search') }}" aria-label="{{ _('search') }}" id="mobileSearchButton">
+            <button sui-style="flat" sui-screen="narrow" title="{{ _('search') }}" aria-label="{{ _('search') }}" class="accountRequired" id="mobileSearchButton">
                 <sui-icon aria-hidden="true">search</sui-icon>
             </button>
-            <input type="search" placeholder="{{ _('searchForFiles') }}" sui-screen="wide" sui-size="smallest" id="searchInput">
+            <input type="search" placeholder="{{ _('searchForFiles') }}" sui-screen="wide" sui-size="smallest" class="accountRequired" id="searchInput">
             <sui-spacer sui-screen="wide"></sui-spacer>
-            <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('upload') }}" id="uploadButton">
+            <button sui-style="flat" sui-screen="desktop" aria-label="{{ _('upload') }}" class="writePermissionRequired" id="uploadButton">
                 <sui-icon aria-hidden="true">upload</sui-icon>
                 {{ _("upload") }}
             </button>
@@ -112,11 +113,20 @@
                     <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item">
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
-                                <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
-                                    <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
-                                    <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
-                                    <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
-                                </li>
+                                <s-if condition="{{ index.getListingHasWritePermission(item) }}">
+                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                        <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
+                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                    </li>
+                                </s-if>
+                                <s-else>
+                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                        <span>{{ fs.getItemDisplayName(item) }}</span>
+                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                    </li>
+                                </s-else>
                             </s-if>
                         </s-each>
                     </ul>
@@ -159,7 +169,10 @@
             <s-set var="progress" value="fs.getFileOperationsQueueProgress()"></s-set>
             <progress value="{{ progress.bytesTotal > 0 ? (progress.bytesProgress / progress.bytesTotal) : 0 }}"></progress>
             <span>
-                <a href="javascript:void(0);" sui-style="integrated">{{ progress.bytesTotal > 0 ? _("operationsProgress", progress) : _("spaceLeft", {value: 0, space: "0 bytes"}) }} <sui-icon sui-flippable aria-hidden="true">arrow_right</sui-icon></a>
+                <a href="javascript:void(0);" sui-style="integrated">
+                    {{ progress.bytesTotal > 0 ? _("operationsProgress", progress) : _("spaceLeft", {value: 0, space: "0 bytes"}) }}
+                    <sui-icon sui-flippable aria-hidden="true">arrow_right</sui-icon>
+                </a>
             </span>
         </nav>
         <dialog id="renameDuplicateDialog">
@@ -183,7 +196,7 @@
                     <ol sui-style="breadcrumbs" sui-size="grow">
                         <s-each in="index.getMoveCopyFolderView()?.path" keyvar="i" valuevar="item">
                             <s-set var="name" value="item.name"></s-set>
-                            <s-if condition="{{ item.key == index.getRootFolderKey() }}">
+                            <s-if condition="{{ item.key == index.getRootFolderKey() && !index.getListingIsSharedLink() }}">
                                 <s-set var="name" value="_('rootFolderName')"></s-set>
                             </s-if>
                             <s-if condition="{{ typeof(item.name) != 'string' }}">
@@ -243,8 +256,8 @@
             </sui-buttonrow>
         </dialog>
         <sui-menu id="mobileMenu">
-            <button translate>settings</button>
-            <button id="mobileAccountButton" translate>accounts</button>
+            <button class="accountRequired" translate>settings</button>
+            <button class="accountRequired" id="mobileAccountButton" translate>accounts</button>
             <button id="mobileViewMenuButton" translate>viewMenu</button>
         </sui-menu>
         <sui-menu id="accountsMenu">
@@ -267,7 +280,7 @@
             <button><sui-icon></sui-icon> {{ _("manageAccounts") }}</button>
         </sui-menu>
         <sui-menu id="newMenu">
-            <button sui-screen="mobile" id="mobileUploadButton">
+            <button sui-screen="mobile" class="writePermissionRequired" id="mobileUploadButton">
                 <sui-icon aria-hidden="true">upload</sui-icon>
                 {{ _("upload") }}
             </button>
@@ -328,21 +341,21 @@
         </sui-menu>
         <!-- TODO: Add full functionality with copy/paste etc. -->
         <sui-menu id="viewContextMenu">
-            <button><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
-            <hr sui-screen="desktop">
+            <button class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <hr sui-screen="desktop" class="writePermissionRequired">
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
         </sui-menu>
         <sui-menu id="itemContextMenu">
             <button id="downloadButton"><sui-icon aria-hidden="true">download</sui-icon> {{ _("download") }}</button>
             <hr>
-            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
+            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
             <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">content_copy</sui-icon> {{ _("copy") }}</button>
-            <button sui-screen="desktop"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
-            <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
-            <button onclick="index.openMoveCopyDialog(false);"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
-            <button onclick="index.selectFirstItemForRenaming();"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
-            <button><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
+            <button sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);" class="writePermissionRequired"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
+            <button onclick="index.openMoveCopyDialog(false);" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
+            <button onclick="index.selectFirstItemForRenaming();" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
+            <button class="writePermissionRequired"><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
             <hr sui-screen="desktop">
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>

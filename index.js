@@ -39,6 +39,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var currentListing = [];
     var listingIsLoading = true;
     var listingIsSearchResults = false;
+    var listingHasWritePermission = true;
     var dataUnavailableWhileOffline = false;
     var dataNotFound = false;
     var renameDuplicateIsFolder = false;
@@ -78,6 +79,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return listingIsSearchResults;
     };
 
+    exports.getListingHasWritePermission = function() {
+        return listingHasWritePermission;
+    };
+
     exports.getDataUnavailableWhileOffline = function() {
         return dataUnavailableWhileOffline;
     };
@@ -92,6 +97,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.getListingIsAvailable = function() {
         return !exports.getListingIsLoading() && !exports.getDataUnavailableWhileOffline() && !exports.getDataNotFound();
+    };
+
+    exports.getListingIsSharedLink = function() {
+        return urls.getActionFromCurrentUrl() == "open";
     };
 
     exports.getRenameDuplicateIsFolder = function() {
@@ -126,6 +135,15 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             subElements.render();
         });
+    };
+
+    exports.renderPermissionEffects = function() {
+        document.querySelectorAll(".writePermissionRequired").forEach((element) => element.disabled = !listingHasWritePermission);
+
+        if (profiles.isGuestMode()) {
+            document.querySelectorAll(".accountRequired, .writePermissionRequired").forEach((element) => element.hidden = true);
+            document.querySelectorAll(".guestMode").forEach((element) => element.hidden = false);
+        }
     };
 
     exports.attachListItemOpenEvents = function(list) {
@@ -227,6 +245,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             dataUnavailableWhileOffline = false;
         }
 
+        var folderObject;
+
         return fs.listFolder(
             key,
             config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME),
@@ -247,12 +267,32 @@ namespace("com.subnodal.cloud.index", function(exports) {
             currentListing = listing;
             dataNotFound = false;
 
+            return resources.getObject(key, true);
+        }).then(function(object) {
+            folderObject = object;
+
+            if (!profiles.isGuestMode()) {
+                return profiles.getUidFromToken();
+            } else {
+                return Promise.resolve(null);
+            }
+
+        }).then(function(uid) {
+            listingHasWritePermission = false;
+
+            if (uid != null) {
+                listingHasWritePermission ||= folderObject.owner == uid;
+                listingHasWritePermission ||= folderObject.permissions[uid] == "write";
+            }
+
             exports.renderFolderArea();
 
             exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"), hardRefresh);
 
-            return Promise.resolve(listing);
+            exports.renderPermissionEffects();
+
+            return Promise.resolve(currentListing);
         });
     };
 
@@ -387,8 +427,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return null;
     };
 
+    exports.getCurrentSelection = function() {
+        return views.getSelectedListItems(document.querySelector("#currentFolderView")).filter(function(item) {
+            return item.getAttribute("data-rendered") == "true";
+        });
+    };
+
     exports.getItemKeysFromCurrentSelection = function() {
-        return views.getSelectedListItems(document.querySelector("#currentFolderView")).map(function(element) {
+        return exports.getCurrentSelection().map(function(element) {
             return element.getAttribute("data-key");
         });
     };
@@ -500,7 +546,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.selectFirstItemForRenaming = function() {
-        var selectedItem = views.getSelectedListItems(document.querySelector("#currentFolderView"))[0];
+        var selectedItem = exports.getCurrentSelection()[0];
 
         if (!(selectedItem instanceof Node)) {
             return;
@@ -586,7 +632,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.downloadSelectedItems = function() {
-        var selectedItems = views.getSelectedListItems(document.querySelector("#currentFolderView"));
+        var selectedItems = exports.getCurrentSelection();
 
         if (selectedItems.length == 0) {
             return Promise.resolve();
@@ -688,7 +734,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.copySelectionToClipboard = function(cut = false) {
-        return navigator.clipboard.writeText(urls.encodeItem(exports.getItemKeysFromCurrentSelection(), cut));
+        return navigator.clipboard.writeText(urls.encodeItems(exports.getItemKeysFromCurrentSelection(), cut));
     };
 
     exports.performLiveRefresh = function() {
@@ -720,7 +766,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return Promise.resolve(false); // Don't interfere with focus
         }
 
-        if (views.getSelectedListItems(document.querySelector("#currentFolderView")).length > 0) {
+        if (exports.getCurrentSelection().length > 0) {
             return Promise.resolve(false); // Don't interfere with user's selection
         }
 
@@ -733,23 +779,65 @@ namespace("com.subnodal.cloud.index", function(exports) {
         config.init();
 
         exports.populateAccounts();
+        exports.renderPermissionEffects();
 
         fs.cancelAndClearFileOperationsQueue();
 
-        resources.syncOfflineUpdatedObjects().then(function() {
-            return fs.getRootObjectKeyFromProfile();
-        }).then(function(key) {
-            if (key == null) {
-                return;
-            }
+        if (urls.getActionFromCurrentUrl() == "open") {
+            var itemKeys = urls.getItemsFromCurrentUrl().items;
 
-            rootFolderKey = key;
-            currentFolderKey = key;
+            Promise.all(itemKeys.map((key) => resources.getObject(key))).then(function(items) {
+                items.forEach(function(item, i) {
+                    item.key = itemKeys[i];
 
-            exports.navigate(currentFolderKey, true);
+                    if (i == 0 && (item == null || item.type == "folder")) {
+                        rootFolderKey = itemKeys[0];
+                        currentFolderKey = rootFolderKey;
 
-            exports.populateCurrentFolder(); // Syncing may have caused a few files to change
-        });
+                        exports.navigate(currentFolderKey, true);
+    
+                        return;
+                    }
+
+                    if (item.type == "folder") {
+                        window.open(urls.encodeItems([itemKeys[i]]));
+    
+                        return;
+                    }
+    
+                    var association = associations.findAssociationForFilename(item.name);
+
+                    if (association == null) {
+                        return;
+                    }
+
+                    var openUrl = association.getOpenUrlForItem(item);
+
+                    if (i == 0) {
+                        window.location.replace(openUrl);
+                    } else {
+                        window.open(openUrl);
+                    }
+
+                    return;
+                });
+            });
+        } else {
+            resources.syncOfflineUpdatedObjects().then(function() {
+                return fs.getRootObjectKeyFromProfile();
+            }).then(function(key) {
+                if (key == null) {
+                    return;
+                }
+    
+                rootFolderKey = key;
+                currentFolderKey = rootFolderKey;
+    
+                exports.navigate(currentFolderKey, true);
+    
+                exports.populateCurrentFolder(); // Syncing may have caused a few files to change
+            });
+        }
 
         listingIsLoading = true;
         listingIsSearchResults = false;
@@ -818,6 +906,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         document.querySelector("#addAccountButton").addEventListener("click", function() {
             window.location.href = profiles.ADD_PROFILE_REDIRECT_URL;
+        });
+
+        document.querySelector("#signInButton").addEventListener("click", function() {
+            window.location.href = profiles.NO_PROFILES_REDIRECT_URL;
         });
 
         document.querySelector("#backButton").addEventListener("click", function() {

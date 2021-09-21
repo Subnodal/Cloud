@@ -9,6 +9,7 @@
 
 namespace("com.subnodal.cloud.profiles", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
+    var urls = require("com.subnodal.cloud.urls");
 
     exports.PROFILE_VERSION = 0;
     exports.COMPLETE_REDIRECT_URL = "/";
@@ -63,6 +64,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     exports.setProfile = exports.withProfilesFactory(function(token, data) {
+        if (token == null) {
+            return;
+        }
+
         exports.profiles[token] = data;
     });
 
@@ -90,6 +95,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         return Object.keys(exports.profiles);
     };
 
+    exports.isGuestMode = function() {
+        return exports.listProfiles().length == 0;
+    };
+
     exports.getUidFromToken = function(token) {
         return new Promise(function(resolve, reject) {
             var uid = exports.getProfile(token);
@@ -106,6 +115,12 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
 
     exports.checkProfilesState = function() {
         return new Promise(function(resolve, reject) {
+            if (urls.getActionFromCurrentUrl() == "open") {
+                resolve(true);
+
+                return;
+            }
+
             if (Object.keys(exports.listProfiles()).length == 0) {
                 window.location.replace(exports.NO_PROFILES_REDIRECT_URL);
 
@@ -120,6 +135,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
 
     exports.checkCurrentProfileState = function() {
         return resources.getProfileInfo().then(function(data) {
+            if (urls.getActionFromCurrentUrl() == "open") {
+                return Promise.resolve(true);
+            }
+
             if (typeof(data?.name) != "string") {
                 window.location.replace("/setup.html");
 

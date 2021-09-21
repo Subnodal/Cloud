@@ -945,11 +945,14 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, separateFolders = true, hardRefresh = false) {
         var listing = [];
+        var objectData = {};
 
         return resources.getObject(folderKey, !hardRefresh).then(function(data) {
             if (data == null || data?.deleted == true || data?.type != "folder") {
                 return Promise.resolve(null);
             }
+
+            objectData = data || {};
 
             var contents = data.contents || {};
 
