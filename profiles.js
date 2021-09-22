@@ -134,6 +134,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     exports.checkCurrentProfileState = function() {
+        if (exports.isGuestMode()) {
+            return Promise.resolve(true);
+        }
+
         return resources.getProfileInfo().then(function(data) {
             if (urls.getActionFromCurrentUrl() == "open") {
                 return Promise.resolve(true);

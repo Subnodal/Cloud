@@ -27,6 +27,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     var shortTermObjectsCache = {};
 
     exports.getProfileInfo = function(token = profiles.getSelectedProfileToken()) {
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         if (!navigator.onLine) {
             return Promise.resolve(profiles.getProfile(token) || null);
         }
@@ -41,6 +45,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.setProfileInfo = function(data, token = profiles.getSelectedProfileToken()) {
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         if (!navigator.onLine) {
             return Promise.reject("Connect to the internet to change this information");
         }
@@ -90,6 +98,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.getSearchIndexObjects = function(hash, token = profiles.getSelectedProfileToken()) {
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         if (!navigator.onLine) {
             return Promise.resolve(exports.getSearchIndexCacheObjects(hash, token));
         }
@@ -102,6 +114,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.setSearchIndexObject = function(objectKey, hash, deltaScore, token = profiles.getSelectedProfileToken()) {
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         exports.setSearchIndexCacheObject(objectKey, hash, deltaScore, token);
 
         if (!navigator.onLine) {
@@ -242,6 +258,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     exports.setObject = function(key, data, token = profiles.getSelectedProfileToken()) {
         var oldData;
 
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         exports.setObjectCacheItem(key, {
             ...(exports.getObjectCache()[key] || {}),
             ...data,
@@ -276,6 +296,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
     };
 
     exports.setFolderObject = function(key, data, token = profiles.getSelectedProfileToken()) {
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
+
         return exports.getObject(key).then(function(oldData) {
             // We have to merge the folder *contents* to ensure that the folder is up-to-date
 
@@ -292,6 +316,10 @@ namespace("com.subnodal.cloud.resources", function(exports) {
 
     exports.createObject = function(data, token = profiles.getSelectedProfileToken()) {
         var key = core.generateKey(64);
+
+        if (profiles.isGuestMode()) {
+            return Promise.reject("In guest mode, and so no profile exists");
+        }
 
         return profiles.getUidFromToken().then(function(uid) {
             var permissions = {};

@@ -782,7 +782,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     exports.reload = function() {
         config.init();
 
-        exports.populateAccounts();
+        if (!profiles.isGuestMode()) {
+            exports.populateAccounts();
+        }
+
         exports.renderPermissionEffects();
 
         fs.cancelAndClearFileOperationsQueue();

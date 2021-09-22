@@ -9,8 +9,21 @@
 
 namespace("com.subnodal.cloud.config", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
+    var profiles = require("com.subnodal.cloud.profiles");
 
     exports.data = {};
+
+    exports.getGuestConfig = function() {
+        try {
+            return JSON.parse(localStorage.getItem("subnodalCloud_guestConfig") || "{}");
+        } catch (e) {
+            return {};
+        }
+    };
+
+    exports.setGuestConfig = function(data) {
+        localStorage.setItem("subnodalCloud_guestConfig", JSON.stringify(data));
+    };
 
     exports.getSetting = function(setting, requiredType = null, fallback = null) {
         if (!exports.data.hasOwnProperty(setting) || (requiredType != null && typeof(exports.data[setting]) != requiredType)) {
@@ -22,6 +35,19 @@ namespace("com.subnodal.cloud.config", function(exports) {
 
     exports.setSetting = function(setting, data) {
         exports.data[setting] = data; // Set immediately
+
+        if (profiles.isGuestMode()) {
+            var guestConfig = exports.getGuestConfig();
+
+            guestConfig = {
+                ...guestConfig,
+                ...exports.data
+            };
+
+            exports.setGuestConfig(guestConfig);
+
+            return;
+        }
 
         resources.getProfileInfo().then(function(oldData) {
             if (typeof(oldData?.config) == "object") {
@@ -37,6 +63,12 @@ namespace("com.subnodal.cloud.config", function(exports) {
     };
 
     exports.init = function() {
+        if (profiles.isGuestMode()) {
+            exports.data = exports.getGuestConfig();
+
+            return;
+        }
+
         resources.getProfileInfo().then(function(data) {
             if (typeof(data?.config) != "object") {
                 return;
