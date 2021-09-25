@@ -341,7 +341,7 @@
         </sui-menu>
         <!-- TODO: Add full functionality with copy/paste etc. -->
         <sui-menu id="viewContextMenu">
-            <button class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button onclick="index.pasteItemsFromClipboard();" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
             <hr sui-screen="desktop" class="writePermissionRequired">
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
@@ -351,7 +351,7 @@
             <hr>
             <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
             <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">content_copy</sui-icon> {{ _("copy") }}</button>
-            <button sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button onclick="index.pasteItemsFromClipboard();" sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
             <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);" class="writePermissionRequired"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
             <button onclick="index.openMoveCopyDialog(false);" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
             <button onclick="index.selectFirstItemForRenaming();" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>

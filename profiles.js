@@ -115,7 +115,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
 
     exports.checkProfilesState = function() {
         return new Promise(function(resolve, reject) {
-            if (urls.getActionFromCurrentUrl() == "open") {
+            if (urls.getActionFromUrl() == "open") {
                 resolve(true);
 
                 return;
@@ -139,7 +139,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         }
 
         return resources.getProfileInfo().then(function(data) {
-            if (urls.getActionFromCurrentUrl() == "open") {
+            if (urls.getActionFromUrl() == "open") {
                 return Promise.resolve(true);
             }
 

@@ -100,7 +100,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.getListingIsSharedLink = function() {
-        return urls.getActionFromCurrentUrl() == "open";
+        return urls.getActionFromUrl() == "open";
     };
 
     exports.getRenameDuplicateIsFolder = function() {
@@ -738,7 +738,33 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.copySelectionToClipboard = function(cut = false) {
-        return navigator.clipboard.writeText(urls.encodeItems(exports.getItemKeysFromCurrentSelection(), cut));
+        return navigator.clipboard.writeText(urls.encodeItems(exports.getItemKeysFromCurrentSelection(), cut, currentFolderKey));
+    };
+
+    exports.pasteItemsFromClipboard = function() {
+        var pasteData;
+
+        return navigator.clipboard.readText().then(function(text) {
+            if (!urls.isCloudUrl(text)) {
+                return;
+            }
+
+            pasteData = urls.getItemsFromUrl(text);
+
+            return Promise.all(pasteData.items.map((key) => resources.getObject(key)));
+        }).then(function(items) {
+            items.forEach(function(item, i) {
+                item.key = pasteData.items[i];
+            });
+
+            if (pasteData.cut) {
+                navigator.clipboard.writeText(urls.encodeItems(items.map((item) => item.key))); // Copy instead for subsequent pastes
+            }
+
+            return exports.bulkMoveCopyItems(items, pasteData.cutFrom, currentFolderKey, !pasteData.cut);
+        }).then(function() {
+            return exports.populateFolderView(true);
+        });
     };
 
     exports.performLiveRefresh = function() {
@@ -790,8 +816,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         fs.cancelAndClearFileOperationsQueue();
 
-        if (urls.getActionFromCurrentUrl() == "open") {
-            var itemKeys = urls.getItemsFromCurrentUrl().items;
+        if (urls.getActionFromUrl() == "open") {
+            var itemKeys = urls.getItemsFromUrl().items;
 
             Promise.all(itemKeys.map((key) => resources.getObject(key))).then(function(items) {
                 items.forEach(function(item, i) {
@@ -1039,6 +1065,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             if (event.key == "c" && event.ctrlKey) {
                 exports.copySelectionToClipboard();
+            }
+
+            if (event.key == "v" && event.ctrlKey) {
+                exports.pasteItemsFromClipboard();
             }
         });
 

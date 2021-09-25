@@ -14,10 +14,10 @@ namespace("com.subnodal.cloud.urls", function(exports) {
         return array.map((item) => item.trim()).filter((item) => item != "");
     }
 
-    exports.encodeItems = function(items, cut = false) {
+    exports.encodeItems = function(items, cut = false, cutFrom = null) {
         var itemsValue = items.map((key) => encodeURIComponent(key)).join(",");
 
-        return `${window.location.href.split("?")[0]}?action=open&items=${itemsValue}&cut=${cut ? "true" : "false"}`;
+        return `${window.location.href.split("?")[0]}?action=open&items=${itemsValue}&cut=${cut ? "true&cutFrom=" + encodeURIComponent(cutFrom) : "false"}`;
     };
 
     exports.encodeSelection = function(items, path) {
@@ -27,21 +27,26 @@ namespace("com.subnodal.cloud.urls", function(exports) {
         return `${window.location.href.split("?")[0]}?action=select&items=${itemsValue}&path=${pathValue}`;
     };
 
-    exports.getActionFromCurrentUrl = function() {
-        return core.parameter("action") || null;
+    exports.isCloudUrl = function(url = window.location.href) {
+        return !!url.match(new RegExp(`^https?:\\/\\/(?:${window.location.host}|cloud.subnodal.com)\\/`));
     };
 
-    exports.getItemsFromCurrentUrl = function() {
+    exports.getActionFromUrl = function(url = window.location.href) {
+        return core.parameter("action", url) || null;
+    };
+
+    exports.getItemsFromUrl = function(url = window.location.href) {
         return {
-            items: normaliseArray((core.parameter("items") || "").split(",")),
-            cut: !!core.parameter("cut")
+            items: normaliseArray((core.parameter("items", url) || "").split(",")),
+            cut: core.parameter("cut", url) == "true",
+            cutFrom: core.parameter("cutFrom", url) || null
         };
     };
 
-    exports.getSelectionFromCurrentUrl = function() {
+    exports.getSelectionFromUrl = function(url = window.location.href) {
         return {
-            items: normaliseArray((core.parameter("items") || "").split(",")),
-            path: normaliseArray((core.parameter("path") || "").split(","))
+            items: normaliseArray((core.parameter("items", url) || "").split(",")),
+            path: normaliseArray((core.parameter("path", url) || "").split(","))
         };
     };
 });
