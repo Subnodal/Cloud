@@ -606,6 +606,97 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
 
         cancel() {
+            this.state = exports.fileOperationStates.CANCELLED;
+
+            return Promise.resolve();
+        }
+    };
+
+    exports.DeleteOperation = class extends exports.FileOperation {
+        constructor(objectKey, parentFolder, token = profiles.getSelectedProfileToken()) {
+            super();
+
+            this.objectKey = objectKey;
+            this.parentFolder = parentFolder;
+            this.token = token;
+
+            this.object = null;
+            this.progressInterval = null;
+        }
+
+        get name() {
+            return this.object?.name || null;
+        }
+
+        getObject() {
+            var thisScope = this;
+
+            return resources.getObject(this.objectKey).then(function(object) {
+                thisScope.object = object;
+            });
+        }
+
+        start() {
+            var thisScope = this;
+
+            this.state = exports.fileOperationStates.RUNNING;
+            this.bytesProgress = 0;
+            this.bytesTotal = 0;
+
+            return this.getObject().then(function() {
+                return resources.getObject(thisScope.parentFolder);
+            }).then(function(parentData) {
+                var parentContents = parentData.contents || {};
+    
+                if (!Object.keys(parentContents).includes(thisScope.objectKey)) {
+                    console.warn("Item doesn't exist in parent folder; deleting anyway");
+
+                    return Promise.resolve();
+                }
+    
+                parentContents[thisScope.objectKey] = null;
+
+                if (thisScope.object.type == "file") {
+                    return resources.setObject(thisScope.objectKey, {
+                        name: null,
+                        deleted: true,
+                        contentsAddress: null,
+                        size: 0
+                    });
+                }
+
+                if (thisScope.object.type == "folder") {
+                    var deleteOperations = [];
+                    var promiseChain = Promise.resolve();
+
+                    Object.keys(thisScope.object.contents || []).forEach(function(objectKey) {
+                        var operation = new exports.DeleteOperation(
+                            objectKey,
+                            thisScope.objectKey,
+                            thisScope.token
+                        );
+
+                        deleteOperations.push(operation);
+
+                        promiseChain = promiseChain.then(function() {
+                            if (thisScope.state == exports.fileOperationStates.CANCELLED) {
+                                return Promise.reject("Operation was cancelled");
+                            }
+    
+                            return operation.start();
+                        });
+                    });
+
+                    return promiseChain;
+                }
+            }).then(function() {
+                thisScope.state = exports.fileOperationStates.FINISHED;
+
+                return Promise.resolve();
+            });
+        }
+
+        cancel() {
             this.state = exprots.fileOperationStates.CANCELLED;
 
             return Promise.resolve();
@@ -945,7 +1036,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
     exports.listFolder = function(folderKey, sortBy = exports.sortByAttributes.NAME, sortReverse = false, separateFolders = true, hardRefresh = false) {
         var listing = [];
-        var objectData = {};
 
         return resources.getObject(folderKey, !hardRefresh).then(function(data) {
             if (data == null || data?.deleted == true || data?.type != "folder") {
