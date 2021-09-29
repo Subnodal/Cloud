@@ -50,6 +50,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     exports.getSelectedProfileToken = function() {
+        if (profiles.isGuestMode()) {
+            throw new Error("In guest mode, and so no profile exists");
+        }
+
         return localStorage.getItem("subnodalCloud_selectedProfile");
     };
 
