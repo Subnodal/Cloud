@@ -217,7 +217,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.renderFolderArea = function() {
-        subElements.render(document.querySelector("#folderArea"));
+        var folderArea = document.querySelector("#folderArea");
+        var folderAreaParent = folderArea.parentElement;
+        var folderAreaIndex = Array.prototype.indexOf.call(folderAreaParent.children, folderArea);
+
+        folderArea.remove();
+
+        subElements.render(folderArea);
+
+        folderAreaParent.insertBefore(folderArea, folderAreaParent.children[folderAreaIndex]);
+
         subElements.render(document.querySelector("#folderBreadcrumbs"));
     };
 

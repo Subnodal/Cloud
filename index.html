@@ -111,7 +111,7 @@
             <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
                 <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
                     <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
-                        <s-each in="index.getCurrentListing()" valuevar="item">
+                        <s-each in="index.getCurrentListing()" valuevar="item" s-defer>
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
                                 <s-if condition="{{ index.getListingHasWritePermission(item) }}">
                                     <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
