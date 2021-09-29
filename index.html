@@ -227,6 +227,7 @@
                             </s-each>
                         </ul>
                         <s-if condition="{{ index.getMoveCopyFolderView()?.listing.length == 0 }}">
+                            <!-- TODO: Allow invocation of context menu for pasting items into empty folder -->
                             <div class="screenMessage subtle">
                                 <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
                                 <h2 sui-mono translate>moveCopy_emptyFolder</h2>
