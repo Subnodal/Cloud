@@ -218,6 +218,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.renderFolderArea = function() {
         var folderArea = document.querySelector("#folderArea");
+        var folderAreaScrollPosition = {top: folderArea.scrollTop, left: folderArea.scrollLeft};
         var folderAreaParent = folderArea.parentElement;
         var folderAreaIndex = Array.prototype.indexOf.call(folderAreaParent.children, folderArea);
 
@@ -226,6 +227,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
         subElements.render(folderArea);
 
         folderAreaParent.insertBefore(folderArea, folderAreaParent.children[folderAreaIndex]);
+
+        folderArea.scrollTop = folderAreaScrollPosition.top;
+        folderArea.scrollLeft = folderAreaScrollPosition.left;
 
         subElements.render(document.querySelector("#folderBreadcrumbs"));
     };
