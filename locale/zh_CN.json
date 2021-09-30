@@ -129,6 +129,23 @@
         "moveCopy_offlineFolder": "离线时不可用",
         "moveCopy_folderNotFound": "找不到文件夹",
         "moveCopy_moveHere": "移至这",
-        "moveCopy_copyHere": "复制到这"
+        "moveCopy_copyHere": "复制到这",
+
+        "deleteConfirmation_title": {
+            "{combination} == `file`": "你真的要删除这个文件吗？",
+            "{combination} == `folder`": "你真的要删除这个文件夹吗？",
+            "{combination} == `item`": "你真的要删除这个项目吗？",
+            "{combination} == `files`": "你真的要删除这些文件吗？",
+            "{combination} == `folders`": "你真的要删除这些文件夹吗？",
+            "{combination} == `multiple`": "你真的要删除这些项目吗？"
+        },
+        "deleteConfirmation_name": {
+            "{count} == 1": "{displayName}",
+            "{count} > 1": ""
+        },
+        "deleteConfirmation_description": {
+            "{count} == 1": "将被永久删除并从其父文件夹中移除。",
+            "{count} > 1": "它们将被永久删除并从其父文件夹中移除。"
+        }
     }
 }

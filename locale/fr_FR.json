@@ -73,9 +73,9 @@
         },
 
         "operationsProgress": {
-            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesProgress} == 0 && {filesTotal} == 1": "Téléchargement...",
-            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesProgress} == 1 && {filesTotal} == 1": "Téléchargé avec succès",
-            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
+            "({combinedAction} == `upload` || {combinedAction} == `download`) && {filesProgress} == 0 && {filesTotal} == 1": "Téléchargement...",
+            "({combinedAction} == `upload` || {combinedAction} == `download`) && {filesProgress} == 1 && {filesTotal} == 1": "Téléchargé avec succès",
+            "({combinedAction} == `upload` || {combinedAction} == `download`) && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
             "{combinedAction} == `copy` && {filesProgress} == 0 && {filesTotal} == 1": "Copie...",
             "{combinedAction} == `copy` && {filesProgress} == 1 && {filesTotal} == 1": "Copié avec succès",
             "{combinedAction} == `copy` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers copiés",
@@ -129,6 +129,23 @@
         "moveCopy_offlineFolder": "Indisponible hors connexion",
         "moveCopy_folderNotFound": "Dossier introuvable",
         "moveCopy_moveHere": "Déménager ici",
-        "moveCopy_copyHere": "Copier ici"
+        "moveCopy_copyHere": "Copier ici",
+
+        "deleteConfirmation_title": {
+            "{combination} == `file`": "Voulez-vous vraiment supprimer ce fichier ?",
+            "{combination} == `folder`": "Voulez-vous vraiment supprimer ce dossier ?",
+            "{combination} == `item`": "Voulez-vous vraiment supprimer cet élément ?",
+            "{combination} == `files`": "Voulez-vous vraiment supprimer ces fichiers ?",
+            "{combination} == `folders`": "Voulez-vous vraiment supprimer ces dossiers ?",
+            "{combination} == `multiple`": "Voulez-vous vraiment supprimer ces éléments ?"
+        },
+        "deleteConfirmation_name": {
+            "{count} == 1": "{displayName}",
+            "{count} > 1": ""
+        },
+        "deleteConfirmation_description": {
+            "{count} == 1": " sera définitivement supprimé et supprimé de son dossier parent.",
+            "{count} > 1": "Ils seront définitivement supprimés et supprimés de leur dossier parent."
+        }
     }
 }
