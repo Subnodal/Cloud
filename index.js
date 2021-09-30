@@ -467,7 +467,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             count: selection.length,
             combination: null,
             names: [],
-            primaryName: null
+            displayName: null
         };
 
         selection.forEach(function(item) {
@@ -477,7 +477,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             info.names.push(item.name);
         });
 
-        info.primaryName = info.names[0] || null;
+        info.displayName = info.count > 0 ? fs.getItemDisplayName(selection[0]) : null;
 
         if (info.containsFiles && info.count == 1) {
             info.combination = "file";
