@@ -70,16 +70,21 @@
         },
 
         "operationsProgress": {
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "正在上传……",
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "上传成功",
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesTotal} > 1": "已上传{filesTotal}个文件中的{filesProgress}个",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "生在下载……",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "下载成功",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesTotal} > 1": "已下载{filesTotal}个文件中的{filesProgress}个",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "正在复制……",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "复制成功",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "已复制{filesTotal}个文件中的{filesProgress}个",
-            "{filesTotal} > 1": "完成{filesTotal}个文件中的{filesProgress}个"
+            "{combinedAction} == `upload` && {filesProgress} == 0 && {filesTotal} == 1": "正在上传……",
+            "{combinedAction} == `upload` && {filesProgress} == 1 && {filesTotal} == 1": "上传成功",
+            "{combinedAction} == `upload` && {filesTotal} > 1": "已上传{filesTotal}个文件中的{filesProgress}个",
+            "{combinedAction} == `download` && {filesProgress} == 0 && {filesTotal} == 1": "生在下载……",
+            "{combinedAction} == `download` && {filesProgress} == 1 && {filesTotal} == 1": "下载成功",
+            "{combinedAction} == `download` && {filesTotal} > 1": "已下载{filesTotal}个文件中的{filesProgress}个",
+            "{combinedAction} == `copy` && {filesProgress} == 0 && {filesTotal} == 1": "正在复制……",
+            "{combinedAction} == `copy` && {filesProgress} == 1 && {filesTotal} == 1": "复制成功",
+            "{combinedAction} == `copy` && {filesTotal} > 1": "已复制{filesTotal}个文件中的{filesProgress}个",
+            "{combinedAction} == `delete` && {filesProgress} == 0 && {filesTotal} == 1": "正在删除……",
+            "{combinedAction} == `delete` && {filesProgress} == 1 && {filesTotal} == 1": "删除成功",
+            "{combinedAction} == `delete` && {filesTotal} > 1": "已删除{filesTotal}个文件中的{filesProgress}个",
+            "{combinedAction} == `multiple` && {filesProgress} == 0 && {filesTotal} == 1": "加工……",
+            "{combinedAction} == `multiple` && {filesProgress} == 1 && {filesTotal} == 1": "完毕",
+            "{combinedAction} == `null` && {filesTotal} > 1": "完成{filesTotal}个文件中的{filesProgress}个"
         },
 
         "view_styleThumbnail": "图标视图",

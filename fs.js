@@ -507,6 +507,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             return resources.getObject(this.objectKey).then(function(object) {
                 thisScope.object = object;
+                thisScope.bytesTotal = object.size * 2;
             });
         }
 
@@ -515,7 +516,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             this.state = exports.fileOperationStates.RUNNING;
             this.bytesProgress = 0;
-            this.bytesTotal = 0;
 
             return this.getObject().then(function() {
                 if (thisScope.object.type == "file") {
@@ -641,7 +641,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             this.state = exports.fileOperationStates.RUNNING;
             this.bytesProgress = 0;
-            this.bytesTotal = 0;
+            this.bytesTotal = 1;
 
             return this.getObject().then(function() {
                 return resources.getObject(thisScope.parentFolder);
@@ -656,6 +656,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     
                 parentContents[thisScope.objectKey] = null;
 
+                return resources.setFolderObject(thisScope.parentFolder, {contents: parentContents}, thisScope.token);
+            }).then(function() {
                 if (thisScope.object.type == "file") {
                     return resources.setObject(thisScope.objectKey, {
                         name: null,
@@ -691,6 +693,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 }
             }).then(function() {
                 thisScope.state = exports.fileOperationStates.FINISHED;
+                thisScope.bytesProgress = 1;
 
                 return Promise.resolve();
             });
@@ -836,7 +839,9 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             filesTotal: 0,
             containsUpload: false,
             containsDownload: false,
-            containsCopy: false
+            containsCopy: false,
+            containsDelete: false,
+            combinedAction: null
         };
 
         exports.fileOperationsQueue.forEach(function(operation) {
@@ -858,14 +863,34 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             if (operation instanceof exports.IpfsFileUploadOperation) {
                 progress.containsUpload = true;
+
+                if (progress.combinedAction != "upload") {
+                    progress.combinedAction = progress.combinedAction == null ? "upload" : "multiple";
+                }
             }
 
             if (operation instanceof exports.IpfsFileDownloadOperation || operation instanceof exports.FolderDownloadOperation) {
                 progress.containsDownload = true;
+
+                if (progress.combinedAction != "download") {
+                    progress.combinedAction = progress.combinedAction == null ? "download" : "multiple";
+                }
             }
 
             if (operation instanceof exports.CopyOperation) {
                 progress.containsCopy = true;
+
+                if (progress.combinedAction != "copy") {
+                    progress.combinedAction = progress.combinedAction == null ? "copy" : "multiple";
+                }
+            }
+
+            if (operation instanceof exports.DeleteOperation) {
+                progress.containsDelete = true;
+
+                if (progress.combinedAction != "delete") {
+                    progress.combinedAction = progress.combinedAction == null ? "delete" : "multiple";
+                }
             }
         });
 

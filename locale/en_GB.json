@@ -73,16 +73,21 @@
         },
 
         "operationsProgress": {
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Uploading...",
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Uploaded successfully",
-            "{containsUpload} == `true` && {containsDownload} == `false` && {containsCopy} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files uploaded",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Downloading...",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Downloaded successfully",
-            "{containsDownload} == `true` && {containsUpload} == `false` && {containsCopy} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files downloaded",
-            "{containsCopy} == `true` && {containsUpload} == `false` && {containsDownload} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Copying...",
-            "{containsCopy} == `true` && {containsUpload} == `false` && {containsDownload} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Copied successfully",
-            "{containsCopy} == `true` && {containsUpload} == `false` && {containsDownload} == `false` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files copied",
-            "{filesTotal} > 1": "{filesProgress} of {filesTotal} files done"
+            "{combinedAction} == `upload` && {filesProgress} == 0 && {filesTotal} == 1": "Uploading...",
+            "({combinedAction} == `upload` && {filesProgress} == 1 && {filesTotal} == 1)": "Uploaded successfully",
+            "{combinedAction} == `upload` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files uploaded",
+            "{combinedAction} == `download` && {filesProgress} == 0 && {filesTotal} == 1": "Downloading...",
+            "{combinedAction} == `download` && {filesProgress} == 1 && {filesTotal} == 1": "Downloaded successfully",
+            "{combinedAction} == `download` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files downloaded",
+            "{combinedAction} == `copy` && {filesProgress} == 0 && {filesTotal} == 1": "Copying...",
+            "{combinedAction} == `copy` && {filesProgress} == 1 && {filesTotal} == 1": "Copied successfully",
+            "{combinedAction} == `copy` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files copied",
+            "{combinedAction} == `delete` && {filesProgress} == 0 && {filesTotal} == 1": "Deleting...",
+            "{combinedAction} == `delete` && {filesProgress} == 1 && {filesTotal} == 1": "Deleted successfully",
+            "{combinedAction} == `delete` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files deleted",
+            "{combinedAction} == `multiple` && {filesProgress} == 0 && {filesTotal} == 1": "Working...",
+            "{combinedAction} == `multiple` && {filesProgress} == 1 && {filesTotal} == 1": "Finished",
+            "{combinedAction} == `null` && {filesTotal} > 1": "{filesProgress} of {filesTotal} files done"
         },
 
         "view_styleThumbnail": "Icon view",
@@ -127,6 +132,23 @@
         "moveCopy_offlineFolder": "Unavailable while offline",
         "moveCopy_folderNotFound": "Folder not found",
         "moveCopy_moveHere": "Move here",
-        "moveCopy_copyHere": "Copy here"
+        "moveCopy_copyHere": "Copy here",
+
+        "deleteConfirmation_title": {
+            "{combination} == `file`": "Do you really want to delete this file?",
+            "{combination} == `folder`": "Do you really want to delete this folder?",
+            "{combination} == `item`": "Do you really want to delete this item?",
+            "{combination} == `files`": "Do you really want to delete these files?",
+            "{combination} == `folders`": "Do you really want to delete these folders?",
+            "{combination} == `multiple`": "Do you really want to delete these items?"
+        },
+        "deleteConfirmation_name": {
+            "{count} == 1": "{primaryName}",
+            "{count} > 1": ""
+        },
+        "deleteConfirmation_description": {
+            "{count} == 1": " will be permanently deleted and removed from its parent folder.",
+            "{count} > 1": "They will be permanently deleted and removed from their parent folder."
+        }
     }
 }

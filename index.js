@@ -139,6 +139,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.renderPermissionEffects = function() {
         document.querySelectorAll(".writePermissionRequired").forEach((element) => element.disabled = !listingHasWritePermission);
+        document.querySelectorAll(".parentalActionsRequired").forEach((element) => element.disabled = listingIsSearchResults);
 
         if (profiles.isGuestMode()) {
             document.querySelectorAll(".accountRequired, .writePermissionRequired").forEach((element) => element.hidden = true);
@@ -353,6 +354,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"));
 
+            exports.renderPermissionEffects();
+
             return Promise.resolve(objects);
         });
     };
@@ -456,6 +459,41 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return exports.getItemKeysFromCurrentSelection().map(function(key) {
             return exports.getItemFromCurrentListing(key);
         });
+    };
+
+    exports.getInfoAboutCurrentSelection = function() {
+        var selection = exports.getItemsFromCurrentSelection();
+        var info = {
+            count: selection.length,
+            combination: null,
+            names: [],
+            primaryName: null
+        };
+
+        selection.forEach(function(item) {
+            info.containsFiles ||= item.type == "file";
+            info.containsFolders ||= item.type == "folder";
+
+            info.names.push(item.name);
+        });
+
+        info.primaryName = info.names[0] || null;
+
+        if (info.containsFiles && info.count == 1) {
+            info.combination = "file";
+        } else if (info.containsFolders && info.count == 1) {
+            info.combination = "folder";
+        } else if (info.count == 1) {
+            info.combination = "item";
+        } else if (info.containsFiles && !info.containsFolders) {
+            info.combination = "files";
+        } else if (info.containsFolders && !info.containsFiles) {
+            info.combination = "folders";
+        } else {
+            info.combination = "multiple";
+        }
+
+        return info;
     };
 
     exports.selectAll = function() {
@@ -688,6 +726,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.openMoveCopyDialog = function(isCopy = false) {
+        if (listingIsSearchResults) {
+            return Promise.reject("Cannot perform parental actions on items in search results");
+        }
+
         moveCopyIsCopy = isCopy;
 
         if (!listingIsSearchResults) {
@@ -724,13 +766,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     parentFolderListing
                 );
 
-                promiseChain = promiseChain.then(function() {
-                    if (copy) {
-                        return fs.copyItem(item.key, newParentFolder, newName);
-                    } else {
+                if (copy) {
+                    var operation = new fs.CopyOperation(item.key, newParentFolder, newName, profiles.getSelectedProfileToken());
+
+                    operation.getObject(); // Find the size of the item to copy so we can display its progress
+                    fs.addToFileOperationsQueue(operation);
+
+                    promiseChain = promiseChain.then(function() {
+                        return operation.start();
+                    });
+                } else {
+                    promiseChain = promiseChain.then(function() {
                         return fs.moveItem(item.key, oldParentFolder, newParentFolder, newName);
-                    }
-                });
+                    });
+                }
             });
 
             return promiseChain;
@@ -751,11 +800,19 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.copySelectionToClipboard = function(cut = false) {
+        if (listingIsSearchResults) {
+            return Promise.reject("Cannot perform parental actions on items in search results");
+        }
+
         return navigator.clipboard.writeText(urls.encodeItems(exports.getItemKeysFromCurrentSelection(), cut, currentFolderKey));
     };
 
     exports.pasteItemsFromClipboard = function() {
         var pasteData;
+
+        if (listingIsSearchResults) {
+            return Promise.reject("Cannot perform parental actions on items in search results");
+        }
 
         return navigator.clipboard.readText().then(function(text) {
             if (!urls.isCloudUrl(text)) {
@@ -778,6 +835,36 @@ namespace("com.subnodal.cloud.index", function(exports) {
         }).then(function() {
             return exports.populateFolderView(true);
         });
+    };
+
+    exports.deleteSelection = function() {
+        var promiseChain = Promise.resolve();
+
+        dialogs.close(document.querySelector("#deleteConfirmationDialog"));
+
+        if (listingIsSearchResults) {
+            return Promise.reject("Cannot perform parental actions on items in search results");
+        }
+
+        exports.getItemKeysFromCurrentSelection().forEach(function(key) {
+            promiseChain = promiseChain.then(function() {
+                var operation = new fs.DeleteOperation(key, currentFolderKey);
+
+                fs.addToFileOperationsQueue(operation);
+
+                return operation.start();
+            });
+        });
+
+        return promiseChain.then(function() {
+            return exports.renderFolderArea();
+        });
+    };
+
+    exports.confirmDeletion = function() {
+        subElements.render(document.querySelector("#deleteConfirmationDialog"));
+
+        dialogs.open(document.querySelector("#deleteConfirmationDialog"));
     };
 
     exports.performLiveRefresh = function() {
@@ -994,7 +1081,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         document.querySelector("#mobileSearchBackButton").addEventListener("click", function() {
-            if (exports.getListingIsSearchResults()) {
+            if (listingIsSearchResults) {
                 exports.exitSearch();
             } else {
                 exports.goBack();

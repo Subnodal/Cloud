@@ -38,7 +38,7 @@
         "makeCopy": "Faire une copie...",
         "moveTo": "Déménager à...",
         "rename": "Renommer",
-        "delete": "Effacer",
+        "delete": "Supprimer",
         "selectAll": "Tout sélectionner",
         "invertSelection": "Inverser la sélection",
 
@@ -73,15 +73,18 @@
         },
 
         "operationsProgress": {
-            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Téléchargement...",
-            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Téléchargé avec succès",
-            "({containsUpload} == `true` || {containsDownload} == `true`) && {containsCopy} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Copie...",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Copié avec succès",
-            "{containsCopy} == `true` && {containsDownload} == `false` && {containsUpload} == `false` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers copiés",
-            "{containsDownload} == `false` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 0 && {filesTotal} == 1": "Chargement...",
-            "{containsDownload} == `false` && {containsUpload} == `false` && {containsCopy} == `false` && {filesProgress} == 1 && {filesTotal} == 1": "Chargé avec succès",
-            "{filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
+            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesProgress} == 0 && {filesTotal} == 1": "Téléchargement...",
+            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesProgress} == 1 && {filesTotal} == 1": "Téléchargé avec succès",
+            "({combinedAction} == `upload` || {combinedAction} == `download`) {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers téléchargés",
+            "{combinedAction} == `copy` && {filesProgress} == 0 && {filesTotal} == 1": "Copie...",
+            "{combinedAction} == `copy` && {filesProgress} == 1 && {filesTotal} == 1": "Copié avec succès",
+            "{combinedAction} == `copy` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers copiés",
+            "{combinedAction} == `delete` && {filesProgress} == 0 && {filesTotal} == 1": "Supression...",
+            "{combinedAction} == `delete` && {filesProgress} == 1 && {filesTotal} == 1": "Supression avec succès",
+            "{combinedAction} == `delete` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers supprimés",
+            "{combinedAction} == `multiple` && {filesProgress} == 0 && {filesTotal} == 1": "Chargement...",
+            "{combinedAction} == `multiple` && {filesProgress} == 1 && {filesTotal} == 1": "Chargé avec succès",
+            "{combinedAction} == `null` && {filesTotal} > 1": "{filesProgress} des {filesTotal} fichiers chargés"
         },
 
         "view_styleThumbnail": "Vue d'icône",

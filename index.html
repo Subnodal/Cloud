@@ -113,7 +113,7 @@
                     <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
                         <s-each in="index.getCurrentListing()" valuevar="item" s-defer>
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
-                                <s-if condition="{{ index.getListingHasWritePermission(item) }}">
+                                <s-if condition="{{ index.getListingHasWritePermission(item) && !index.getListingIsSearchResults() }}">
                                     <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
                                         <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
                                         <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
@@ -253,7 +253,15 @@
             </div>
             <sui-buttonrow>
                 <button onclick="index.performMoveCopy();">{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyHere") : _("moveCopy_moveHere") }}</button>
-                <button sui-style="flat" sui-action="close">{{ _("cancel") }}</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="deleteConfirmationDialog">
+            <h1>{{ _("deleteConfirmation_title", index.getInfoAboutCurrentSelection()) }}</h1>
+            <p><strong>{{ _("deleteConfirmation_name", index.getInfoAboutCurrentSelection()) || "&ic;" }}</strong><span>{{ _("deleteConfirmation_description", index.getInfoAboutCurrentSelection()) }}</span></p>
+            <sui-buttonrow>
+                <button onclick="index.deleteSelection();" translate>delete</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
             </sui-buttonrow>
         </dialog>
         <sui-menu id="mobileMenu">
@@ -305,44 +313,43 @@
         <sui-menu id="viewMenu">
             <div sui-screen="desktop">
                 <button onclick="index.setSettingAndRepopulate('cloud_viewStyle', 'thumbnail');">
-                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "thumbnail" ? "done" : "&nbsp;" }}</sui-icon>
+                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "thumbnail" ? "done" : "&ic;" }}</sui-icon>
                     {{ _("view_styleThumbnail") }}
                 </button>
                 <button onclick="index.setSettingAndRepopulate('cloud_viewStyle', 'compact');">
-                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "compact" ? "done" : "&nbsp;" }}</sui-icon>
+                    <sui-icon aria-hidden="true">{{ config.getSetting("cloud_viewStyle", "string", "thumbnail") == "compact" ? "done" : "&ic;" }}</sui-icon>
                     {{ _("view_styleCompact") }}
                 </button>
                 <hr>
             </div>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.NAME);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.NAME ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.NAME ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_sortByName") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.CREATED_AT);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.CREATED_AT ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.CREATED_AT ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_sortByCreatedAt") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.LAST_MODIFIED);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.LAST_MODIFIED ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.LAST_MODIFIED ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_sortByLastModified") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_sortBy', fs.sortByAttributes.SIZE);">
-                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.SIZE ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME) == fs.sortByAttributes.SIZE ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_sortBySize") }}
             </button>
             <hr>
             <button onclick="index.setSettingAndRepopulate('cloud_sortReverse', !config.getSetting('cloud_sortReverse', 'boolean', false));">
-                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_sortReverse', 'boolean', false) ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_sortReverse', 'boolean', false) ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_sortReverse") }}
             </button>
             <button onclick="index.setSettingAndRepopulate('cloud_separateFolders', !config.getSetting('cloud_separateFolders', 'boolean', true));">
-                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_separateFolders', 'boolean', true) ? "done" : "&nbsp;" }}</sui-icon>
+                <sui-icon aria-hidden="true">{{ config.getSetting('cloud_separateFolders', 'boolean', true) ? "done" : "&ic;" }}</sui-icon>
                 {{ _("view_separateFolders") }}
             </button>
         </sui-menu>
-        <!-- TODO: Add full functionality with copy/paste etc. -->
         <sui-menu id="viewContextMenu">
-            <button onclick="index.pasteItemsFromClipboard();" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button onclick="index.pasteItemsFromClipboard();" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
             <hr sui-screen="desktop" class="writePermissionRequired">
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
@@ -350,13 +357,13 @@
         <sui-menu id="itemContextMenu">
             <button id="downloadButton"><sui-icon aria-hidden="true">download</sui-icon> {{ _("download") }}</button>
             <hr>
-            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
-            <button onclick="index.copySelectionToClipboard();" sui-screen="desktop"><sui-icon aria-hidden="true">content_copy</sui-icon> {{ _("copy") }}</button>
-            <button onclick="index.pasteItemsFromClipboard();" sui-screen="desktop" class="writePermissionRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
-            <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);" class="writePermissionRequired"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
-            <button onclick="index.openMoveCopyDialog(false);" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
-            <button onclick="index.selectFirstItemForRenaming();" class="writePermissionRequired"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
-            <button class="writePermissionRequired"><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
+            <button onclick="index.copySelectionToClipboard(true);" sui-screen="desktop" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">content_cut</sui-icon> {{ _("cut") }}</button>
+            <button onclick="index.copySelectionToClipboard();" sui-screen="desktop" class="parentalActionsRequired"><sui-icon aria-hidden="true">content_copy</sui-icon> {{ _("copy") }}</button>
+            <button onclick="index.pasteItemsFromClipboard();" sui-screen="desktop" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">content_paste</sui-icon> {{ _("paste") }}</button>
+            <button sui-screen="mobile" onclick="index.openMoveCopyDialog(true);" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">file_copy</sui-icon> {{ _("makeCopy") }}</button>
+            <button onclick="index.openMoveCopyDialog(false);" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">drive_file_move</sui-icon> {{ _("moveTo") }}</button>
+            <button onclick="index.selectFirstItemForRenaming();" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">drive_file_rename_outline</sui-icon> {{ _("rename") }}</button>
+            <button onclick="index.confirmDeletion();" class="writePermissionRequired parentalActionsRequired"><sui-icon aria-hidden="true">delete</sui-icon> {{ _("delete") }}</button>
             <hr sui-screen="desktop">
             <button sui-screen="desktop" onclick="index.selectAll();"><sui-icon aria-hidden="true">select_all</sui-icon> {{ _("selectAll") }}</button>
             <button sui-screen="desktop" onclick="index.invertSelection();"><sui-icon aria-hidden="true"></sui-icon> {{ _("invertSelection") }}</button>
