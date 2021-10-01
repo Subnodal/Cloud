@@ -1138,8 +1138,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
         });
 
-        elements.attachSelectorEvent("contextmenu", "#currentFolderView", function(element, event) {
-            if (event.target != element) {
+        elements.attachSelectorEvent("contextmenu", "#folderArea, #currentFolderView", function(element, event) {
+            if (event.target != element && currentListing.length > 0 && !exports.getListingIsLoading() && !exports.getListingIsUnavailable()) {
                 return;
             }
     
@@ -1154,7 +1154,23 @@ namespace("com.subnodal.cloud.index", function(exports) {
             menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
         });
 
-        elements.attachSelectorEvent("keydown", "#currentFolderView", function(element, event) {
+        document.addEventListener("keydown", function(event) {
+            if (event.target.matches("input")) {
+                return;
+            }
+
+            if (event.key == "Escape") {
+                views.deselectList(document.querySelector("#currentFolderView"));
+
+                return;
+            }
+
+            if (event.key == "a" && event.ctrlKey) {
+                exports.selectAll();
+
+                return;
+            }
+
             if (exports.getItemsFromCurrentSelection().length == 0) {
                 return;
             }
