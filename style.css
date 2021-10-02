@@ -60,6 +60,10 @@ dialog .screenMessage {
     height: unset;
 }
 
+#currentFolderView li {
+    -webkit-user-drag: element;
+}
+
 @media (max-width: 600px) {
     .screenMessage {
         padding-left: 10vw;

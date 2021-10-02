@@ -234,6 +234,15 @@ namespace("com.subnodal.cloud.index", function(exports) {
         folderArea.scrollLeft = folderAreaScrollPosition.left;
 
         subElements.render(document.querySelector("#folderBreadcrumbs"));
+
+        document.querySelectorAll("#currentFolderView li").forEach(function(element) {
+            element.addEventListener("dragstart", function(event) {
+                event.dataTransfer.setData("text", urls.encodeItems([...new Set([
+                    element.getAttribute("data-key"),
+                    ...exports.getItemKeysFromCurrentSelection()
+                ])]));
+            })
+        });
     };
 
     exports.populateCurrentFolder = function(key = currentFolderKey, hardRefresh = false, refreshInBackground = false) {
@@ -1163,6 +1172,53 @@ namespace("com.subnodal.cloud.index", function(exports) {
             }
 
             menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
+        });
+
+        elements.attachSelectorEvent("dragover", "#currentFolderView", function(element, event) {
+            event.preventDefault();
+        });
+
+        elements.attachSelectorEvent("drop", "#currentFolderView li, #currentFolderView", function(element, event) {
+            if (listingIsSearchResults) {
+                return;
+            }
+
+            var dropText = event.dataTransfer.getData("text");
+            var dropTargetFolderKey = currentFolderKey;
+            var dropInFolder = false;
+
+            if (!urls.isCloudUrl(dropText)) {
+                return;
+            }
+
+            // Allow dropping items into folders without having to open those folders
+            if (element.matches("#currentFolderView li") && exports.getItemFromCurrentListing(element.getAttribute("data-key"))?.type == "folder") {
+                dropTargetFolderKey = element.getAttribute("data-key");
+                dropInFolder = true;
+            }
+
+            var dropData = urls.getItemsFromUrl(dropText);
+            var itemsCount = 0;
+
+            Promise.all(dropData.items
+                .filter((key) => dropInFolder || currentListing.find((item) => item.key == key) == null) // Don't drop items into their source location
+                .map((key) => resources.getObject(key))
+            ).then(function(items) {
+                itemsCount = items.length;
+
+                items.forEach(function(item, i) {
+                    item.key = dropData.items[i];
+                });
+
+                return exports.bulkMoveCopyItems(items, null, dropTargetFolderKey, true);
+            }).then(function() {
+                // Don't render when items count is 0 — for example, when items are dropped into their source location and are therefore filtered out
+                if (itemsCount == 0) {
+                    return;
+                }
+
+                return exports.populateFolderView(true);
+            });
         });
 
         document.addEventListener("keydown", function(event) {

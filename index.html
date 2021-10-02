@@ -114,14 +114,14 @@
                         <s-each in="index.getCurrentListing()" valuevar="item" s-defer>
                             <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
                                 <s-if condition="{{ index.getListingHasWritePermission(item) && !index.getListingIsSearchResults() }}">
-                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                    <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
                                         <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
                                         <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
                                         <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
                                     </li>
                                 </s-if>
                                 <s-else>
-                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                    <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
                                         <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
                                         <span>{{ fs.getItemDisplayName(item) }}</span>
                                         <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
