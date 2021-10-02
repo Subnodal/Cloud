@@ -146,6 +146,12 @@
         "deleteConfirmation_description": {
             "{count} == 1": " sera définitivement supprimé et supprimé de son dossier parent.",
             "{count} > 1": "Ils seront définitivement supprimés et supprimés de leur dossier parent."
-        }
+        },
+
+        "shortcutDisplayName_subUI_selectAll": "Sélectionnez tous les fichiers dans le dossier actuel",
+        "shortcutDisplayName_subUI_rename": "Renommer le fichier sélectionné",
+        "shortcutDisplayName_item_cut": "Couper les fichiers sélectionnés dans le presse-papiers",
+        "shortcutDisplayName_item_copy": "Copier les fichiers sélectionnés dans le presse-papiers",
+        "shortcutDisplayName_item_paste": "Coller des fichiers depuis le presse-papiers"
     }
 }

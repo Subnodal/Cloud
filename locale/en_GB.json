@@ -149,6 +149,12 @@
         "deleteConfirmation_description": {
             "{count} == 1": " will be permanently deleted and removed from its parent folder.",
             "{count} > 1": "They will be permanently deleted and removed from their parent folder."
-        }
+        },
+
+        "shortcutDisplayName_subUI_selectAll": "Select all files in the current folder",
+        "shortcutDisplayName_subUI_rename": "Rename the selected file",
+        "shortcutDisplayName_item_cut": "Cut the selected files to the clipboard",
+        "shortcutDisplayName_item_copy": "Copy the selected files to the clipboard",
+        "shortcutDisplayName_item_paste": "Paste files from the clipboard"
     }
 }

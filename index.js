@@ -11,6 +11,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var subElements = require("com.subnodal.subelements");
     var elements = require("com.subnodal.subelements.elements");
     var l10n = require("com.subnodal.subelements.l10n");
+    var shortcuts = require("com.subnodal.subui.shortcuts");
     var menus = require("com.subnodal.subui.menus");
     var views = require("com.subnodal.subui.views");
     var dialogs = require("com.subnodal.subui.dialogs");
@@ -908,6 +909,16 @@ namespace("com.subnodal.cloud.index", function(exports) {
     exports.reload = function() {
         config.init();
 
+        shortcuts.assignDefaultShortcut("item_cut", {code: "KeyX", primaryModifierKey: true});
+        shortcuts.assignDefaultShortcut("item_copy", {code: "KeyC", primaryModifierKey: true});
+        shortcuts.assignDefaultShortcut("item_paste", {code: "KeyV", primaryModifierKey: true});
+
+        shortcuts.setDisplayNameForAction("subUI_selectAll", _("shortcutDisplayName_subUI_selectAll"));
+        shortcuts.setDisplayNameForAction("subUI_rename", _("shortcutDisplayName_subUI_rename"));
+        shortcuts.setDisplayNameForAction("item_cut", _("shortcutDisplayName_item_cut"));
+        shortcuts.setDisplayNameForAction("item_copy", _("shortcutDisplayName_item_copy"));
+        shortcuts.setDisplayNameForAction("item_paste", _("shortcutDisplayName_item_paste"));
+
         if (!profiles.isGuestMode()) {
             exports.populateAccounts();
         }
@@ -1159,13 +1170,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            if (event.key == "Escape") {
+            if (event.code == "Escape") {
                 views.deselectList(document.querySelector("#currentFolderView"));
 
                 return;
             }
 
-            if (event.key == "a" && event.ctrlKey) {
+            if (shortcuts.getActionFromEvent(event) == "subUI_selectAll") {
                 exports.selectAll();
 
                 return;
@@ -1175,15 +1186,15 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            if (event.key == "x" && event.ctrlKey) {
+            if (shortcuts.getActionFromEvent(event) == "item_cut") {
                 exports.copySelectionToClipboard(true);
             }
 
-            if (event.key == "c" && event.ctrlKey) {
+            if (shortcuts.getActionFromEvent(event) == "item_copy") {
                 exports.copySelectionToClipboard();
             }
 
-            if (event.key == "v" && event.ctrlKey) {
+            if (shortcuts.getActionFromEvent(event) == "item_paste") {
                 exports.pasteItemsFromClipboard();
             }
         });

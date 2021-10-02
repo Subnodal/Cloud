@@ -146,6 +146,12 @@
         "deleteConfirmation_description": {
             "{count} == 1": "将被永久删除并从其父文件夹中移除。",
             "{count} > 1": "它们将被永久删除并从其父文件夹中移除。"
-        }
+        },
+
+        "shortcutDisplayName_subUI_selectAll": "选择当前文件夹中的所有文件",
+        "shortcutDisplayName_subUI_rename": "重命名所选文件",
+        "shortcutDisplayName_item_cut": "将选定的文件剪切到剪贴板",
+        "shortcutDisplayName_item_copy": "将选定的文件复制到剪贴板",
+        "shortcutDisplayName_item_paste": "从剪贴板粘贴文件"
     }
 }
