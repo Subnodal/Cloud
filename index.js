@@ -377,6 +377,96 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return exports.populateCurrentFolder(currentFolderKey, hardRefresh);
     };
 
+    exports.renderTreeViewSubnodes = function(key, nodeElement, path, pathPosition, hardRefresh = false) {
+        return fs.listFolder(
+            key,
+            config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME),
+            config.getSetting("cloud_sortReverse", "boolean", false),
+            config.getSetting("cloud_separateFolders", "boolean", true),
+            hardRefresh
+        ).then(function(listing) {
+            nodeElement.innerHTML = "";
+
+            listing.forEach(function(item) {
+                if (item.type != "folder") {
+                    return;
+                }
+
+                var listItemElement = document.createElement("li");
+                var expandableElement = document.createElement("details");
+                var nameElement = document.createElement("summary");
+                var childNodeElement = document.createElement("ul");
+
+                nameElement.textContent = fs.getItemDisplayName(item);
+
+                expandableElement.addEventListener("click", function(event) {
+                    currentPath = [...path.slice(0, pathPosition + 1), item];
+
+                    document.querySelectorAll("#folderTreeView li").forEach((element) => element.setAttribute("aria-selected", false));
+                    listItemElement.setAttribute("aria-selected", true);
+
+                    event.stopPropagation();
+
+                    exports.populateCurrentFolder(item.key);
+
+                    return exports.renderTreeViewSubnodes(item.key, childNodeElement, currentPath, pathPosition + 1, hardRefresh);
+                });
+
+                expandableElement.append(nameElement);
+                expandableElement.append(childNodeElement);
+                listItemElement.append(expandableElement);
+                nodeElement.append(listItemElement);
+
+                if (path[pathPosition + 1]?.key == item.key) {
+                    document.querySelectorAll("#folderTreeView li").forEach((element) => element.setAttribute("aria-selected", false));
+                    listItemElement.setAttribute("aria-selected", true);
+                    expandableElement.setAttribute("open", "");
+
+                    return exports.renderTreeViewSubnodes(item.key, childNodeElement, [...path, item], pathPosition + 1, hardRefresh);
+                }
+            });
+        });
+    }
+
+    exports.populateFolderTreeView = function(path = currentPath, hardRefresh = false) {
+        if (listingIsSearchResults) {
+            return;
+        }
+
+        var rootElement = document.querySelector("#folderTreeView");
+
+        var listItemElement = document.createElement("li");
+        var expandableElement = document.createElement("details");
+        var nameElement = document.createElement("summary");
+        var childNodeElement = document.createElement("ul");
+
+        rootElement.innerHTML = "";
+
+        // TODO: Dynamically add root nodes for multiple root folder access (such as shared storage)
+
+        nameElement.textContent = _("rootFolderName");
+
+        expandableElement.append(nameElement);
+        expandableElement.append(childNodeElement);
+        listItemElement.append(expandableElement);
+        rootElement.append(listItemElement);
+
+        expandableElement.setAttribute("open", "");
+
+        expandableElement.addEventListener("click", function() {
+            exports.navigate(rootFolderKey, true, false);
+
+            return exports.renderTreeViewSubnodes(rootFolderKey, childNodeElement, path, 0, hardRefresh);
+        });
+
+        if (currentFolderKey == rootFolderKey) {
+            rootElement.querySelectorAll("li").forEach((element) => element.setAttribute("aria-selected", false));
+            listItemElement.setAttribute("aria-selected", true);
+        }
+
+        exports.renderTreeViewSubnodes(path[0].key, childNodeElement, path, 0, hardRefresh);
+    };
+
     exports.exitSearch = function() {
         document.querySelector("#searchInput").value = "";
         document.querySelector("#mobileSearchInput").value = "";
@@ -386,6 +476,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
         currentPath = preSearchPath;
         currentFolderKey = currentPath[currentPath.length - 1]?.key || rootFolderKey;
         preSearchPath = [];
+
+        exports.populateFolderTreeView();
 
         return exports.populateCurrentFolder();
     };
@@ -404,7 +496,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return resources.getObject(key).then(function(data) {
             currentPath.push({...data, key});
 
+            if (!listingIsSearchResults) {
+                exports.populateFolderTreeView();
+            }
+
             return exports.populateCurrentFolder(key);
+        }).then(function() {
+            return Promise.resolve();
         });
     };
 
@@ -431,12 +529,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         currentFolderKey = toKey;
 
+        if (!listingIsSearchResults) {
+            exports.populateFolderTreeView();
+        }
+
         return exports.populateCurrentFolder(toKey);
     };
 
     exports.goForward = function() {
         if (forwardPath.length == 0) {
             return; // Cannot go forward any further
+        }
+
+        if (!listingIsSearchResults) {
+            exports.populateFolderTreeView();
         }
 
         return exports.navigate(forwardPath.pop().key);
@@ -932,7 +1038,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.reload = function() {
-        config.init();
+        config.init().then(function() {
+            var folderTreeViewHandlePosition = config.getSetting("cloud_folderTreeViewHandlePosition", "number", null);
+
+            if (folderTreeViewHandlePosition != null) {
+                document.querySelector("#folderTreeViewPanel").style.width = `${folderTreeViewHandlePosition}px`;
+            }
+        });
 
         shortcuts.assignDefaultShortcut("item_cut", {code: "KeyX", primaryModifierKey: true});
         shortcuts.assignDefaultShortcut("item_copy", {code: "KeyC", primaryModifierKey: true});
@@ -1176,6 +1288,26 @@ namespace("com.subnodal.cloud.index", function(exports) {
             setTimeout(function() {
                 exports.reload();
             }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
+        });
+
+        var handleWasDragged = false;
+
+        ["mousedown", "touchstart"].forEach(function(eventType) {
+            document.querySelector("#folderTreeViewHandle").addEventListener(eventType, function() {
+                handleWasDragged = true;
+            });
+        });
+
+        ["mouseup", "touchend"].forEach(function(eventType) {
+            window.addEventListener(eventType, function() {
+                if (!handleWasDragged) {
+                    return;
+                }
+
+                config.setSetting("cloud_folderTreeViewHandlePosition", document.querySelector("#folderTreeViewPanel").clientWidth);
+
+                handleWasDragged = false;
+            });
         });
 
         elements.attachSelectorEvent("contextmenu", "#folderArea, #currentFolderView", function(element, event) {

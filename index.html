@@ -107,63 +107,73 @@
             <input type="search" sui-size="grow" id="mobileSearchInput">
             <sui-spacer sui-screen="desktop" sui-size="grow"></sui-spacer>
         </nav>
-        <main sui-stack="column" id="folderArea">
-            <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
-                <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
-                    <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
-                        <s-each in="index.getCurrentListing()" valuevar="item" s-defer>
-                            <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
-                                <s-if condition="{{ index.getListingHasWritePermission(item) && !index.getListingIsSearchResults() }}">
-                                    <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
-                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
-                                        <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
-                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
-                                    </li>
-                                </s-if>
-                                <s-else>
-                                    <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
-                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
-                                        <span>{{ fs.getItemDisplayName(item) }}</span>
-                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
-                                    </li>
-                                </s-else>
-                            </s-if>
-                        </s-each>
-                    </ul>
-                </s-if>
-                <s-if condition="{{ index.getCurrentListing().length == 0 && !index.getListingIsSearchResults() }}">
-                    <div class="screenMessage subtle">
-                        <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                        <h2 sui-mono translate>emptyFolder_title</h2>
-                        <p translate>emptyFolder_description</p>
-                    </div>
-                </s-if>
-                <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() && index.getSearchQuery() != '' }}">
-                    <div class="screenMessage subtle">
-                        <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                        <h2 sui-mono translate>searchNoResults_title</h2>
-                        <p translate>searchNoResults_description</p>
-                    </div>
-                </s-if>
-            </s-if>
-            <s-if condition="{{ index.getListingIsLoading() && !index.getListingIsUnavailable() }}">
-                <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
-            </s-if>
-            <s-if condition="{{ index.getListingIsUnavailable() && index.getDataUnavailableWhileOffline() }}">
-                <div class="screenMessage subtle">
-                    <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                    <h2 sui-mono translate>offlineFolder_title</h2>
-                    <p translate>offlineFolder_description</p>
-                    <button translate id="viewOfflineRetryButton">retry</button>
-                </div>
-            </s-if>
-            <s-if condition="{{ index.getListingIsUnavailable() && index.getDataNotFound() }}">
-                <div class="screenMessage subtle">
-                    <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                    <h2 sui-mono translate>folderNotFound_title</h2>
-                    <p translate>folderNotFound_description</p>
-                </div>
-            </s-if>
+        <main sui-stack="column">
+            <sui-panels>
+                <sui-panel sui-screen="wide" sui-style="thin flat" id="folderTreeViewPanel">
+                    <aside>
+                        <ul sui-tree id="folderTreeView"></ul>
+                    </aside>
+                </sui-panel>
+                <sui-handle sui-screen="wide" id="folderTreeViewHandle"></sui-handle>
+                <sui-content id="folderArea">
+                    <s-if condition="{{ index.getListingIsAvailable() }}" sui-stack="column" sui-size="grow">
+                        <s-if sui-stack="column" sui-size="grow" condition="{{ index.getCurrentListing().length > 0 }}">
+                            <ul sui-iconlist sui-size="grow" sui-style="{{ config.getSetting('cloud_viewStyle', 'string', 'thumbnail') }}" id="currentFolderView">
+                                <s-each in="index.getCurrentListing()" valuevar="item" s-defer>
+                                    <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
+                                        <s-if condition="{{ index.getListingHasWritePermission(item) && !index.getListingIsSearchResults() }}">
+                                            <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                                <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                                <input tabindex="-1" value="{{ fs.getItemDisplayName(item) }}" onchange="index.renameItemByInput(this);">
+                                                <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                            </li>
+                                        </s-if>
+                                        <s-else>
+                                            <li tabindex="0" draggable data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}" data-rendered="{{ true }}">
+                                                <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                                <span>{{ fs.getItemDisplayName(item) }}</span>
+                                                <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                            </li>
+                                        </s-else>
+                                    </s-if>
+                                </s-each>
+                            </ul>
+                        </s-if>
+                        <s-if condition="{{ index.getCurrentListing().length == 0 && !index.getListingIsSearchResults() }}">
+                            <div class="screenMessage subtle">
+                                <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                                <h2 sui-mono translate>emptyFolder_title</h2>
+                                <p translate>emptyFolder_description</p>
+                            </div>
+                        </s-if>
+                        <s-if condition="{{ index.getCurrentListing().length == 0 && index.getListingIsSearchResults() && index.getSearchQuery() != '' }}">
+                            <div class="screenMessage subtle">
+                                <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                                <h2 sui-mono translate>searchNoResults_title</h2>
+                                <p translate>searchNoResults_description</p>
+                            </div>
+                        </s-if>
+                    </s-if>
+                    <s-if condition="{{ index.getListingIsLoading() && !index.getListingIsUnavailable() }}">
+                        <sui-loader sui-style="cover" aria-label="{{ _('loading') }}"></sui-loader>
+                    </s-if>
+                    <s-if condition="{{ index.getListingIsUnavailable() && index.getDataUnavailableWhileOffline() }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>offlineFolder_title</h2>
+                            <p translate>offlineFolder_description</p>
+                            <button translate id="viewOfflineRetryButton">retry</button>
+                        </div>
+                    </s-if>
+                    <s-if condition="{{ index.getListingIsUnavailable() && index.getDataNotFound() }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>folderNotFound_title</h2>
+                            <p translate>folderNotFound_description</p>
+                        </div>
+                    </s-if>
+                </sui-content>
+            </sui-panels>
         </main>
         <nav sui-screen="desktop" id="progressInfo">
             <s-set var="progress" value="fs.getFileOperationsQueueProgress()"></s-set>

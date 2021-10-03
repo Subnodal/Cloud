@@ -66,15 +66,17 @@ namespace("com.subnodal.cloud.config", function(exports) {
         if (profiles.isGuestMode()) {
             exports.data = exports.getGuestConfig();
 
-            return;
+            return Promise.resolve();
         }
 
-        resources.getProfileInfo().then(function(data) {
+        return resources.getProfileInfo().then(function(data) {
             if (typeof(data?.config) != "object") {
-                return;
+                return Promise.resolve();
             }
 
             exports.data = data.config;
+
+            return Promise.resolve();
         });
     };
 });
