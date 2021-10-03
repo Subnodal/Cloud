@@ -803,6 +803,35 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
     };
 
+    exports.getItemPermissions = function(key, profile = undefined, uid = undefined, preferCache = false) {
+        return (function() {
+            if (uid != undefined) {
+                return Promise.resolve(uid);
+            }
+
+            if (!profiles.isGuestMode()) {
+                return profiles.getUidFromToken(profile);
+            } else {
+                return Promise.resolve(null);
+            }
+        })().then(function(resolvedUid) {
+            uid = resolvedUid;
+
+            return resources.getObject(key, preferCache);
+        }).then(function(item) {
+            var permissions = {
+                write: false
+            };
+
+            if (uid != null) {
+                permissions.write ||= item.owner == uid;
+                permissions.write ||= item.permissions[uid] == "write";
+            }
+
+            return Promise.resolve(permissions);
+        });
+    };
+
     exports.getFileOperationsQueue = function() {
         return exports.fileOperationsQueue;
     };

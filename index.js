@@ -300,7 +300,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
             } else {
                 return Promise.resolve(null);
             }
-
         }).then(function(uid) {
             listingHasWritePermission = false;
 
@@ -554,6 +553,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return newName;
     };
 
+    exports.checkItemHasWritePermission = function(key) {
+        if (key == currentFolderKey) {
+            return Promise.resolve(listingHasWritePermission);
+        }
+
+        return fs.getItemPermissions(key).then(function(permissions) {
+            return Promise.resolve(permissions.write);
+        });
+    };
+
+    exports.openPermissionDeniedDialog = function() {
+        dialogs.open(document.querySelector(profiles.isGuestMode() ? "#guestSignInDialog" : "#permissionDeniedDialog"));
+    };
+
     exports.renameItemByInput = function(input) {
         var key = input.closest("li").getAttribute("data-key");
         var appendExtension = "";
@@ -636,17 +649,18 @@ namespace("com.subnodal.cloud.index", function(exports) {
         document.querySelector("#fileUpload").click();
     };
 
-    exports.uploadChosenFiles = function() {
+    exports.uploadChosenFiles = function(filesList = document.querySelector("#fileUpload").files, listing = currentListing) {
         var otherNames = [];
         var operations = [];
         var promiseChain = Promise.resolve();
 
-        [...document.querySelector("#fileUpload").files].forEach(function(file) {
+        [...filesList].forEach(function(file) {
             var operation = new fs.IpfsFileUploadOperation(exports.findNextAvailableName(
                 file.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
                 (file.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
                 null,
-                otherNames
+                otherNames,
+                listing
             ), currentFolderKey);
 
             fs.addToFileOperationsQueue(operation);
@@ -866,9 +880,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
             });
         });
 
-        return promiseChain.then(function() {
-            return exports.renderFolderArea();
+        exports.getCurrentSelection().forEach(function(element) {
+            element.remove(); // Remove this element so the user doesn't think it still persists after asking for deletion
         });
+
+        return promiseChain; // No need to re-render folder area since selection has already been removed from the view
     };
 
     exports.confirmDeletion = function() {
@@ -921,12 +937,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
         shortcuts.assignDefaultShortcut("item_cut", {code: "KeyX", primaryModifierKey: true});
         shortcuts.assignDefaultShortcut("item_copy", {code: "KeyC", primaryModifierKey: true});
         shortcuts.assignDefaultShortcut("item_paste", {code: "KeyV", primaryModifierKey: true});
+        shortcuts.assignDefaultShortcut("item_delete", {code: "Delete"});
 
         shortcuts.setDisplayNameForAction("subUI_selectAll", _("shortcutDisplayName_subUI_selectAll"));
         shortcuts.setDisplayNameForAction("subUI_rename", _("shortcutDisplayName_subUI_rename"));
         shortcuts.setDisplayNameForAction("item_cut", _("shortcutDisplayName_item_cut"));
         shortcuts.setDisplayNameForAction("item_copy", _("shortcutDisplayName_item_copy"));
         shortcuts.setDisplayNameForAction("item_paste", _("shortcutDisplayName_item_paste"));
+        shortcuts.setDisplayNameForAction("item_delete", _("shortcutDisplayName_item_delete"));
 
         if (!profiles.isGuestMode()) {
             exports.populateAccounts();
@@ -1061,8 +1079,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
             window.location.href = profiles.ADD_PROFILE_REDIRECT_URL;
         });
 
-        document.querySelector("#signInButton").addEventListener("click", function() {
-            window.location.href = profiles.NO_PROFILES_REDIRECT_URL;
+        document.querySelectorAll(".signInButton").forEach(function(element) {
+            element.addEventListener("click", function() {
+                window.location.href = profiles.NO_PROFILES_REDIRECT_URL;
+            });
         });
 
         document.querySelector("#backButton").addEventListener("click", function() {
@@ -1179,17 +1199,14 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         elements.attachSelectorEvent("drop", "#currentFolderView li, #currentFolderView", function(element, event) {
+            event.preventDefault();
+
             if (listingIsSearchResults) {
                 return;
             }
 
-            var dropText = event.dataTransfer.getData("text");
             var dropTargetFolderKey = currentFolderKey;
             var dropInFolder = false;
-
-            if (!urls.isCloudUrl(dropText)) {
-                return;
-            }
 
             // Allow dropping items into folders without having to open those folders
             if (element.matches("#currentFolderView li") && exports.getItemFromCurrentListing(element.getAttribute("data-key"))?.type == "folder") {
@@ -1197,23 +1214,73 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 dropInFolder = true;
             }
 
-            var dropData = urls.getItemsFromUrl(dropText);
-            var itemsCount = 0;
+            if (event.dataTransfer.files.length > 0) {
+                return exports.checkItemHasWritePermission(dropTargetFolderKey).then(function(result) {
+                    if (!result) {
+                        exports.openPermissionDeniedDialog();
+    
+                        return;
+                    }
 
-            Promise.all(dropData.items
-                .filter((key) => dropInFolder || currentListing.find((item) => item.key == key) == null) // Don't drop items into their source location
-                .map((key) => resources.getObject(key))
-            ).then(function(items) {
-                itemsCount = items.length;
+                    if (dropTargetFolderKey == currentFolderKey) {
+                        return exports.uploadChosenFiles(event.dataTransfer.files);
+                    } else {
+                        return fs.listFolder(dropTargetFolderKey).then(function(listing) {
+                            return exports.uploadChosenFiles(event.dataTransfer.files, listing);
+                        });
+                    }
+                });
+            }
+
+            var dropText = event.dataTransfer.getData("text");
+
+            if (!urls.isCloudUrl(dropText)) {
+                return;
+            }
+
+            var dropData = urls.getItemsFromUrl(dropText);
+            var items = [];
+
+            return exports.checkItemHasWritePermission(dropTargetFolderKey).then(function(result) {
+                if (!result) {
+                    exports.openPermissionDeniedDialog();
+
+                    return;
+                }
+
+                return Promise.all(dropData.items
+                    .filter((key) => dropInFolder || currentListing.find((item) => item.key == key) == null) // Don't drop items into their source location
+                    .map((key) => resources.getObject(key))
+                );
+            }).then(function(filteredItems) {
+                items = filteredItems;
+
+                if (dropTargetFolderKey == currentFolderKey) {
+                    return Promise.resolve(currentListing);
+                } else {
+                    return fs.listFolder(dropTargetFolderKey);
+                }
+            }).then(function(listing) {
+                var otherNames = [];
 
                 items.forEach(function(item, i) {
                     item.key = dropData.items[i];
+
+                    item.name = exports.findNextAvailableName(
+                        item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
+                        (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
+                        null,
+                        otherNames,
+                        listing
+                    );
+
+                    otherNames.push(item.name);
                 });
 
                 return exports.bulkMoveCopyItems(items, null, dropTargetFolderKey, true);
             }).then(function() {
                 // Don't render when items count is 0 — for example, when items are dropped into their source location and are therefore filtered out
-                if (itemsCount == 0) {
+                if (items.length == 0) {
                     return;
                 }
 
@@ -1242,16 +1309,34 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            if (shortcuts.getActionFromEvent(event) == "item_cut") {
-                exports.copySelectionToClipboard(true);
-            }
+            switch (shortcuts.getActionFromEvent(event)) {
+                case "item_cut":
+                    if (!listingHasWritePermission) {
+                        return;
+                    }
 
-            if (shortcuts.getActionFromEvent(event) == "item_copy") {
-                exports.copySelectionToClipboard();
-            }
+                    exports.copySelectionToClipboard(true);
+                    break;
+    
+                case "item_copy":
+                    exports.copySelectionToClipboard();
+                    break;
+    
+                case "item_paste":
+                    if (!listingHasWritePermission) {
+                        return;
+                    }
 
-            if (shortcuts.getActionFromEvent(event) == "item_paste") {
-                exports.pasteItemsFromClipboard();
+                    exports.pasteItemsFromClipboard();
+                    break;
+    
+                case "item_delete":
+                    if (!listingHasWritePermission) {
+                        return;
+                    }
+
+                    index.confirmDeletion();
+                    break;
             }
         });
 

@@ -48,7 +48,7 @@
             <button sui-style="thick flat circular" title="{{ _('accounts') }}" class="accountRequired" id="accountButton">
                 <img src="https://cdn.subnodal.com/lib/subui/media/account.svg" sui-style="profile" alt="{{ _('accounts') }}">
             </button>
-            <button sui-style="mobile" class="guestMode" id="signInButton" hidden translate>signIn</button>
+            <button sui-style="mobile" class="guestMode signInButton" hidden translate>signIn</button>
         </nav>
         <nav id="mainNavigation">
             <button sui-style="flat" title="{{ _('back') }}" aria-label="{{ _('back') }}" id="backButton"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
@@ -175,6 +175,21 @@
                 </a>
             </span>
         </nav>
+        <dialog id="permissionDeniedDialog">
+            <h1 translate>permissionDenied_title</h1>
+            <p translate>permissionDenied_description</p>
+            <sui-buttonrow>
+                <button sui-action="close" translate>ok</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="guestSignInDialog">
+            <h1 translate>guestSignIn_title</h1>
+            <p translate>guestSignIn_description</p>
+            <sui-buttonrow>
+                <button class="signInButton" translate>signIn</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
         <dialog id="renameDuplicateDialog">
             <s-if condition="{{ index.getRenameDuplicateIsFolder() }}">
                 <h1 translate>renameDuplicateFolder_title</h1>

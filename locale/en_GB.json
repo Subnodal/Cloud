@@ -121,6 +121,11 @@
         "folderNotFound_title": "We can't find what you're looking for",
         "folderNotFound_description": "The folder you're looking for may have been deleted.",
 
+        "permissionDenied_title": "Permission denied",
+        "permissionDenied_description": "Sorry, but you do not have permission to perform this action. Contact the original owners if you want to try again.",
+        "guestSignIn_title": "Sign into Subnodal Cloud to perform this action",
+        "guestSignIn_description": "Guests can't make changes to files and folders in Subnodal Cloud. You can create a Subnodal Account if you don't have one already.",
+
         "renameDuplicateFolder_title": "Can't rename this folder",
         "renameDuplicateFolder_description": "There already is another file in the same folder with this name.",
         "renameDuplicateFile_title": "Can't rename this file",
@@ -155,6 +160,7 @@
         "shortcutDisplayName_subUI_rename": "Rename the selected file",
         "shortcutDisplayName_item_cut": "Cut the selected files to the clipboard",
         "shortcutDisplayName_item_copy": "Copy the selected files to the clipboard",
-        "shortcutDisplayName_item_paste": "Paste files from the clipboard"
+        "shortcutDisplayName_item_paste": "Paste files from the clipboard",
+        "shortcutDisplayName_item_delete": "Delete the selected file"
     }
 }

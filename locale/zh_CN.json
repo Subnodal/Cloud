@@ -118,6 +118,11 @@
         "folderNotFound_title": "我们找不到您要找的东西",
         "folderNotFound_description": "您要查找的文件夹可能已被删除。",
 
+        "permissionDenied_title": "没有权限",
+        "permissionDenied_description": "抱歉，你无权执行此操作。 如果你想再试一次，请联系原始所有者。",
+        "guestSignIn_title": "登录次结·云以执行此操作",
+        "guestSignIn_description": "访客无法更改次结·云中的文件和文件夹。 如果您还没有次结·帐户，您可以创建一个。",
+
         "renameDuplicateFolder_title": "无法重命名此文件夹",
         "renameDuplicateFolder_description": "同一个文件夹中已经有另一个文件同名。",
         "renameDuplicateFile_title": "无法重命名此文件",
@@ -152,6 +157,7 @@
         "shortcutDisplayName_subUI_rename": "重命名所选文件",
         "shortcutDisplayName_item_cut": "将选定的文件剪切到剪贴板",
         "shortcutDisplayName_item_copy": "将选定的文件复制到剪贴板",
-        "shortcutDisplayName_item_paste": "从剪贴板粘贴文件"
+        "shortcutDisplayName_item_paste": "从剪贴板粘贴文件",
+        "shortcutDisplayName_item_delete": "删除名所选文件"
     }
 }

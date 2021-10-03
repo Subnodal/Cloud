@@ -118,6 +118,11 @@
         "folderNotFound_title": "Nous ne pouvons pas trouver ce que vous cherchez",
         "folderNotFound_description": "Le dossier que vous recherchez a peut-être été supprimé.",
 
+        "permissionDenied_title": "Permission refusée",
+        "permissionDenied_description": "Désolé, mais vous n'êtes pas autorisé à effectuer cette action. Contactez les propriétaires d'origine si vous souhaitez réessayer.",
+        "guestSignIn_title": "Connectez-vous à Sousnœud Cloud pour effectuer cette action",
+        "guestSignIn_description": "Les invités ne peuvent pas apporter de modifications aux fichiers et dossiers dans Sousnœud Cloud. Vous pouvez créer un Compte Sousnœud si vous n'en avez pas déjà un.",
+
         "renameDuplicateFolder_title": "Impossible de renommer ce dossier",
         "renameDuplicateFolder_description": "Il y a déjà un autre fichier dans le même dossier avec ce nom.",
         "renameDuplicateFile_title": "Impossible de renommer ce fichier",
@@ -152,6 +157,7 @@
         "shortcutDisplayName_subUI_rename": "Renommer le fichier sélectionné",
         "shortcutDisplayName_item_cut": "Couper les fichiers sélectionnés dans le presse-papiers",
         "shortcutDisplayName_item_copy": "Copier les fichiers sélectionnés dans le presse-papiers",
-        "shortcutDisplayName_item_paste": "Coller des fichiers depuis le presse-papiers"
+        "shortcutDisplayName_item_paste": "Coller des fichiers depuis le presse-papiers",
+        "shortcutDisplayName_item_delete": "Supprimer le fichier sélectionné"
     }
 }
