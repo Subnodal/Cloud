@@ -68,7 +68,7 @@ namespace("com.subnodal.cloud.thumbnails", function(exports) {
             return Promise.resolve(null);
         }
 
-        var operation = new fs.IpfsFileDownloadOperation(key);
+        var operation = fs.FileDownloadOperation.createSpecificOperation(key);
 
         return operation.start().then(function() {
             var mimeType = exports.findImageThumbnailMimeType(operation.name);

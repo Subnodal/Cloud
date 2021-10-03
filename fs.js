@@ -61,19 +61,22 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
     };
 
-    exports.IpfsFileUploadOperation = class extends exports.FileOperation {
-        constructor(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
+    exports.FileUploadOperation = class extends exports.FileOperation {
+        constructor(name, parentFolder, encryptionKey = null) {
             super();
 
             this.name = name;
             this.parentFolder = parentFolder;
             this.encryptionKey = encryptionKey;
-            this.token = token;
 
-            this.objectKey = null;
             this.fileData = null;
             this.contentsAddress = null;
-            this.abortController = null;
+        }
+
+        static createSpecificOperation(name, parentFolder, encryptionKey = undefined, token = undefined) {
+            // All file upload operation instantiaton should happen here so as to select the appropriate subclass for the parent folder
+
+            return new exports.IpfsFileUploadOperation(name, parentFolder, encryptionKey, token);
         }
 
         static encrypt(fileData, encryptionKey) {
@@ -116,6 +119,17 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
         upload(element, useUploadedFilename = true) {
             return this.setFile(element.files[0], useUploadedFilename);
+        }
+    };
+
+    exports.IpfsFileUploadOperation = class extends exports.FileUploadOperation {
+        constructor(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
+            super(name, parentFolder, encryptionKey);
+            this.token = token;
+
+            this.objectKey = null;
+            this.fileData = null;
+            this.abortController = null;
         }
 
         start() {
@@ -184,15 +198,31 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
     };
 
-    exports.IpfsFileDownloadOperation = class extends exports.FileOperation {
+    exports.FileDownloadOperation = class extends exports.FileOperation {
         constructor(objectKey) {
             super();
 
             this.objectKey = objectKey;
-            this.object = null;
 
             this.fileData = null;
-            this.abortController = null;
+        }
+
+        static createSpecificOperation(objectKey) {
+            // All file download operation instantiaton should happen here so as to select the appropriate subclass for the parent folder
+
+            return new exports.IpfsFileDownloadOperation(objectKey);
+        }
+
+        get name() {
+            return Promise.reject("Operation not implemented on base class");
+        }
+
+        get encryptionKey() {
+            return Promise.reject("Operation not implemented on base class");
+        }
+
+        get contentsAddress() {
+            return Promise.reject("Operation not implemented on base class");
         }
 
         static decrypt(fileData, encryptionKey) {
@@ -211,6 +241,23 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 worker.postMessage({operation: "decrypt", args: [fileData, encryptionKey]});
             });
+        }
+
+        zip(zipParent) {
+            if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
+                return Promise.reject("File data is not yet available");
+            }
+
+            zipParent.file(this.name, this.fileData);
+        }
+    };
+
+    exports.IpfsFileDownloadOperation = class extends exports.FileDownloadOperation {
+        constructor(objectKey) {
+            super(objectKey);
+
+            this.object = null;
+            this.abortController = null;
         }
 
         get name() {
@@ -298,14 +345,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             });
         }
 
-        zip(zipParent) {
-            if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
-                return Promise.reject("File data is not yet available");
-            }
-
-            zipParent.file(this.name, this.fileData);
-        }
-
         download() {
             if (this.state != exports.fileOperationStates.FINISHED || this.fileData == null) {
                 return Promise.reject("File data is not yet available");
@@ -368,7 +407,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                     var subObject = thisScope.object.contents[subObjectKey];
 
                     if (subObject.type == "file") {
-                        thisScope.subOperations.push(new exports.IpfsFileDownloadOperation(subObjectKey));
+                        thisScope.subOperations.push(exports.FileDownloadOperation.createSpecificOperation(subObjectKey));
 
                         return;
                     }
@@ -438,7 +477,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             }
 
             this.subOperations.forEach(function(subOperation) {
-                if (subOperation instanceof exports.IpfsFileDownloadOperation) {
+                if (subOperation instanceof exports.FileDownloadOperation) {
                     subOperation.zip(zipParent);
 
                     return;
@@ -519,9 +558,9 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             return this.getObject().then(function() {
                 if (thisScope.object.type == "file") {
-                    var fileDownloadOperation = new exports.IpfsFileDownloadOperation(thisScope.objectKey);
+                    var fileDownloadOperation = exports.FileDownloadOperation.createSpecificOperation(thisScope.objectKey);
 
-                    var fileUploadOperation = new exports.IpfsFileUploadOperation(
+                    var fileUploadOperation = exports.FileUploadOperation.createSpecificOperation(
                         thisScope.name,
                         thisScope.parentFolder,
                         thisScope.token
@@ -890,7 +929,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
             progress.filesTotal++;
 
-            if (operation instanceof exports.IpfsFileUploadOperation) {
+            if (operation instanceof exports.FileUploadOperation) {
                 progress.containsUpload = true;
 
                 if (progress.combinedAction != "upload") {
@@ -898,7 +937,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 }
             }
 
-            if (operation instanceof exports.IpfsFileDownloadOperation || operation instanceof exports.FolderDownloadOperation) {
+            if (operation instanceof exports.FileDownloadOperation || operation instanceof exports.FolderDownloadOperation) {
                 progress.containsDownload = true;
 
                 if (progress.combinedAction != "download") {

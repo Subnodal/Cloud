@@ -655,7 +655,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         var promiseChain = Promise.resolve();
 
         [...filesList].forEach(function(file) {
-            var operation = new fs.IpfsFileUploadOperation(exports.findNextAvailableName(
+            var operation = fs.FileUploadOperation.createSpecificOperation(exports.findNextAvailableName(
                 file.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
                 (file.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
                 null,
@@ -688,7 +688,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         var operation = null;
 
         if (type == "file") {
-            operation = new fs.IpfsFileDownloadOperation(key);
+            operation = fs.FileDownloadOperation.createSpecificOperation(key);
         }
 
         if (type == "folder") {
