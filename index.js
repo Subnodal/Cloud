@@ -444,7 +444,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         // TODO: Dynamically add root nodes for multiple root folder access (such as shared storage)
 
-        nameElement.textContent = _("rootFolderName");
+        nameElement.textContent = exports.getListingIsSharedLink() ? path[0].name :  _("rootFolderName");
 
         expandableElement.append(nameElement);
         expandableElement.append(childNodeElement);
@@ -706,7 +706,13 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return Promise.resolve();
             }
 
-            return fs.renameItem(key, input.value.trim() + appendExtension, currentFolderKey);
+            return fs.renameItem(key, input.value.trim() + appendExtension, currentFolderKey).then(function() {
+                if (data?.type == "folder") {
+                    exports.populateFolderTreeView(currentPath, true);
+                }
+
+                return Promise.resolve();
+            });
         });
     };
 
@@ -990,7 +996,12 @@ namespace("com.subnodal.cloud.index", function(exports) {
             element.remove(); // Remove this element so the user doesn't think it still persists after asking for deletion
         });
 
-        return promiseChain; // No need to re-render folder area since selection has already been removed from the view
+        return promiseChain.then(function() {
+            exports.populateFolderTreeView(currentPath, true);
+            // No need to re-render folder area since selection has already been removed from the view
+
+            return Promise.resolve();
+        });
     };
 
     exports.confirmDeletion = function() {
@@ -1220,6 +1231,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return exports.populateCurrentFolder(currentFolderKey, true);
             }).then(function() {
                 exports.selectItemForRenaming(newFolderKey);
+                exports.populateFolderTreeView(currentPath, true);
             });
         });
 
