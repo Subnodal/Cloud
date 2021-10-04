@@ -370,6 +370,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 };
             }
 
+            console.log(objects);
+
+            objects = objects.filter((object) => console.log(object) || !object.deleted);
+
             currentListing = objects;
             currentPath = [{
                 key: ".searchResults",
@@ -1507,7 +1511,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             switch (shortcuts.getActionFromEvent(event)) {
                 case "item_cut":
-                    if (!listingHasWritePermission) {
+                    if (!listingHasWritePermission && !listingIsSearchResults) {
                         return;
                     }
 
@@ -1519,7 +1523,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     break;
     
                 case "item_paste":
-                    if (!listingHasWritePermission) {
+                    if (!listingHasWritePermission && !listingIsSearchResults) {
                         return;
                     }
 
@@ -1527,7 +1531,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     break;
     
                 case "item_delete":
-                    if (!listingHasWritePermission) {
+                    if (!listingHasWritePermission && !listingIsSearchResults) {
                         return;
                     }
 

@@ -697,15 +697,6 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                 return resources.setFolderObject(thisScope.parentFolder, {contents: parentContents}, thisScope.token);
             }).then(function() {
-                if (thisScope.object.type == "file") {
-                    return resources.setObject(thisScope.objectKey, {
-                        name: null,
-                        deleted: true,
-                        contentsAddress: null,
-                        size: 0
-                    });
-                }
-
                 if (thisScope.object.type == "folder") {
                     var deleteOperations = [];
                     var promiseChain = Promise.resolve();
@@ -730,6 +721,15 @@ namespace("com.subnodal.cloud.fs", function(exports) {
 
                     return promiseChain;
                 }
+
+                return Promise.resolve();
+            }).then(function() {
+                return resources.setObject(thisScope.objectKey, {
+                    name: null,
+                    deleted: true,
+                    contentsAddress: null,
+                    size: 0
+                });
             }).then(function() {
                 thisScope.state = exports.fileOperationStates.FINISHED;
                 thisScope.bytesProgress = 1;
