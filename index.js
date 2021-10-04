@@ -370,9 +370,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 };
             }
 
-            console.log(objects);
-
-            objects = objects.filter((object) => console.log(object) || !object.deleted);
+            objects = objects.filter((object) => !object.deleted);
 
             currentListing = objects;
             currentPath = [{
@@ -425,6 +423,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
                 expandableElement.addEventListener("click", function(event) {
                     currentPath = [...path.slice(0, pathPosition + 1), item];
+                    currentFolderKey = item.key;
                     forwardPath = [];
 
                     document.querySelectorAll("#folderTreeView li").forEach((element) => element.setAttribute("aria-selected", false));
@@ -735,6 +734,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 if (data?.type == "folder") {
                     exports.populateFolderTreeView(currentPath, true);
                 }
+
+                currentListing.find((item) => item.key == key).name = input.value.trim() + appendExtension;
 
                 return Promise.resolve();
             });
