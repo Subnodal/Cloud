@@ -401,6 +401,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
                 expandableElement.addEventListener("click", function(event) {
                     currentPath = [...path.slice(0, pathPosition + 1), item];
+                    forwardPath = [];
 
                     document.querySelectorAll("#folderTreeView li").forEach((element) => element.setAttribute("aria-selected", false));
                     listItemElement.setAttribute("aria-selected", true);
