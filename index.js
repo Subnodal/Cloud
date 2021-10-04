@@ -236,7 +236,23 @@ namespace("com.subnodal.cloud.index", function(exports) {
         subElements.render(document.querySelector("#folderBreadcrumbs"));
 
         document.querySelectorAll("#currentFolderView li").forEach(function(element) {
+            var ignoreTouchDrag = false;
+
+            element.addEventListener("touchstart", function() {
+                ignoreTouchDrag = true;
+            });
+
+            element.addEventListener("touchend", function() {
+                ignoreTouchDrag = false;
+            });
+
             element.addEventListener("dragstart", function(event) {
+                if (ignoreTouchDrag) {
+                    event.preventDefault();
+
+                    return;
+                }
+
                 event.dataTransfer.setData("text", urls.encodeItems([...new Set([
                     element.getAttribute("data-key"),
                     ...exports.getItemKeysFromCurrentSelection()
