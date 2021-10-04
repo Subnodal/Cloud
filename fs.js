@@ -728,6 +728,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                     name: null,
                     deleted: true,
                     contentsAddress: null,
+                    encryptionKey: null,
                     size: 0
                 });
             }).then(function() {
