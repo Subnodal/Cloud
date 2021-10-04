@@ -158,6 +158,10 @@
         "shortcutDisplayName_item_cut": "Couper les fichiers sélectionnés dans le presse-papiers",
         "shortcutDisplayName_item_copy": "Copier les fichiers sélectionnés dans le presse-papiers",
         "shortcutDisplayName_item_paste": "Coller des fichiers depuis le presse-papiers",
-        "shortcutDisplayName_item_delete": "Supprimer le fichier sélectionné"
+        "shortcutDisplayName_item_delete": "Supprimer le fichier sélectionné",
+        "shortcutDisplayName_navigation_back": "Naviguer vers l'arrière",
+        "shortcutDisplayName_navigation_forward": "Naviguer vers l'avant",
+        "shortcutDisplayName_interface_focusSearch": "Aller à la barre de recherche",
+        "shortcutDisplayName_interface_focusCurrentFolderView": "Sélectionnez le premier élément du dossier actuel"
     }
 }

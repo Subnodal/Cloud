@@ -158,6 +158,10 @@
         "shortcutDisplayName_item_cut": "将选定的文件剪切到剪贴板",
         "shortcutDisplayName_item_copy": "将选定的文件复制到剪贴板",
         "shortcutDisplayName_item_paste": "从剪贴板粘贴文件",
-        "shortcutDisplayName_item_delete": "删除名所选文件"
+        "shortcutDisplayName_item_delete": "删除名所选文件",
+        "shortcutDisplayName_navigation_back": "回来导航",
+        "shortcutDisplayName_navigation_forward": "向前导航",
+        "shortcutDisplayName_interface_focusSearch": "跳转到搜索栏",
+        "shortcutDisplayName_interface_focusCurrentFolderView": "选择当前文件夹的第一项"
     }
 }

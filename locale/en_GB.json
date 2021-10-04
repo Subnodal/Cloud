@@ -161,6 +161,10 @@
         "shortcutDisplayName_item_cut": "Cut the selected files to the clipboard",
         "shortcutDisplayName_item_copy": "Copy the selected files to the clipboard",
         "shortcutDisplayName_item_paste": "Paste files from the clipboard",
-        "shortcutDisplayName_item_delete": "Delete the selected file"
+        "shortcutDisplayName_item_delete": "Delete the selected file",
+        "shortcutDisplayName_navigation_back": "Navigate back",
+        "shortcutDisplayName_navigation_forward": "Navigate forward",
+        "shortcutDisplayName_interface_focusSearch": "Jump to search bar",
+        "shortcutDisplayName_interface_focusCurrentFolderView": "Select the current folder's first item"
     }
 }

@@ -256,6 +256,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         listingIsLoading = !refreshInBackground;
         listingIsSearchResults = false;
 
+        if (currentPath[0]?.key != ".searchResults") {
+            preSearchPath = currentPath;
+        }
+
         exports.renderFolderArea();
 
         if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
@@ -1062,6 +1066,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         shortcuts.assignDefaultShortcut("item_copy", {code: "KeyC", primaryModifierKey: true});
         shortcuts.assignDefaultShortcut("item_paste", {code: "KeyV", primaryModifierKey: true});
         shortcuts.assignDefaultShortcut("item_delete", {code: "Delete"});
+        shortcuts.assignDefaultShortcut("navigation_back", {code: "ArrowLeft", secondaryModifierKey: true});
+        shortcuts.assignDefaultShortcut("navigation_forward", {code: "ArrowRight", secondaryModifierKey: true});
+        shortcuts.assignDefaultShortcut("interface_focusSearch", {code: "Slash"});
+        shortcuts.assignDefaultShortcut("interface_focusCurrentFolderView", {code: "F10"});
 
         shortcuts.setDisplayNameForAction("subUI_selectAll", _("shortcutDisplayName_subUI_selectAll"));
         shortcuts.setDisplayNameForAction("subUI_rename", _("shortcutDisplayName_subUI_rename"));
@@ -1069,6 +1077,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
         shortcuts.setDisplayNameForAction("item_copy", _("shortcutDisplayName_item_copy"));
         shortcuts.setDisplayNameForAction("item_paste", _("shortcutDisplayName_item_paste"));
         shortcuts.setDisplayNameForAction("item_delete", _("shortcutDisplayName_item_delete"));
+        shortcuts.setDisplayNameForAction("navigation_back", _("shortcutDisplayName_navigation_back"));
+        shortcuts.setDisplayNameForAction("navigation_forward", _("shortcutDisplayName_navigation_forward"));
+        shortcuts.setDisplayNameForAction("interface_focusSearch", _("shortcutDisplayName_interface_focusSearch"));
+        shortcuts.setDisplayNameForAction("interface_focusCurrentFolderView", _("shortcutDisplayName_interface_focusCurrentFolderView"));
 
         if (!profiles.isGuestMode()) {
             exports.populateAccounts();
@@ -1433,7 +1445,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
             });
         });
 
-        document.addEventListener("keydown", function(event) {
+        window.addEventListener("keydown", function(event) {
             if (event.target.matches("input")) {
                 return;
             }
@@ -1444,10 +1456,33 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            if (shortcuts.getActionFromEvent(event) == "subUI_selectAll") {
-                exports.selectAll();
+            switch (shortcuts.getActionFromEvent(event)) {
+                case "subUI_selectAll":
+                    exports.selectAll();
+                    break;
 
-                return;
+                case "navigation_back":
+                    exports.goBack();
+                    event.preventDefault();
+                    break;
+
+                case "navigation_forward":
+                    exports.goForward();
+                    event.preventDefault();
+                    break;
+
+                case "interface_focusSearch":
+                    document.querySelector("#searchInput").focus();
+                    event.preventDefault();
+                    break;
+
+                case "interface_focusCurrentFolderView":
+                    if (document.querySelector("#currentFolderView li:first-child") instanceof Node) {
+                        views.selectListItem(document.querySelector("#currentFolderView li:first-child"));
+                    }
+
+                    event.preventDefault();
+                    break;
             }
 
             if (exports.getItemsFromCurrentSelection().length == 0) {
