@@ -427,6 +427,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     currentFolderKey = item.key;
                     forwardPath = [];
 
+                    document.querySelector("#searchInput").value = "";
+                    document.querySelector("#mobileSearchInput").value = "";
+
                     document.querySelectorAll("#folderTreeView li").forEach((element) => element.setAttribute("aria-selected", false));
                     listItemElement.setAttribute("aria-selected", true);
 
@@ -485,6 +488,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
         });
 
         if (currentFolderKey == rootFolderKey) {
+            document.querySelector("#searchInput").value = "";
+            document.querySelector("#mobileSearchInput").value = "";
+
             rootElement.querySelectorAll("li").forEach((element) => element.setAttribute("aria-selected", false));
             listItemElement.setAttribute("aria-selected", true);
         }
