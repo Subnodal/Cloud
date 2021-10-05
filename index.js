@@ -343,7 +343,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     exports.populateSearchResults = function(phrase) {
         views.deselectList(document.querySelector("#currentFolderView"));
 
-        if (!listingIsSearchResults) {
+        if (currentPath[0]?.key != ".searchResults") {
             preSearchPath = currentPath;
         }
 
