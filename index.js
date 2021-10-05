@@ -474,6 +474,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         Promise.all(keys.map((key) => resources.getObject(key))).then(function(objects) {
             rootElement.innerHTML = "";
+            
+            document.querySelector("#rootFolderSwitcherMenu").innerHTML = "";
 
             objects.forEach(function(object, i) {
                 var listItemElement = document.createElement("li");
@@ -481,20 +483,21 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 var nameElement = document.createElement("summary");
                 var childNodeElement = document.createElement("ul");
 
-                console.log(keys[i], rootObjectKey);
+                function visitLocation() {
+                    exports.navigate(keys[i], true, false);
+                    exports.renderTreeViewSubnodes(keys[i], childNodeElement, path, 0, hardRefresh);
+                }
 
-                nameElement.textContent = (keys[i] == rootObjectKey && !index.getListingIsSharedLink() ? _("rootFolderName") : object.name) || _("unknownName");
+                var name = (keys[i] == rootObjectKey && !index.getListingIsSharedLink() ? _("rootFolderName") : object.name) || _("unknownName");
+
+                nameElement.textContent = name;
 
                 expandableElement.append(nameElement);
                 expandableElement.append(childNodeElement);
                 listItemElement.append(expandableElement);
                 rootElement.append(listItemElement);
 
-                expandableElement.addEventListener("click", function() {
-                    exports.navigate(keys[i], true, false);
-
-                    return exports.renderTreeViewSubnodes(keys[i], childNodeElement, path, 0, hardRefresh);
-                });
+                expandableElement.addEventListener("click", visitLocation);
 
                 if (currentFolderKey == keys[i]) {
                     document.querySelector("#searchInput").value = "";
@@ -508,7 +511,26 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     expandableElement.setAttribute("open", "");
                     exports.renderTreeViewSubnodes(path[0].key, childNodeElement, path, 0, hardRefresh);
                 }
+
+                var rootSwitcherMenuButton = document.createElement("button");
+                var rootSwitcherMenuButtonIcon = document.createElement("sui-icon");
+                var rootSwitcherMenuButtonText = document.createElement("span");
+
+                rootSwitcherMenuButtonIcon.textContent = currentFolderKey == keys[i] ? "done" : "";
+                rootSwitcherMenuButtonText.textContent = name;
+
+                rootSwitcherMenuButtonIcon.setAttribute("aria-hidden", true);
+
+                rootSwitcherMenuButton.append(rootSwitcherMenuButtonIcon);
+                rootSwitcherMenuButton.append(document.createTextNode(" "));
+                rootSwitcherMenuButton.append(rootSwitcherMenuButtonText);
+
+                rootSwitcherMenuButton.addEventListener("click", visitLocation);
+
+                document.querySelector("#rootFolderSwitcherMenu").append(rootSwitcherMenuButton);
             });
+
+            mobileRootFolderSwitcherMenuButton.hidden = objects.length == 1;
         });
     };
 
@@ -938,46 +960,58 @@ namespace("com.subnodal.cloud.index", function(exports) {
             return Promise.reject("No parent folder was chosen");
         }
 
-        return fs.listFolder(newParentFolder).then(function(parentFolderListing) {
-            var otherNames = [];
-            var promiseChain = Promise.resolve();
+        return exports.checkItemHasWritePermission(newParentFolder).then(function(result) {
+            if (!result) {
+                exports.openPermissionDeniedDialog();
 
-            items.forEach(function(item) {
-                var newName = exports.findNextAvailableName(
-                    item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                    (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
-                    null,
-                    otherNames,
-                    parentFolderListing
-                );
+                return;
+            }
 
-                if (copy) {
-                    var operation = new fs.CopyOperation(item.key, newParentFolder, newName, profiles.getSelectedProfileToken());
+            return fs.listFolder(newParentFolder).then(function(parentFolderListing) {
+                var otherNames = [];
+                var promiseChain = Promise.resolve();
 
-                    operation.getObject(); // Find the size of the item to copy so we can display its progress
-                    fs.addToFileOperationsQueue(operation);
+                items.forEach(function(item) {
+                    var newName = exports.findNextAvailableName(
+                        item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
+                        (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
+                        null,
+                        otherNames,
+                        parentFolderListing
+                    );
 
-                    promiseChain = promiseChain.then(function() {
-                        return operation.start();
-                    });
-                } else {
-                    promiseChain = promiseChain.then(function() {
-                        return fs.moveItem(item.key, oldParentFolder, newParentFolder, newName);
-                    });
-                }
+                    if (copy) {
+                        var operation = new fs.CopyOperation(item.key, newParentFolder, newName, profiles.getSelectedProfileToken());
+
+                        operation.getObject(); // Find the size of the item to copy so we can display its progress
+                        fs.addToFileOperationsQueue(operation);
+
+                        promiseChain = promiseChain.then(function() {
+                            return operation.start();
+                        });
+                    } else {
+                        promiseChain = promiseChain.then(function() {
+                            return fs.moveItem(item.key, oldParentFolder, newParentFolder, newName);
+                        });
+                    }
+                });
+
+                return promiseChain;
             });
-
-            return promiseChain;
         });
     }
 
     exports.performMoveCopy = function() {
+        if (exports.getMoveCopyFolderView().currentFolderKey == null) {
+            return Promise.resolve(); // Is root folder listing, so cannot move/copy there
+        }
+
         dialogs.close(document.querySelector("#moveCopyDialog"));
 
         return exports.bulkMoveCopyItems(
             exports.getItemsFromCurrentSelection(),
             currentFolderKey,
-            index.getMoveCopyFolderView().currentFolderKey,
+            exports.getMoveCopyFolderView().currentFolderKey,
             moveCopyIsCopy
         ).then(function() {
             return exports.populateFolderView(true);
@@ -1194,7 +1228,6 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return fs.getSharedObjectKeysFromProfile();
             }).then(function(keys) {
                 sharedObjectKeys = keys;
-                console.log(sharedObjectKeys);
 
                 exports.populateFolderTreeView();
             });
@@ -1257,6 +1290,10 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         document.querySelector("#mobileMenuButton").addEventListener("click", function(event) {
             menus.toggleMenu(document.querySelector("#mobileMenu"), elements.findAncestor(event.target, "button"));
+        });
+
+        document.querySelector("#mobileRootFolderSwitcherMenuButton").addEventListener("click", function(event) {
+            menus.toggleMenu(document.querySelector("#rootFolderSwitcherMenu"), elements.findAncestor(event.target, "button"));
         });
 
         document.querySelectorAll("#accountButton, #mobileAccountButton").forEach(function(element) {

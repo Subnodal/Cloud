@@ -54,6 +54,9 @@
         "searchForFiles": "Rechercher des fichiers",
         "searchResults": "Résultats de recherche",
 
+        "locations": "Emplacements",
+        "switchLocations": "Changer d'emplacement",
+
         "space_bytes": {
             "{space} == 1": "{space} octet",
             "{space} != 1": "{space} octets"

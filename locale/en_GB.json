@@ -54,6 +54,9 @@
         "searchForFiles": "Search for files",
         "searchResults": "Search results",
 
+        "locations": "Locations",
+        "switchLocations": "Switch locations",
+
         "space_bytes": {
             "{space} == 1": "{space} byte",
             "{space} != 1": "{space} bytes"

@@ -110,7 +110,9 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             }
 
             return fs.listFolder(key, this.sortBy, this.sortReverse, this.separateFolders).then(function(listing) {
-                thisScope.loading = false;
+                thisScope.listingIsLoading = false;
+                thisScope.dataUnavailableWhileOffline = false;
+                thisScope.dataNotFound = false;
 
                 if (listing == null) {
                     thisScope.dataNotFound = true;
@@ -121,15 +123,47 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 }
 
                 thisScope.listing = listing;
+
+                thisScope.render();
+                thisScope.attachListItemOpenEvents();
+
+                return Promise.resolve(listing);
+            });
+        }
+
+        populateRoots() {
+            var thisScope = this;
+            var rootKeys = [];
+
+            views.deselectList(this.viewElement);
+
+            this.listingIsLoading = true;
+
+            this.render();
+
+            return fs.getRootObjectKeyFromProfile().then(function(key) {
+                rootKeys.push(key);
+
+                return fs.getSharedObjectKeysFromProfile();
+            }).then(function(keys) {
+                rootKeys.push(...keys);
+
+                return Promise.all(rootKeys.map((key) => resources.getObject(key)));
+            }).then(function(objects) {
+                objects.forEach(function(object, i) {
+                    object.key = rootKeys[i];
+                });
+
                 thisScope.listingIsLoading = false;
                 thisScope.dataUnavailableWhileOffline = false;
                 thisScope.dataNotFound = false;
 
-                thisScope.render();
+                thisScope.listing = objects;
 
+                thisScope.render();
                 thisScope.attachListItemOpenEvents();
 
-                return Promise.resolve(listing);
+                return Promise.resolve(objects);
             });
         }
 
@@ -157,7 +191,11 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             var thisScope = this;
 
             if (typeof(toKey) != "string") {
-                return; // Tries to find ancestor of root
+                // Show root objects instead
+
+                this.path = [];
+
+                return thisScope.populateRoots();
             }
     
             while (this.currentFolderKey != toKey) {
