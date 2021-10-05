@@ -222,7 +222,7 @@
                         <s-if condition="{{ index.getMoveCopyFolderView()?.path.length > 0 }}">
                             <s-each in="index.getMoveCopyFolderView()?.path" keyvar="i" valuevar="item">
                                 <s-set var="name" value="item.name"></s-set>
-                                <s-if condition="{{ item.key == index.getRootFolderKey() && !index.getListingIsSharedLink() }}">
+                                <s-if condition="{{ item.key == index.getRootObjectKey() && !index.getListingIsSharedLink() }}">
                                     <s-set var="name" value="_('rootFolderName')"></s-set>
                                 </s-if>
                                 <s-if condition="{{ typeof(item.name) != 'string' }}">
@@ -250,7 +250,7 @@
                                 <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
                                     <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
                                         <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
-                                        <span>{{ fs.getItemDisplayName(item) }}</span>
+                                        <span>{{ item.key == index.getRootObjectKey() && !index.getListingIsSharedLink() ? _('rootFolderName') : fs.getItemDisplayName(item) }}</span>
                                         <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
                                     </li>
                                 </s-if>
