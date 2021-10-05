@@ -63,7 +63,7 @@
             <ol sui-style="breadcrumbs" sui-size="grow" id="folderBreadcrumbs">
                 <s-each in="index.getCurrentPath()" keyvar="i" valuevar="item">
                     <s-set var="name" value="item.name"></s-set>
-                    <s-if condition="{{ item.key == index.getRootFolderKey() && !index.getListingIsSharedLink() }}">
+                    <s-if condition="{{ item.key == index.getRootObjectKey() && !index.getListingIsSharedLink() }}">
                         <s-set var="name" value="_('rootFolderName')"></s-set>
                     </s-if>
                     <s-if condition="{{ typeof(item.name) != 'string' }}">

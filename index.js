@@ -33,6 +33,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     var firstLoad = true;
     var accounts = {};
+    var rootObjectKey = null;
+    var sharedObjectKeys = [];
     var rootFolderKey = null;
     var currentFolderKey = null;
     var currentPath = [];
@@ -61,7 +63,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
         return accounts;
     };
 
-    exports.getRootFolderKey = function() {
+    exports.getRootObjectKey = function() { // Our personal root object
+        return rootObjectKey;
+    };
+
+    exports.getRootFolderKey = function() { // The current personal/shared root object
         return rootFolderKey;
     };
 
@@ -102,7 +108,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.getListingIsSharedLink = function() {
-        return urls.getActionFromUrl() == "open";
+        return urls.getActionFromUrl() == "open" && urls.getItemsFromUrl().items[0] == rootObjectKey;
     };
 
     exports.getRenameDuplicateIsFolder = function() {
@@ -141,7 +147,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
     exports.renderPermissionEffects = function() {
         document.querySelectorAll(".writePermissionRequired").forEach((element) => element.disabled = !listingHasWritePermission);
-        document.querySelectorAll(".parentalActionsRequired").forEach((element) => element.disabled = listingIsSearchResults);
+        document.querySelectorAll(".parentalActionsRequired").forEach((element) => element.disabled ||= listingIsSearchResults);
 
         if (profiles.isGuestMode()) {
             document.querySelectorAll(".accountRequired, .writePermissionRequired").forEach((element) => element.hidden = true);
@@ -410,7 +416,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         ).then(function(listing) {
             nodeElement.innerHTML = "";
 
-            listing.forEach(function(item) {
+            (listing || []).forEach(function(item) {
                 if (item.type != "folder") {
                     return;
                 }
@@ -425,6 +431,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 expandableElement.addEventListener("click", function(event) {
                     currentPath = [...path.slice(0, pathPosition + 1), item];
                     currentFolderKey = item.key;
+                    rootFolderKey = currentPath[0].key;
                     forwardPath = [];
 
                     document.querySelector("#searchInput").value = "";
@@ -463,39 +470,46 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         var rootElement = document.querySelector("#folderTreeView");
 
-        var listItemElement = document.createElement("li");
-        var expandableElement = document.createElement("details");
-        var nameElement = document.createElement("summary");
-        var childNodeElement = document.createElement("ul");
+        var keys = [rootObjectKey, ...sharedObjectKeys];
 
-        rootElement.innerHTML = "";
+        Promise.all(keys.map((key) => resources.getObject(key))).then(function(objects) {
+            rootElement.innerHTML = "";
 
-        // TODO: Dynamically add root nodes for multiple root folder access (such as shared storage)
+            objects.forEach(function(object, i) {
+                var listItemElement = document.createElement("li");
+                var expandableElement = document.createElement("details");
+                var nameElement = document.createElement("summary");
+                var childNodeElement = document.createElement("ul");
 
-        nameElement.textContent = exports.getListingIsSharedLink() ? path[0].name :  _("rootFolderName");
+                console.log(keys[i], rootObjectKey);
 
-        expandableElement.append(nameElement);
-        expandableElement.append(childNodeElement);
-        listItemElement.append(expandableElement);
-        rootElement.append(listItemElement);
+                nameElement.textContent = (keys[i] == rootObjectKey && !index.getListingIsSharedLink() ? _("rootFolderName") : object.name) || _("unknownName");
 
-        expandableElement.setAttribute("open", "");
+                expandableElement.append(nameElement);
+                expandableElement.append(childNodeElement);
+                listItemElement.append(expandableElement);
+                rootElement.append(listItemElement);
 
-        expandableElement.addEventListener("click", function() {
-            exports.navigate(rootFolderKey, true, false);
+                expandableElement.addEventListener("click", function() {
+                    exports.navigate(keys[i], true, false);
 
-            return exports.renderTreeViewSubnodes(rootFolderKey, childNodeElement, path, 0, hardRefresh);
+                    return exports.renderTreeViewSubnodes(keys[i], childNodeElement, path, 0, hardRefresh);
+                });
+
+                if (currentFolderKey == keys[i]) {
+                    document.querySelector("#searchInput").value = "";
+                    document.querySelector("#mobileSearchInput").value = "";
+
+                    rootElement.querySelectorAll("li").forEach((element) => element.setAttribute("aria-selected", false));
+                    listItemElement.setAttribute("aria-selected", true);
+                }
+
+                if (path[0].key == keys[i]) {
+                    expandableElement.setAttribute("open", "");
+                    exports.renderTreeViewSubnodes(path[0].key, childNodeElement, path, 0, hardRefresh);
+                }
+            });
         });
-
-        if (currentFolderKey == rootFolderKey) {
-            document.querySelector("#searchInput").value = "";
-            document.querySelector("#mobileSearchInput").value = "";
-
-            rootElement.querySelectorAll("li").forEach((element) => element.setAttribute("aria-selected", false));
-            listItemElement.setAttribute("aria-selected", true);
-        }
-
-        exports.renderTreeViewSubnodes(path[0].key, childNodeElement, path, 0, hardRefresh);
     };
 
     exports.exitSearch = function() {
@@ -520,6 +534,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         if (key == ".searchResults") {
             return exports.populateSearchResults(exports.getSearchQuery());
+        } else if (replaceRoot) {
+            rootFolderKey = key;
         }
 
         currentFolderKey = key;
@@ -1082,6 +1098,9 @@ namespace("com.subnodal.cloud.index", function(exports) {
     };
 
     exports.reload = function() {
+        rootObjectKey = null;
+        sharedObjectKeys = [];
+
         config.init().then(function() {
             var folderTreeViewHandlePosition = config.getSetting("cloud_folderTreeViewHandlePosition", "number", null);
 
@@ -1126,8 +1145,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     item.key = itemKeys[i];
 
                     if (i == 0 && (item == null || item.type == "folder")) {
-                        rootFolderKey = itemKeys[0];
-                        currentFolderKey = rootFolderKey;
+                        rootObjectKey = itemKeys[0];
+                        currentFolderKey = itemKeys[0];
 
                         exports.navigate(currentFolderKey, true);
     
@@ -1164,13 +1183,20 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 if (key == null) {
                     return;
                 }
-    
-                rootFolderKey = key;
-                currentFolderKey = rootFolderKey;
+
+                rootObjectKey = key;
+                currentFolderKey = key;
     
                 exports.navigate(currentFolderKey, true);
     
                 exports.populateCurrentFolder(); // Syncing may have caused a few files to change
+
+                return fs.getSharedObjectKeysFromProfile();
+            }).then(function(keys) {
+                sharedObjectKeys = keys;
+                console.log(sharedObjectKeys);
+
+                exports.populateFolderTreeView();
             });
         }
 

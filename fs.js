@@ -740,7 +740,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
         }
 
         cancel() {
-            this.state = exprots.fileOperationStates.CANCELLED;
+            this.state = exports.fileOperationStates.CANCELLED;
 
             return Promise.resolve();
         }
@@ -817,6 +817,16 @@ namespace("com.subnodal.cloud.fs", function(exports) {
             }
 
             return Promise.resolve(key);
+        });
+    };
+
+    exports.getSharedObjectKeysFromProfile = function(token = profiles.getSelectedProfileToken()) {
+        if (token == null) {
+            return Promise.resolve([]);
+        }
+
+        return resources.getProfileInfo(token).then(function(data) {
+            return Promise.resolve(data?.fsSharedObjects || []);
         });
     };
 
