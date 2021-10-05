@@ -15,6 +15,12 @@ namespace("com.subnodal.cloud", function(exports) {
     var profiles = require("com.subnodal.cloud.profiles");
     var config = require("com.subnodal.cloud.config");
 
+    var readyCallbacks = [];
+
+    exports.ready = function(callback) {
+        readyCallbacks.push(callback);
+    };
+
     Promise.all([
         requests.getJson("/locale/en_GB.json"),
         requests.getJson("/locale/fr_FR.json"),
@@ -28,6 +34,10 @@ namespace("com.subnodal.cloud", function(exports) {
             },
             localeCode: localStorage.getItem("subnodalCloud_locale") || null,
             fallbackLocaleCode: "en_GB"
+        });
+
+        subElements.ready(function() {
+            readyCallbacks.forEach((callback) => callback());
         });
 
         document.querySelector("title").textContent = _("subnodalCloud");

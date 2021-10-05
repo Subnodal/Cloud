@@ -16,6 +16,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
     var views = require("com.subnodal.subui.views");
     var dialogs = require("com.subnodal.subui.dialogs");
 
+    var cloud = require("com.subnodal.cloud");
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
     var config = require("com.subnodal.cloud.config");
@@ -1183,7 +1184,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         exports.populateFolderView();
     };
 
-    subElements.ready(function() {
+    cloud.ready(function() {
         exports.reload();
 
         thumbnails.startThemeDetection(function() {
