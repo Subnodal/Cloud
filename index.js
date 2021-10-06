@@ -516,7 +516,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 var rootSwitcherMenuButtonIcon = document.createElement("sui-icon");
                 var rootSwitcherMenuButtonText = document.createElement("span");
 
-                rootSwitcherMenuButtonIcon.textContent = currentFolderKey == keys[i] ? "done" : "";
+                rootSwitcherMenuButtonIcon.textContent = rootFolderKey == keys[i] ? "done" : "";
                 rootSwitcherMenuButtonText.textContent = name;
 
                 rootSwitcherMenuButtonIcon.setAttribute("aria-hidden", true);
