@@ -1171,67 +1171,69 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         fs.cancelAndClearFileOperationsQueue();
 
-        if (urls.getActionFromUrl() == "open") {
-            var itemKeys = urls.getItemsFromUrl().items;
-
-            Promise.all(itemKeys.map((key) => resources.getObject(key))).then(function(items) {
-                items.forEach(function(item, i) {
-                    item.key = itemKeys[i];
-
-                    if (i == 0 && (item == null || item.type == "folder")) {
-                        rootObjectKey = itemKeys[0];
-                        currentFolderKey = itemKeys[0];
-
-                        exports.navigate(currentFolderKey, true);
+        associations.init().then(function() {
+            if (urls.getActionFromUrl() == "open") {
+                var itemKeys = urls.getItemsFromUrl().items;
+    
+                Promise.all(itemKeys.map((key) => resources.getObject(key))).then(function(items) {
+                    items.forEach(function(item, i) {
+                        item.key = itemKeys[i];
+    
+                        if (i == 0 && (item == null || item.type == "folder")) {
+                            rootObjectKey = itemKeys[0];
+                            currentFolderKey = itemKeys[0];
+    
+                            exports.navigate(currentFolderKey, true);
+        
+                            return;
+                        }
+    
+                        if (item.type == "folder") {
+                            window.open(urls.encodeItems([itemKeys[i]]));
+        
+                            return;
+                        }
+        
+                        var association = associations.findAssociationForFilename(item.name);
+    
+                        if (association == null) {
+                            return;
+                        }
+    
+                        var openUrl = association.getOpenUrlForItem(item);
+    
+                        if (i == 0) {
+                            window.location.replace(openUrl);
+                        } else {
+                            window.open(openUrl);
+                        }
     
                         return;
-                    }
-
-                    if (item.type == "folder") {
-                        window.open(urls.encodeItems([itemKeys[i]]));
-    
-                        return;
-                    }
-    
-                    var association = associations.findAssociationForFilename(item.name);
-
-                    if (association == null) {
-                        return;
-                    }
-
-                    var openUrl = association.getOpenUrlForItem(item);
-
-                    if (i == 0) {
-                        window.location.replace(openUrl);
-                    } else {
-                        window.open(openUrl);
-                    }
-
-                    return;
+                    });
                 });
-            });
-        } else {
-            resources.syncOfflineUpdatedObjects().then(function() {
-                return fs.getRootObjectKeyFromProfile();
-            }).then(function(key) {
-                if (key == null) {
-                    return;
-                }
-
-                rootObjectKey = key;
-                currentFolderKey = key;
+            } else {
+                resources.syncOfflineUpdatedObjects().then(function() {
+                    return fs.getRootObjectKeyFromProfile();
+                }).then(function(key) {
+                    if (key == null) {
+                        return;
+                    }
     
-                exports.navigate(currentFolderKey, true);
+                    rootObjectKey = key;
+                    currentFolderKey = key;
+        
+                    exports.navigate(currentFolderKey, true);
+        
+                    exports.populateCurrentFolder(); // Syncing may have caused a few files to change
     
-                exports.populateCurrentFolder(); // Syncing may have caused a few files to change
-
-                return fs.getSharedObjectKeysFromProfile();
-            }).then(function(keys) {
-                sharedObjectKeys = keys;
-
-                exports.populateFolderTreeView();
-            });
-        }
+                    return fs.getSharedObjectKeysFromProfile();
+                }).then(function(keys) {
+                    sharedObjectKeys = keys;
+    
+                    exports.populateFolderTreeView();
+                });
+            }
+        });
 
         listingIsLoading = true;
         listingIsSearchResults = false;
