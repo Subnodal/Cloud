@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+    Subnodal Cloud
+
+    Copyright (C) Subnodal Technologies. All Rights Reserved.
+
+    https://cloud.subnodal.com
+    Licenced by the Subnodal Open-Source Licence, which can be found at LICENCE.md.
+-->
+<html>
+    <head>
+        <title>Subnodal Cloud</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+        <link rel="shortcut icon" href="/media/icon.png">
+        <Link rel="stylesheet" href="https://cdn.subnodal.com/lib/subui/subui.min.css">
+        <Link rel="stylesheet" href="/style.css">
+        <script src="https://cdn.subnodal.com/lib/submodules.min.js"></script>
+        <script src="https://cdn.subnodal.com/lib/subelements.min.js"></script>
+        <script src="https://cdn.subnodal.com/lib/subui/subui.min.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-functions.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-database.js"></script>
+        <script src="/lib/crypto-js.js"></script>
+        <script src="/lib/ipfs.min.js"></script>
+        <script src="/lib/jszip.min.js"></script>
+        <script src="/resources.js"></script>
+        <script src="/profiles.js"></script>
+        <script src="/config.js"></script>
+        <script src="/fs.js"></script>
+        <script src="/urls.js"></script>
+        <script src="/associations.js"></script>
+        <script src="/thumbnails.js"></script>
+        <script src="/folderviews.js"></script>
+        <script src="/embed.js"></script>
+        <script src="/script.js"></script>
+        <script src="/apibridge.js"></script>
+    </head>
+    <body hidden>
+        <dialog id="confirmAuthenticationDialog">
+            <h1 translate>guestSignIn_title</h1>
+            <p translate>guestSignIn_description</p>
+            <sui-buttonrow>
+                <button id="confirmAuthenticationButton" translate>signIn</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
+    </body>
+</html>

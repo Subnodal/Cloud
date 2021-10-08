@@ -14,7 +14,9 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     exports.PROFILE_VERSION = 0;
     exports.COMPLETE_REDIRECT_URL = "/";
     exports.SETUP_REDIRECT_URL = "/setup.html";
+    exports.SETUP_REDIRECT_EMBED_URL = "/setup.html?embed=true";
     exports.NO_PROFILES_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud";
+    exports.NO_PROFILES_REDIRECT_PAYLOAD_URL = exports.NO_PROFILES_REDIRECT_URL + "&payload={payload}";
     exports.ADD_PROFILE_REDIRECT_URL = "https://accounts.subnodal.com/?platform=cloud&switchAccounts=true";
 
     exports.profiles = {};
@@ -50,7 +52,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     exports.getSelectedProfileToken = function() {
-        if (profiles.isGuestMode()) {
+        if (exports.isGuestMode()) {
             throw new Error("In guest mode, and so no profile exists");
         }
 
@@ -117,7 +119,11 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         });
     };
 
-    exports.checkProfilesState = function() {
+    function defaultOpenCallback(url) {
+
+    }
+
+    exports.checkProfilesState = function(payload = {}, openHandler = window.location.replace) {
         return new Promise(function(resolve, reject) {
             if (urls.getActionFromUrl() == "open") {
                 resolve(true);
@@ -126,7 +132,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
             }
 
             if (Object.keys(exports.listProfiles()).length == 0) {
-                window.location.replace(exports.NO_PROFILES_REDIRECT_URL);
+                openHandler(exports.NO_PROFILES_REDIRECT_PAYLOAD_URL.replace(/\{payload\}/g, encodeURIComponent(JSON.stringify(payload))));
 
                 resolve(false);
 
@@ -137,7 +143,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         });
     };
 
-    exports.checkCurrentProfileState = function() {
+    exports.checkCurrentProfileState = function(openHandler = window.location.replace) {
         if (exports.isGuestMode()) {
             return Promise.resolve(true);
         }
@@ -148,7 +154,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
             }
 
             if (typeof(data?.name) != "string") {
-                window.location.replace("/setup.html");
+                openHandler("/setup.html");
 
                 return Promise.resolve(false);
             }

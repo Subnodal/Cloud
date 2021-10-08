@@ -14,6 +14,7 @@ namespace("com.subnodal.cloud", function(exports) {
 
     var profiles = require("com.subnodal.cloud.profiles");
     var config = require("com.subnodal.cloud.config");
+    var embed = require("com.subnodal.cloud.embed");
 
     var readyCallbacks = [];
 
@@ -38,9 +39,17 @@ namespace("com.subnodal.cloud", function(exports) {
 
         subElements.ready(function() {
             readyCallbacks.forEach((callback) => callback());
+
+            if (embed.isEmbedded()) {
+                embed.init();
+            }
         });
 
         document.querySelector("title").textContent = _("subnodalCloud");
+
+        if (embed.isEmbedded()) {
+            return;
+        }
 
         if (window.location.pathname != "/authenticate.html") {
             profiles.checkProfilesState().then(function(profileOkay) {

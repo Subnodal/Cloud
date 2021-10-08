@@ -13,6 +13,8 @@ namespace("com.subnodal.cloud.authenticate", function(exports) {
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
 
+    var payload = {};
+
     exports.processProfile = function(token) {
         return resources.getProfileInfo(token).then(function(data) {
             profiles.setSelectedProfileToken(token);
@@ -44,7 +46,25 @@ namespace("com.subnodal.cloud.authenticate", function(exports) {
         localStorage.setItem("subnodalCloud_locale", core.parameter("locale"));
     }
 
+    if (core.parameter("payload") != null) {
+        try {
+            payload = JSON.parse(core.parameter("payload")) || {};
+        } catch (e) {
+            console.warn("Couldn't parse authentication payload:", e);
+        }
+    }
+
     exports.processProfile(core.parameter("token")).then(function(needsSetup) {
+        if (payload.embed) {
+            if (needsSetup) {
+                window.location.replace(profiles.SETUP_REDIRECT_EMBED_URL);
+
+                return;
+            }
+
+            window.close(); // Fallback below if window doesn't close
+        }
+
         window.location.replace(needsSetup ? profiles.SETUP_REDIRECT_URL : profiles.COMPLETE_REDIRECT_URL);
     });
 });
