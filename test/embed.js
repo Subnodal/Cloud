@@ -8,5 +8,9 @@ window.addEventListener("load", function() {
 
     window.addEventListener("message", function(event) {
         console.log("Got data:", event.data);
+
+        if (event.data.eventToken == "authenticationTest") {
+            document.querySelector("#status").textContent = "Authenticated";
+        }
     });
 });
