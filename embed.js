@@ -10,7 +10,6 @@
 namespace("com.subnodal.cloud.embed", function(exports) {
     var dialogs = require("com.subnodal.subui.dialogs");
 
-    var cloud = require("com.subnodal.cloud");
     var profiles = require("com.subnodal.cloud.profiles");
 
     window.embed = exports;
