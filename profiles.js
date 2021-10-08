@@ -120,10 +120,10 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
     };
 
     function defaultOpenCallback(url) {
-
+        window.location.replace(url);
     }
 
-    exports.checkProfilesState = function(payload = {}, openHandler = window.location.replace) {
+    exports.checkProfilesState = function(payload = {}, openHandler = defaultOpenCallback) {
         return new Promise(function(resolve, reject) {
             if (urls.getActionFromUrl() == "open") {
                 resolve(true);
@@ -143,7 +143,7 @@ namespace("com.subnodal.cloud.profiles", function(exports) {
         });
     };
 
-    exports.checkCurrentProfileState = function(openHandler = window.location.replace) {
+    exports.checkCurrentProfileState = function(openHandler = defaultOpenCallback) {
         if (exports.isGuestMode()) {
             return Promise.resolve(true);
         }
