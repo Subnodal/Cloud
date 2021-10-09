@@ -15,6 +15,8 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
     exports.bridgeResponses = {};
     exports.readyCallbacks = [];
 
+    var focusReturnElement = null;
+
     exports.applyBridgeStyling = function() {
         exports.bridgeEmbed.setAttribute("style", `
             all: initial;
@@ -61,11 +63,23 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                     return;
 
                 case "show":
+                    if (focusReturnElement == null) {
+                        focusReturnElement = document.activeElement;
+                    }
+
                     exports.showBridge();
+
                     return;
 
                 case "hide":
                     exports.hideBridge();
+
+                    if (focusReturnElement instanceof Node) {
+                        focusReturnElement.focus();
+
+                        focusReturnElement = null;
+                    }
+
                     return;
 
                 default:
