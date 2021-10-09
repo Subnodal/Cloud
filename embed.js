@@ -71,6 +71,8 @@ namespace("com.subnodal.cloud.embed", function(exports) {
                     return;
                 }
 
+                exports.closeDialog(document.querySelector("#confirmAuthenticationDialog"));
+
                 callback(...mainArguments);
             });
         };
@@ -98,8 +100,6 @@ namespace("com.subnodal.cloud.embed", function(exports) {
             var popupLocation = `top=${(screen.height / 2) - (600 / 2)},left=${(screen.width / 2) - (550 / 2)},width=550,height=600`;
 
             window.open(authenticationConfirmUrl, "popUpWindow", popupLocation);
-
-            exports.closeDialog(document.querySelector("#confirmAuthenticationDialog"));
         });
 
         document.querySelectorAll("dialog").forEach(function(element) {
