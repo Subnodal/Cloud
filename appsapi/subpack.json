@@ -1,0 +1,6 @@
+{
+    "identifier": "com.subnodal.cloud.appsapi",
+    "modules": [
+        "appsapi.js"
+    ]
+}

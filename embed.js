@@ -8,6 +8,7 @@
 */
 
 namespace("com.subnodal.cloud.embed", function(exports) {
+    var elements = require("com.subnodal.subelements.elements");
     var dialogs = require("com.subnodal.subui.dialogs");
 
     var profiles = require("com.subnodal.cloud.profiles");
@@ -22,10 +23,26 @@ namespace("com.subnodal.cloud.embed", function(exports) {
         return window.location.pathname == "/embed.html";
     };
 
+    exports.openDialog = function(element) {
+        window.parent.postMessage({type: "show"}, "*");
+
+        setTimeout(function() {
+            dialogs.open(element);
+        });
+    };
+
+    exports.closeDialog = function(element) {
+        dialogs.close(element);
+
+        setTimeout(function() {
+            window.parent.postMessage({type: "hide"}, "*");
+        }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500);
+    };
+
     function confirmAuthentication(url) {
         authenticationConfirmUrl = url;
 
-        dialogs.open(document.querySelector("#confirmAuthenticationDialog"));
+        exports.openDialog(document.querySelector("#confirmAuthenticationDialog"));
     }
 
     exports.checkAuthentication = function() {
@@ -45,6 +62,12 @@ namespace("com.subnodal.cloud.embed", function(exports) {
 
             authenticationPromise.then(function(authenticated) {
                 if (!authenticated) {
+                    window.addEventListener("focus", function focusCheck() {
+                        exports.eventDescriptors[descriptor](...mainArguments);
+
+                        window.removeEventListener("focus", focusCheck);
+                    });
+
                     return;
                 }
 
@@ -76,7 +99,24 @@ namespace("com.subnodal.cloud.embed", function(exports) {
 
             window.open(authenticationConfirmUrl, "popUpWindow", popupLocation);
 
-            dialogs.close(document.querySelector("#confirmAuthenticationDialog"));
+            exports.closeDialog(document.querySelector("#confirmAuthenticationDialog"));
         });
+
+        document.querySelectorAll("dialog").forEach(function(element) {
+            element.addEventListener("cancel", function(event) {
+                exports.closeDialog(element);
+
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        });
+
+        document.querySelectorAll("dialog [sui-action='close']").forEach(function(element) {
+            element.addEventListener("click", function() {
+                exports.closeDialog(elements.findAncestor(element, "dialog"));                
+            });
+        });
+
+        window.parent.postMessage({type: "ready"}, "*");
     };
 });

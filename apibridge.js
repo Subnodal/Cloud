@@ -11,6 +11,6 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
     var embed = require("com.subnodal.cloud.embed");
 
     embed.registerEventDescriptor("ensureAuthentication", function(data, respond) {
-        respond(true);
+        respond({status: "ok", result: "authenticated"});
     }, true);
 });

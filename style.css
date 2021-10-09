@@ -64,6 +64,10 @@ dialog .screenMessage {
     -webkit-user-drag: element;
 }
 
+#embed, #embed body {
+    background-color: transparent;
+}
+
 @media (max-width: 600px) {
     .screenMessage {
         padding-left: 10vw;
