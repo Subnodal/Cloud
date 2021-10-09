@@ -9,6 +9,7 @@
 
 namespace("com.subnodal.cloud.setup", function(exports) {
     var subElements = require("com.subnodal.subelements");
+    var core = require("com.subnodal.subelements.core");
     var dialogs = require("com.subnodal.subui.dialogs");
 
     var resources = require("com.subnodal.cloud.resources");
@@ -34,6 +35,12 @@ namespace("com.subnodal.cloud.setup", function(exports) {
         subElements.render();
 
         resources.setProfileInfo({name: name.trim()}).then(function() {
+            if (core.parameter("embed") == "true") {
+                window.close();
+
+                return;
+            }
+
             window.location.replace(profiles.COMPLETE_REDIRECT_URL);
         }).catch(function(error) {
             console.error(error);
