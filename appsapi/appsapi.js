@@ -119,15 +119,29 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         });
     };
 
-    exports.init = function(options) {
-        options = options || {};
-
+    /*
+        @name init
+        Initialise the Cloud Apps API. Once initialised, `ready` callbacks will
+        be called.
+            ~~~~
+            Available options are:
+            * `rootElement`: The element to append the Cloud Apps API Bridge
+              iframe to to allow for communications between the target app and
+              API.
+        @param options <Object = {}> The options to specify when initialising the Cloud Apps API
+    */
+    exports.init = function(options = {}) {
         exports.rootElement = options.rootElement || document.body;
         exports.bridgeHostUrl = options.bridgeHostUrl || "https://cloud.subnodal.com/embed.html";
 
         exports.attachBridge();
     };
 
+    /*
+        @name ready
+        Call the given callback when the Cloud Apps API is ready to be used.
+        @param callback <Function> The callback to call when ready
+    */
     exports.ready = function(callback) {
         exports.readyCallbacks.push(callback);
     };
