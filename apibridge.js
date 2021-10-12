@@ -32,15 +32,16 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                 if (!permissions.write) {
                     console.log("No write permission");
 
-                    return; // TODO: Complain
+                    return; // TODO: Complain by showing dialog
                 }
 
                 if (embed.getSaveOpenFolderView().listing.map((item) => item.name).includes(fullName)) {
                     console.log("Name taken");
 
-                    return; // TODO: Complain
+                    return; // TODO: Complain by showing dialog
                 }
 
+                // TODO: Fix timestamps and other info when creating file
                 fs.createFile(fullName, embed.getSaveOpenFolderView().currentFolderKey).then(function(key) {
                     saveOpenRespond({
                         status: "ok",
