@@ -12,6 +12,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
     exports.rootElement = null;
     exports.bridgeEmbed = null;
     exports.bridgeHostUrl = null;
+    exports.manifest = {};
     exports.bridgeResponses = {};
     exports.readyCallbacks = [];
 
@@ -54,6 +55,10 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             }
 
             switch (event.data?.type) {
+                case "sendManifest":
+                    exports.sendBridgeEventDescriptor("setManifest", exports.manifest);
+                    return;
+
                 case "ready":
                     exports.readyCallbacks.forEach((callback) => callback());
                     return;
@@ -119,6 +124,14 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         });
     };
 
+    exports.showSaveFileDialog = function(defaultName = undefined) {
+        return exports.sendBridgeEventDescriptor("showSaveFileDialog", {name: defaultName});
+    };
+
+    exports.showOpenFileDialog = function() {
+        return exports.sendBridgeEventDescriptor("showOpenFileDialog");
+    };
+
     /*
         @name init
         Initialise the Cloud Apps API. Once initialised, `ready` callbacks will
@@ -133,6 +146,20 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
     exports.init = function(options = {}) {
         exports.rootElement = options.rootElement || document.body;
         exports.bridgeHostUrl = options.bridgeHostUrl || "https://cloud.subnodal.com/embed.html";
+
+        exports.manifest = {
+            associations: (options.associations || []).map((association) => ({
+                extension: association.extension,
+                openUrl: options.openUrl || window.location.href,
+                namingScheme: {
+                    appName: options.appName,
+                    documentTypeName: options.documentTypeName
+                },
+                documentTypeName: association.documentTypeName,
+                creatable: association.creatable == false ? false : true,
+                fallbackLocaleCode: options.fallbackLocaleCode
+            }))
+        };
 
         exports.attachBridge();
     };

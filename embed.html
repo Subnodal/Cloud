@@ -32,6 +32,7 @@
         <script src="/urls.js"></script>
         <script src="/associations.js"></script>
         <script src="/thumbnails.js"></script>
+        <script src="/search.js"></script>
         <script src="/folderviews.js"></script>
         <script src="/embed.js"></script>
         <script src="/script.js"></script>
@@ -43,6 +44,82 @@
             <p translate>guestSignIn_description</p>
             <sui-buttonrow>
                 <button id="confirmAuthenticationButton" translate>signIn</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="saveOpenFileDialog">
+            <h1>{{ embed.getSaveOpenIsSave() ? _("saveOpen_saveFile") : _("saveOpen_openFile") }}</h1>
+            <div sui-stack="column">
+                <div sui-stack="row middle">
+                    <button onclick="embed.getSaveOpenFolderView()?.goBack();" title="{{ _('back') }}" aria-label="{{ _('back') }}"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
+                    <ol sui-style="breadcrumbs" sui-size="grow">
+                        <s-if condition="{{ embed.getSaveOpenFolderView()?.path.length > 0 }}">
+                            <s-each in="embed.getSaveOpenFolderView()?.path" keyvar="i" valuevar="item">
+                                <s-set var="name" value="item.name"></s-set>
+                                <s-if condition="{{ item.key == embed.getRootObjectKey() }}">
+                                    <s-set var="name" value="_('rootFolderName')"></s-set>
+                                </s-if>
+                                <s-if condition="{{ typeof(item.name) != 'string' }}">
+                                    <s-set var="name" value="_('unknownName')"></s-set>
+                                </s-if>
+                                <li>
+                                    <s-if condition="{{ i == embed.getSaveOpenFolderView()?.path.length - 1 }}">
+                                        {{ name }}
+                                    </s-if>
+                                    <s-else>
+                                        <a href="javascript:embed.getSaveOpenFolderView()?.goBack(`{{ item.key }}`);">{{ name }}</a>
+                                    </s-else>
+                                </li>
+                            </s-each>
+                        </s-if>
+                        <s-else>
+                            <strong translate>locations</strong>
+                        </s-else>
+                    </ol>
+                </div>
+                <sui-workarea>
+                    <s-if condition="{{ embed.getSaveOpenFolderView()?.isAvailable }}">
+                        <ul sui-iconlist sui-mode="single" sui-style="linear" id="saveOpenFolderView">
+                            <s-each in="embed.getSaveOpenFolderView()?.listing || []" valuevar="item">
+                                <s-if condition="{{ fs.getItemDisplayName(item) != '' }}"> <!-- If it's blank, it's likely it's a hidden file -->
+                                    <li tabindex="0" data-name="{{ item.name }}" data-key="{{ item.key }}" data-type="{{ item.type }}">
+                                        <img src="{{ thumbnails.getThumbnailForItem(item) }}" aria-hidden="true">
+                                        <span>{{ item.key == embed.getRootObjectKey() ? _('rootFolderName') : fs.getItemDisplayName(item) }}</span>
+                                        <span>{{ fs.getItemDetails(item, config.getSetting("cloud_sortBy", "number", fs.sortByAttributes.NAME)) }}</span>
+                                    </li>
+                                </s-if>
+                            </s-each>
+                        </ul>
+                        <s-if condition="{{ embed.getSaveOpenFolderView()?.listing.length == 0 }}">
+                            <div class="screenMessage subtle">
+                                <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                                <h2 sui-mono translate>folderViewDialog_emptyFolder</h2>
+                            </div>
+                        </s-if>
+                    </s-if>
+                    <s-if condition="{{ embed.getSaveOpenFolderView()?.listingIsLoading }}">
+                        <sui-loader aria-label="{{ _('loading') }}"></sui-loader>
+                    </s-if>
+                    <s-if condition="{{embed.getSaveOpenFolderView()?.isUnavailable && embed.getSaveOpenFolderView()?.dataUnavailableWhileOffline }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>folderViewDialog_offlineFolder</h2>
+                        </div>
+                    </s-if>
+                    <s-if condition="{{ embed.getSaveOpenFolderView()?.isUnavailable && embed.getSaveOpenFolderView()?.dataNotFound }}">
+                        <div class="screenMessage subtle">
+                            <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
+                            <h2 sui-mono translate>folderViewDialog_folderNotFound</h2>
+                        </div>
+                    </s-if>
+                </sui-workarea>
+            </div>
+            <s-if condition="{{ embed.getSaveOpenIsSave() }}">
+                <label for="saveOpenFileName" translate>saveOpen_nameFile</label>
+                <input id="saveOpenFileName">
+            </s-if>
+            <sui-buttonrow>
+                <button onclick="apiBridge.finishSaveOpen();">{{ embed.getSaveOpenIsSave() ? _("saveOpen_save") : _("saveOpen_open") }}</button>
                 <button sui-style="flat" sui-action="close" translate>cancel</button>
             </sui-buttonrow>
         </dialog>

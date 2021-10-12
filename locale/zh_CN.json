@@ -131,13 +131,13 @@
         "renameDuplicateFile_title": "无法重命名此文件",
         "renameDuplicateFile_description": "同一个文件夹中已经有另一个文件同名。",
 
-        "moveCopy_moveToFolder": "移至文件夹",
-        "moveCopy_copyToFolder": "复制到文件夹",
-        "moveCopy_emptyFolder": "空文件夹",
-        "moveCopy_offlineFolder": "离线时不可用",
-        "moveCopy_folderNotFound": "找不到文件夹",
-        "moveCopy_moveHere": "移至这",
-        "moveCopy_copyHere": "复制到这",
+        "folderViewDialog_moveToFolder": "移至文件夹",
+        "folderViewDialog_copyToFolder": "复制到文件夹",
+        "folderViewDialog_emptyFolder": "空文件夹",
+        "folderViewDialog_offlineFolder": "离线时不可用",
+        "folderViewDialog_folderNotFound": "找不到文件夹",
+        "folderViewDialog_moveHere": "移至这",
+        "folderViewDialog_copyHere": "复制到这",
 
         "deleteConfirmation_title": {
             "{combination} == `file`": "你真的要删除这个文件吗？",

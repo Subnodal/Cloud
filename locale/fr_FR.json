@@ -131,13 +131,13 @@
         "renameDuplicateFile_title": "Impossible de renommer ce fichier",
         "renameDuplicateFile_description": "Il y a déjà un autre fichier dans le même dossier avec ce nom.",
 
-        "moveCopy_moveToFolder": "Déménager vers un dossier",
-        "moveCopy_copyToFolder": "Copier vers un dossier",
-        "moveCopy_emptyFolder": "Dossier vide",
-        "moveCopy_offlineFolder": "Indisponible hors connexion",
-        "moveCopy_folderNotFound": "Dossier introuvable",
-        "moveCopy_moveHere": "Déménager ici",
-        "moveCopy_copyHere": "Copier ici",
+        "folderViewDialog_moveToFolder": "Déménager vers un dossier",
+        "folderViewDialog_copyToFolder": "Copier vers un dossier",
+        "folderViewDialog_emptyFolder": "Dossier vide",
+        "folderViewDialog_offlineFolder": "Indisponible hors connexion",
+        "folderViewDialog_folderNotFound": "Dossier introuvable",
+        "folderViewDialog_moveHere": "Déménager ici",
+        "folderViewDialog_copyHere": "Copier ici",
 
         "deleteConfirmation_title": {
             "{combination} == `file`": "Voulez-vous vraiment supprimer ce fichier ?",

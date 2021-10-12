@@ -215,7 +215,7 @@
             </sui-buttonrow>
         </dialog>
         <dialog id="moveCopyDialog">
-            <h1>{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyToFolder") : _("moveCopy_moveToFolder") }}</h1>
+            <h1>{{ index.getMoveCopyIsCopy() ? _("folderViewDialog_copyToFolder") : _("folderViewDialog_moveToFolder") }}</h1>
             <div sui-stack="column">
                 <div sui-stack="row middle">
                     <button onclick="index.getMoveCopyFolderView()?.goBack();" title="{{ _('back') }}" aria-label="{{ _('back') }}"><sui-icon sui-mirrorable aria-hidden="true">arrow_back</sui-icon></button>
@@ -260,7 +260,7 @@
                         <s-if condition="{{ index.getMoveCopyFolderView()?.listing.length == 0 }}">
                             <div class="screenMessage subtle">
                                 <img src="/media/graphics/emptyFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                                <h2 sui-mono translate>moveCopy_emptyFolder</h2>
+                                <h2 sui-mono translate>folderViewDialog_emptyFolder</h2>
                             </div>
                         </s-if>
                     </s-if>
@@ -270,19 +270,19 @@
                     <s-if condition="{{index.getMoveCopyFolderView()?.isUnavailable && index.getMoveCopyFolderView()?.dataUnavailableWhileOffline }}">
                         <div class="screenMessage subtle">
                             <img src="/media/graphics/offlineFolderMessage_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                            <h2 sui-mono translate>moveCopy_offlineFolder</h2>
+                            <h2 sui-mono translate>folderViewDialog_offlineFolder</h2>
                         </div>
                     </s-if>
                     <s-if condition="{{ index.getMoveCopyFolderView()?.isUnavailable && index.getMoveCopyFolderView()?.dataNotFound }}">
                         <div class="screenMessage subtle">
                             <img src="/media/graphics/search_{{ thumbnails.getThemeVariant() }}.svg" aria-hidden="true">
-                            <h2 sui-mono translate>moveCopy_folderNotFound</h2>
+                            <h2 sui-mono translate>folderViewDialog_folderNotFound</h2>
                         </div>
                     </s-if>
                 </sui-workarea>
             </div>
             <sui-buttonrow>
-                <button onclick="index.performMoveCopy();">{{ index.getMoveCopyIsCopy() ? _("moveCopy_copyHere") : _("moveCopy_moveHere") }}</button>
+                <button onclick="index.performMoveCopy();">{{ index.getMoveCopyIsCopy() ? _("folderViewDialog_copyHere") : _("folderViewDialog_moveHere") }}</button>
                 <button sui-style="flat" sui-action="close" translate>cancel</button>
             </sui-buttonrow>
         </dialog>

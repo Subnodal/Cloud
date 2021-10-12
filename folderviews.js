@@ -43,6 +43,20 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             return !this.getListingIsLoading && (this.dataUnavailableWhileOffline || this.dataNotFound);
         }
 
+        get selectedItemKey() {
+            return views.getSelectedListItems(this.viewElement)[0]?.getAttribute("data-key") || null;
+        }
+
+        get selectedItem() {
+            var selectedKey = this.selectedItemKey;
+
+            if (selectedKey == null) {
+                return;
+            }
+
+            return this.listing.find((item) => item.key == selectedKey) || null;
+        }
+
         render() {
             subElements.render(this.containerElement || this.viewElement);
         }
@@ -56,10 +70,6 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
     
             return null;
         };
-
-        handleFileOpen(item) {}
-
-        handleFileSelect(item) {}
 
         attachListItemOpenEvents() {
             var thisScope = this;

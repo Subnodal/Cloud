@@ -45,6 +45,7 @@
         "rootFolderName": "My files",
         "newFolderName": "New folder",
         "unknownName": "Unknown",
+        "untitledName": "Untitled",
         "defaultDocumentTypeName": "{app} document",
         "duplicateDocumentCopyMark": "{name} ({number})",
 
@@ -134,13 +135,13 @@
         "renameDuplicateFile_title": "Can't rename this file",
         "renameDuplicateFile_description": "There already is another file in the same folder with this name.",
 
-        "moveCopy_moveToFolder": "Move to folder",
-        "moveCopy_copyToFolder": "Copy to folder",
-        "moveCopy_emptyFolder": "Empty folder",
-        "moveCopy_offlineFolder": "Unavailable while offline",
-        "moveCopy_folderNotFound": "Folder not found",
-        "moveCopy_moveHere": "Move here",
-        "moveCopy_copyHere": "Copy here",
+        "folderViewDialog_moveToFolder": "Move to folder",
+        "folderViewDialog_copyToFolder": "Copy to folder",
+        "folderViewDialog_emptyFolder": "Empty folder",
+        "folderViewDialog_offlineFolder": "Unavailable while offline",
+        "folderViewDialog_folderNotFound": "Folder not found",
+        "folderViewDialog_moveHere": "Move here",
+        "folderViewDialog_copyHere": "Copy here",
 
         "deleteConfirmation_title": {
             "{combination} == `file`": "Do you really want to delete this file?",
@@ -158,6 +159,12 @@
             "{count} == 1": " will be permanently deleted and removed from its parent folder.",
             "{count} > 1": "They will be permanently deleted and removed from their parent folder."
         },
+
+        "saveOpen_saveFile": "Save file",
+        "saveOpen_openFile": "Open file",
+        "saveOpen_save": "Save",
+        "saveOpen_open": "Open",
+        "saveOpen_nameFile": "Filename",
 
         "shortcutDisplayName_subUI_selectAll": "Select all files in the current folder",
         "shortcutDisplayName_subUI_rename": "Rename the selected file",
