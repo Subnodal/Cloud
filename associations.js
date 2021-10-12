@@ -68,13 +68,13 @@ namespace("com.subnodal.cloud.associations", function(exports) {
         return exports.list || [];
     };
 
-    exports.loadList = function(token = profiles.getSelectedProfileToken()) {
+    exports.loadList = function(token = !profiles.isGuestMode() ? profiles.getSelectedProfileToken() : null) {
         return (function() {
             if (!navigator.onLine || token == null) {
                 var data = [];
 
                 try {
-                    data = JSON.parse(localStorage.getItem("subnodalCloud_associations"));
+                    data = JSON.parse(localStorage.getItem("subnodalCloud_associations") || "[]");
                 } catch (e) {}
 
                 return Promise.resolve(data);
@@ -108,7 +108,11 @@ namespace("com.subnodal.cloud.associations", function(exports) {
         });
     };
 
-    exports.saveList = function(offlineOnly, token = profiles.getSelectedProfileToken()) {
+    exports.saveList = function(offlineOnly, token = !profiles.isGuestMode() ? profiles.getSelectedProfileToken() : null) {
+        if (token == null) {
+            return;
+        }
+
         var data = exports.list.map((association) => association.serialise());
 
         localStorage.setItem("subnodalCloud_associations", JSON.stringify(exports.list.map((association) => association.serialise())));
