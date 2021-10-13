@@ -165,6 +165,10 @@ namespace("com.subnodal.cloud.embed", function(exports) {
 
         document.querySelectorAll("dialog").forEach(function(element) {
             element.addEventListener("cancel", function(event) {
+                if (document.querySelectorAll("dialog[open]").length > 1) {
+                    return; // Is stack of dialogs
+                }
+
                 exports.closeDialog(element);
 
                 event.preventDefault();
@@ -174,6 +178,10 @@ namespace("com.subnodal.cloud.embed", function(exports) {
 
         document.querySelectorAll("dialog [sui-action='close']").forEach(function(element) {
             element.addEventListener("click", function() {
+                if (document.querySelectorAll("dialog[open]").length > 1) {
+                    return; // Is stack of dialogs
+                }
+
                 exports.closeDialog(elements.findAncestor(element, "dialog"));                
             });
         });

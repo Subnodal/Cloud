@@ -39,6 +39,7 @@
         "moveTo": "Move to...",
         "rename": "Rename",
         "delete": "Delete",
+        "replace": "Replace",
         "selectAll": "Select all",
         "invertSelection": "Invert selection",
 
@@ -165,6 +166,13 @@
         "saveOpen_save": "Save",
         "saveOpen_open": "Open",
         "saveOpen_nameFile": "Filename",
+
+        "saveNameTaken_title": "That name is already taken",
+        "saveNameTaken_description": "Another file in this folder has the same name. Try entering a different name.",
+
+        "saveOverwriteFile_title": "Replace this file?",
+        "saveOverwriteFile_description_start": "Another file with the name ",
+        "saveOverwriteFile_description_end": " already exists. Do you want to overwrite its contents?",
 
         "shortcutDisplayName_subUI_selectAll": "Select all files in the current folder",
         "shortcutDisplayName_subUI_rename": "Rename the selected file",

@@ -106,13 +106,13 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
 
             this.listingIsLoading = true;
 
-            this.render()
+            this.render();
 
             if (!navigator.onLine && !resources.getObjectCache().hasOwnProperty(key)) {
                 this.listingIsLoading = false;
                 this.dataUnavailableWhileOffline = true;
 
-                this.render()
+                this.render();
 
                 return Promise.reject("Data unavailable while offline");
             } else {
@@ -176,6 +176,8 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 return Promise.resolve(objects);
             });
         }
+
+        handleFileOpen(item) {}
 
         navigate(key, replaceRoot = false) {
             var thisScope = this;

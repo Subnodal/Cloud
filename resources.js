@@ -232,7 +232,9 @@ namespace("com.subnodal.cloud.resources", function(exports) {
 
         return new Promise(function(resolve, reject) {
             firebase.database().ref("objects/" + key + "/_payload").once("value", function(snapshot) {
-                exports.setObjectCacheItem(key, snapshot.val());
+                if (snapshot.val() != null) {
+                    exports.setObjectCacheItem(key, snapshot.val());
+                }
 
                 resolve(snapshot.val());
             })

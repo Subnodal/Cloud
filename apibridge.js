@@ -8,12 +8,20 @@
 */
 
 namespace("com.subnodal.cloud.apibridge", function(exports) {
+    var subElements = require("com.subnodal.subelements");
+    var dialogs = require("com.subnodal.subui.dialogs");
+
     var embed = require("com.subnodal.cloud.embed");
 
     window.apiBridge = exports;
 
     var saveOpenRespond = null;
     var saveOpenExtension = null;
+    var targetItemName = null;
+
+    exports.getTargetItemName = function() {
+        return targetItemName;
+    };
 
     exports.finishSaveOpen = function() {
         if (embed.getSaveOpenFolderView().currentFolderKey == null) {
@@ -22,7 +30,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
         if (embed.getSaveOpenIsSave()) {
             var name = document.querySelector("#saveOpenFileName").value.trim();
-            var fullName = name + "." + saveOpenExtension;
+            var fullName = saveOpenExtension == "" ? name : name + "." + saveOpenExtension;
 
             if (name == "") {
                 return;
@@ -30,18 +38,26 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
             fs.getItemPermissions(embed.getSaveOpenFolderView().currentFolderKey).then(function(permissions) {
                 if (!permissions.write) {
-                    console.log("No write permission");
+                    dialogs.open(document.querySelector("#permissionDeniedDialog"));
 
-                    return; // TODO: Complain by showing dialog
+                    return;
                 }
 
-                if (embed.getSaveOpenFolderView().listing.map((item) => item.name).includes(fullName)) {
-                    console.log("Name taken");
+                var foundItem = embed.getSaveOpenFolderView().listing.find((item) => item.name == fullName);
 
-                    return; // TODO: Complain by showing dialog
+                if (foundItem != undefined && foundItem.type != "file") {
+                    dialogs.open(document.querySelector("#saveNameTakenDialog"));
+
+                    return;
+                } else if (foundItem != undefined) {
+                    targetItemName = name;
+
+                    subElements.render(document.querySelector("#saveOverwriteFileDialog"));
+                    dialogs.open(document.querySelector("#saveOverwriteFileDialog"));
+
+                    return;
                 }
 
-                // TODO: Fix timestamps and other info when creating file
                 fs.createFile(fullName, embed.getSaveOpenFolderView().currentFolderKey).then(function(key) {
                     saveOpenRespond({
                         status: "ok",
@@ -49,6 +65,8 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                         key
                     });
                 });
+
+                embed.closeDialog(document.querySelector("#saveOpenFileDialog"));
             });
         } else {
             var selectedKey = embed.getSaveOpenFolderView().selectedItemKey;
@@ -62,9 +80,38 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                 result: "selected",
                 key: selectedKey
             });
-        }
 
-        embed.closeDialog(document.querySelector("#saveOpenFileDialog"));
+            embed.closeDialog(document.querySelector("#saveOpenFileDialog"));
+        }
+    };
+
+    exports.finishSaveOverwrite = function() {
+        var name = document.querySelector("#saveOpenFileName").value.trim();
+        var fullName = saveOpenExtension == "" ? name : name + "." + saveOpenExtension;
+
+        fs.getItemPermissions(embed.getSaveOpenFolderView().currentFolderKey).then(function(permissions) {
+            if (!permissions.write) {
+                dialogs.open(document.querySelector("#permissionDeniedDialog"));
+
+                return;
+            }
+
+            var foundItem = embed.getSaveOpenFolderView().listing.find((item) => item.name == fullName);
+
+            if (!foundItem) {
+                exports.finishSaveOpen(); // Call this again, just in case the file to overwrite has been since deleted
+            }
+
+            saveOpenRespond({
+                status: "ok",
+                result: "selected",
+                key: foundItem.key
+            });
+
+            dialogs.close(document.querySelector("#saveOverwriteFileDialog"));
+
+            embed.closeDialog(document.querySelector("#saveOpenFileDialog"));
+        });
     };
 
     embed.registerEventDescriptor("ensureAuthentication", function(data, respond) {
@@ -73,7 +120,6 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
     function showSaveOpenFileDialog() {
         embed.getSaveOpenFolderView().navigate(embed.getRootObjectKey(), true);
-        embed.getSaveOpenFolderView().render();
 
         return embed.openDialog(document.querySelector("#saveOpenFileDialog"));
     }
@@ -84,7 +130,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
         document.querySelector("#saveOpenFileName").value = data.name || _("untitledName");
 
         saveOpenRespond = respond;
-        saveOpenExtension = data.extension || embed.getManifest().associations[0]?.extension || "txt";
+        saveOpenExtension = data.extension || embed.getManifest().associations[0]?.extension || "";
 
         showSaveOpenFileDialog().then(function() {
             setTimeout(function() {

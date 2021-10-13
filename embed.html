@@ -39,14 +39,6 @@
         <script src="/apibridge.js"></script>
     </head>
     <body hidden>
-        <dialog id="confirmAuthenticationDialog">
-            <h1 translate>guestSignIn_title</h1>
-            <p translate>guestSignIn_description</p>
-            <sui-buttonrow>
-                <button id="confirmAuthenticationButton" translate>signIn</button>
-                <button sui-style="flat" sui-action="close" translate>cancel</button>
-            </sui-buttonrow>
-        </dialog>
         <dialog id="saveOpenFileDialog">
             <h1>{{ embed.getSaveOpenIsSave() ? _("saveOpen_saveFile") : _("saveOpen_openFile") }}</h1>
             <div sui-stack="column">
@@ -120,6 +112,36 @@
             </s-if>
             <sui-buttonrow>
                 <button onclick="apiBridge.finishSaveOpen();">{{ embed.getSaveOpenIsSave() ? _("saveOpen_save") : _("saveOpen_open") }}</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="confirmAuthenticationDialog">
+            <h1 translate>guestSignIn_title</h1>
+            <p translate>guestSignIn_description</p>
+            <sui-buttonrow>
+                <button id="confirmAuthenticationButton" translate>signIn</button>
+                <button sui-style="flat" sui-action="close" translate>cancel</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="permissionDeniedDialog">
+            <h1 translate>permissionDenied_title</h1>
+            <p translate>permissionDenied_description</p>
+            <sui-buttonrow>
+                <button sui-action="close" translate>ok</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="saveNameTakenDialog">
+            <h1 translate>saveNameTaken_title</h1>
+            <p translate>saveNameTaken_description</p>
+            <sui-buttonrow>
+                <button sui-action="close" translate>ok</button>
+            </sui-buttonrow>
+        </dialog>
+        <dialog id="saveOverwriteFileDialog">
+            <h1 translate>saveOverwriteFile_title</h1>
+            <p><span>{{ _("saveOverwriteFile_description_start") }}</span><strong>{{ apiBridge.getTargetItemName() || "&ic;" }}</strong><span>{{ _("saveOverwriteFile_description_end") }}</span></p>
+            <sui-buttonrow>
+                <button onclick="apiBridge.finishSaveOverwrite();" translate>replace</button>
                 <button sui-style="flat" sui-action="close" translate>cancel</button>
             </sui-buttonrow>
         </dialog>
