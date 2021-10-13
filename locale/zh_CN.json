@@ -39,12 +39,14 @@
         "moveTo": "搬去……",
         "rename": "重命名……",
         "delete": "删除",
+        "replace": "替换",
         "selectAll": "全选",
         "invertSelection": "反转选择",
 
         "rootFolderName": "我的文件夹",
         "newFolderName": "新建文件夹",
         "unknownName": "未知",
+        "untitledName": "无标题",
         "defaultDocumentTypeName": "{0}文档",
         "duplicateDocumentCopyMark": "{name}（{number}）",
 
@@ -155,6 +157,19 @@
             "{count} == 1": "将被永久删除并从其父文件夹中移除。",
             "{count} > 1": "它们将被永久删除并从其父文件夹中移除。"
         },
+
+        "saveOpen_saveFile": "保存文件",
+        "saveOpen_openFile": "打开文件",
+        "saveOpen_save": "保存",
+        "saveOpen_open": "打开",
+        "saveOpen_nameFile": "文档名称",
+
+        "saveNameTaken_title": "该名称已被使用",
+        "saveNameTaken_description": "此文件夹中的另一个文件具有相同的名称。 尝试输入不同的名称。",
+
+        "saveOverwriteFile_title": "替换这个文件？",
+        "saveOverwriteFile_description_start": "另一个名为",
+        "saveOverwriteFile_description_end": "的文件已经存在。你想覆盖它的内容吗？",
 
         "shortcutDisplayName_subUI_selectAll": "选择当前文件夹中的所有文件",
         "shortcutDisplayName_subUI_rename": "重命名所选文件",

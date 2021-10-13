@@ -39,12 +39,14 @@
         "moveTo": "Déménager à...",
         "rename": "Renommer",
         "delete": "Supprimer",
+        "replace": "Remplacer",
         "selectAll": "Tout sélectionner",
         "invertSelection": "Inverser la sélection",
 
         "rootFolderName": "Mes fichiers",
         "newFolderName": "Nouveau dossier",
         "unknownName": "Inconnu",
+        "untitledName": "Sans titre",
         "defaultDocumentTypeName": "Document {0}",
         "duplicateDocumentCopyMark": "{name} ({number})",
 
@@ -155,6 +157,19 @@
             "{count} == 1": " sera définitivement supprimé et supprimé de son dossier parent.",
             "{count} > 1": "Ils seront définitivement supprimés et supprimés de leur dossier parent."
         },
+
+        "saveOpen_saveFile": "Enregistrer le fichier",
+        "saveOpen_openFile": "Ouvrir le fichier",
+        "saveOpen_save": "Enregistrer",
+        "saveOpen_open": "Ouvrir",
+        "saveOpen_nameFile": "Nom de fichier",
+
+        "saveNameTaken_title": "Ce nom est déjà pris",
+        "saveNameTaken_description": "Un autre fichier de ce dossier porte le même nom. Essayez d'entrer un nom différent.",
+
+        "saveOverwriteFile_title": "Remplacer ce fichier ?",
+        "saveOverwriteFile_description_start": "Un autre fichier portant le nom ",
+        "saveOverwriteFile_description_end": " existe déjà. Voulez-vous écraser son contenu ?",
 
         "shortcutDisplayName_subUI_selectAll": "Sélectionnez tous les fichiers dans le dossier actuel",
         "shortcutDisplayName_subUI_rename": "Renommer le fichier sélectionné",
