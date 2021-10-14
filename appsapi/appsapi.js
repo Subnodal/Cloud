@@ -124,10 +124,23 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         });
     };
 
+    /*
+        @name showSaveFileDialog
+        Present the save file dialog to the user so that they can choose a
+        folder to save their file to and a filename to save their file as.
+        @param defaultName <String | undefined = undefined> The default filename to populate if no filename is chosen (is the localised version of "Untitled" if argument isn't specified)
+        @returns <Promise> A `Promise` that is resolved as an object with the newly-created file's object key as key `key`.
+    */
     exports.showSaveFileDialog = function(defaultName = undefined) {
         return exports.sendBridgeEventDescriptor("showSaveFileDialog", {name: defaultName});
     };
 
+    /*
+        @name showOpenFileDialog
+        Present the open file dialog to the user so that they can choose a file
+        to open.
+        @returns <Promise> A `Promise` that is resolved as an object with the selected file's object key as key `key`.
+    */
     exports.showOpenFileDialog = function() {
         return exports.sendBridgeEventDescriptor("showOpenFileDialog");
     };
@@ -141,6 +154,21 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             * `rootElement`: The element to append the Cloud Apps API Bridge
               iframe to to allow for communications between the target app and
               API.
+            * `appName`: An object containing locale translations for the target
+              app's name.
+            * `fallbackLocaleCode` The locale code to use when the current
+              locale is not supported by the target app.
+            * `associations`: An array of objects that represent file
+              associations:
+              - `extension`: The file extension to associate with.
+              - `documentTypeName`: An object containing locale translations for
+                the association's document type name (such as
+                `"Text document"`).
+              - `thumbnailUrl`: The URL to the thumbnail to use in Subnodal
+                Cloud to represent the file association.
+            * `openUrl`: The URL to redirect to when a file is opened.
+              `{objectKey}` is substituted with the object key of the file to
+              open.
         @param options <Object = {}> The options to specify when initialising the Cloud Apps API
     */
     exports.init = function(options = {}) {
@@ -153,7 +181,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 openUrl: options.openUrl || window.location.href,
                 namingScheme: {
                     appName: options.appName,
-                    documentTypeName: options.documentTypeName,
+                    documentTypeName: association.documentTypeName,
                     fallbackLocaleCode: options.fallbackLocaleCode
                 },
                 thumbnailUrl: association.thumbnailUrl,
