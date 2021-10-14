@@ -153,11 +153,11 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 openUrl: options.openUrl || window.location.href,
                 namingScheme: {
                     appName: options.appName,
-                    documentTypeName: options.documentTypeName
+                    documentTypeName: options.documentTypeName,
+                    fallbackLocaleCode: options.fallbackLocaleCode
                 },
-                documentTypeName: association.documentTypeName,
+                thumbnailUrl: association.thumbnailUrl,
                 creatable: association.creatable == false ? false : true,
-                fallbackLocaleCode: options.fallbackLocaleCode
             }))
         };
 
