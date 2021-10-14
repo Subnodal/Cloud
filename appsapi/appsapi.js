@@ -157,7 +157,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                     fallbackLocaleCode: options.fallbackLocaleCode
                 },
                 thumbnailUrl: association.thumbnailUrl,
-                creatable: association.creatable == false ? false : true,
+                creatable: association.creatable == false ? false : true
             }))
         };
 
