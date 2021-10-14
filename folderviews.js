@@ -71,8 +71,20 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
             return null;
         };
 
-        attachListItemOpenEvents() {
+        attachListItemEvents() {
             var thisScope = this;
+
+            views.attachListSelectEvent(this.viewElement, function() {
+                var listItem = views.getSelectedListItems(thisScope.viewElement)[0];
+
+                if (!(listItem instanceof Node)) {
+                    return;
+                }
+
+                var item = thisScope.getItemFromListing(listItem.getAttribute("data-key"));
+
+                thisScope.handleFileSelect(item);
+            });
 
             this.viewElement.querySelectorAll("li").forEach(function(listItem) {
                 views.attachListItemOpenEvent(listItem, function() {
@@ -93,6 +105,10 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                     thisScope.handleFileOpen(item);
                 });
             });
+        }
+
+        listingFilter(item) {
+            return true;
         }
 
         populate(key = this.currentFolderKey) {
@@ -132,10 +148,12 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                     return Promise.reject("Data not found");
                 }
 
+                listing = listing.filter(thisScope.listingFilter);
+
                 thisScope.listing = listing;
 
                 thisScope.render();
-                thisScope.attachListItemOpenEvents();
+                thisScope.attachListItemEvents();
 
                 return Promise.resolve(listing);
             });
@@ -171,11 +189,13 @@ namespace("com.subnodal.cloud.folderviews", function(exports) {
                 thisScope.listing = objects;
 
                 thisScope.render();
-                thisScope.attachListItemOpenEvents();
+                thisScope.attachListItemEvents();
 
                 return Promise.resolve(objects);
             });
         }
+
+        handleFileSelect(item) {}
 
         handleFileOpen(item) {}
 

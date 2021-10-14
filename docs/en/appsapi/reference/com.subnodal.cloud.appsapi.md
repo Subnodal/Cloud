@@ -35,6 +35,9 @@ Available options are:
 ## ▶️ `showOpenFileDialog`
 `function` · Present the open file dialog to the user so that they can choose a file to open.
 
+**Parameters:**
+* **`filterExtensions`** (`[String] | null` = `manifest.associations?.length`): 0 ? [manifest.associations[0].extension] : null> An array of extensions to only list the files of. Will list all files if `null`.
+
 **Returns:** `Promise` · A `Promise` that is resolved as an object with the selected file's object key as key `key`.
 
 ## ▶️ `showSaveFileDialog`

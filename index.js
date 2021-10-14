@@ -155,7 +155,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
         }
     };
 
-    exports.attachListItemOpenEvents = function(list) {
+    exports.attachListItemEvents = function(list) {
         var isFolderOpening = false;
 
         list.querySelectorAll("li").forEach(function(element) {
@@ -337,7 +337,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             exports.renderFolderArea();
 
-            exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
+            exports.attachListItemEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"), hardRefresh);
 
             exports.renderPermissionEffects();
@@ -389,7 +389,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
             exports.renderFolderArea();
 
-            exports.attachListItemOpenEvents(document.querySelector("#currentFolderView"));
+            exports.attachListItemEvents(document.querySelector("#currentFolderView"));
             exports.applyImageThumbnails(document.querySelector("#currentFolderView"));
 
             exports.renderPermissionEffects();

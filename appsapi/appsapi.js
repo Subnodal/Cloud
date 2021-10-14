@@ -139,10 +139,11 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         @name showOpenFileDialog
         Present the open file dialog to the user so that they can choose a file
         to open.
+        @param filterExtensions <[String] | null = manifest.associations?.length > 0 ? [manifest.associations[0].extension] : null> An array of extensions to only list the files of. Will list all files if `null`.
         @returns <Promise> A `Promise` that is resolved as an object with the selected file's object key as key `key`.
     */
-    exports.showOpenFileDialog = function() {
-        return exports.sendBridgeEventDescriptor("showOpenFileDialog");
+    exports.showOpenFileDialog = function(filterExtensions = exports.manifest.associations?.length > 0 ? [exports.manifest.associations[0].extension] : null) {
+        return exports.sendBridgeEventDescriptor("showOpenFileDialog", {filterExtensions});
     };
 
     /*

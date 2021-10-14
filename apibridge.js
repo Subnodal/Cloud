@@ -124,6 +124,22 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
         return embed.openDialog(document.querySelector("#saveOpenFileDialog"));
     }
 
+    function filterExtensionsFactory(extensions) {
+        return function(item) {
+            if (item.type != "file") {
+                return true;
+            }
+    
+            for (var i = 0; i < extensions.length; i++) {
+                if (item.name.endsWith("." + extensions[i])) {
+                    return true;
+                }
+            }
+    
+            return false;
+        };
+    }
+
     embed.registerEventDescriptor("showSaveFileDialog", function(data, respond) {
         embed.setSaveOpenIsSave(true);
 
@@ -131,6 +147,22 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
         saveOpenRespond = respond;
         saveOpenExtension = data.extension || embed.getManifest().associations[0]?.extension || "";
+
+        embed.getSaveOpenFolderView().handleFileSelect = function(item) {
+            if (item.type != "file") {
+                return;
+            }
+
+            document.querySelector("#saveOpenFileName").value = item.name.replace(/\.[a-zA-Z0-9.]+$/, "");
+        };
+
+        embed.getSaveOpenFolderView().handleFileOpen = function(item) {};
+
+        embed.getSaveOpenFolderView().listingFilter =
+            typeof(embed.getManifest().associations[0]?.extension) == "string" ?
+            filterExtensionsFactory([embed.getManifest().associations[0]?.extension]) :
+            (item) => true
+        ;
 
         showSaveOpenFileDialog().then(function() {
             setTimeout(function() {
@@ -144,6 +176,22 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
         embed.setSaveOpenIsSave(false);
 
         saveOpenRespond = respond;
+
+        embed.getSaveOpenFolderView().handleFileSelect = function(item) {};
+
+        embed.getSaveOpenFolderView().handleFileOpen = function(item) {
+            if (item.type != "file") {
+                return;
+            }
+
+            exports.finishSaveOpen();
+        };
+
+        embed.getSaveOpenFolderView().listingFilter =
+            data.filterExtensions != null && data.filterExtensions.length > 0 ?
+            filterExtensionsFactory(data.filterExtensions) :
+            (item) => true
+        ;
 
         showSaveOpenFileDialog();
     }, true);
