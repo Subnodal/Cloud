@@ -146,6 +146,22 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         return exports.sendBridgeEventDescriptor("showOpenFileDialog", {filterExtensions});
     };
 
+    // TODO: Document
+    exports.readFile = function(key) {
+        return exports.sendBridgeEventDescriptor("readFile", {key});
+    };
+
+    // TODO: Document
+    exports.writeFile = function(key, data) {
+        if (ArrayBuffer.isView(data)) {
+            data = data.buffer;
+        } else if (!(data instanceof ArrayBuffer)) {
+            data = new TextEncoder().encode(String(data)).buffer;
+        }
+
+        return exports.sendBridgeEventDescriptor("writeFile", {key, data});
+    };
+
     /*
         @name init
         Initialise the Cloud Apps API. Once initialised, `ready` callbacks will
@@ -177,11 +193,13 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         exports.bridgeHostUrl = options.bridgeHostUrl || "https://cloud.subnodal.com/embed.html";
 
         exports.manifest = {
+            suggestedOpenUrl: options.openUrl || window.location.href,
             associations: (options.associations || []).map((association) => ({
                 extension: association.extension,
                 openUrl: options.openUrl || window.location.href,
                 namingScheme: {
                     appName: options.appName,
+                    appNameShort: options.appNameShort || options.appName,
                     documentTypeName: association.documentTypeName,
                     fallbackLocaleCode: options.fallbackLocaleCode
                 },

@@ -51,7 +51,12 @@ namespace("com.subnodal.cloud.associations", function(exports) {
             return {
                 extension: this.extension,
                 openUrl: this.openUrl,
-                namingScheme: this.namingScheme,
+                namingScheme: {
+                    appName: this.l10nAppName,
+                    appNameShort: this.l10nAppNameShort || this.l10nAppName,
+                    documentTypeName: this.l10nDocumentTypeName,
+                    fallbackLocaleCode: this.l10nFallbackLocaleCode
+                },
                 thumbnailUrl: this.thumbnailUrl,
                 creatable: this.creatable
             };
@@ -115,10 +120,10 @@ namespace("com.subnodal.cloud.associations", function(exports) {
 
         var data = exports.list.map((association) => association.serialise());
 
-        localStorage.setItem("subnodalCloud_associations", JSON.stringify(exports.list.map((association) => association.serialise())));
+        localStorage.setItem("subnodalCloud_associations", JSON.stringify(data));
 
         if (!offlineOnly && token != null && navigator.onLine) {
-            resources.setProfileInfo("fsAssociations", data);
+            resources.setProfileInfo({fsAssociations: data});
         }
     };
 
@@ -150,6 +155,16 @@ namespace("com.subnodal.cloud.associations", function(exports) {
 
             return Promise.resolve();
         });
+    };
+
+    exports.register = function(association) {
+        var index = exports.list.findIndex((item) => item.extension == association.extension && item.openUrl == association.openUrl);
+
+        if (index >= 0) {
+            exports.list[index] = association;
+        } else {
+            exports.list.push(association);
+        }
     };
 
     exports.init = function() {

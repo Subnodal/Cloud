@@ -62,21 +62,22 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     };
 
     exports.FileUploadOperation = class extends exports.FileOperation {
-        constructor(name, parentFolder, encryptionKey = null) {
+        constructor(name = null, parentFolder = null, encryptionKey = null, objectKey = null) {
             super();
 
             this.name = name;
             this.parentFolder = parentFolder;
             this.encryptionKey = encryptionKey;
+            this.objectKey = objectKey;
 
             this.fileData = null;
             this.contentsAddress = null;
         }
 
-        static createSpecificOperation(name, parentFolder, encryptionKey = undefined, token = undefined) {
+        static createSpecificOperation(name = undefined, parentFolder = undefined, encryptionKey = undefined, objectKey = undefined, token = undefined) {
             // All file upload operation instantiaton should happen here so as to select the appropriate subclass for the parent folder
 
-            return new exports.IpfsFileUploadOperation(name, parentFolder, encryptionKey, token);
+            return new exports.IpfsFileUploadOperation(name, parentFolder, encryptionKey, objectKey, token);
         }
 
         static encrypt(fileData, encryptionKey) {
@@ -123,18 +124,26 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     };
 
     exports.IpfsFileUploadOperation = class extends exports.FileUploadOperation {
-        constructor(name, parentFolder, encryptionKey = core.generateKey(64), token = profiles.getSelectedProfileToken()) {
-            super(name, parentFolder, encryptionKey);
+        constructor(name = null, parentFolder = null, encryptionKey = core.generateKey(64), objectKey = null, token = profiles.getSelectedProfileToken()) {
+            super(name, parentFolder, encryptionKey, objectKey);
             this.token = token;
 
-            this.objectKey = null;
             this.fileData = null;
+            this.extraObjectData = {};
             this.abortController = null;
         }
 
         start() {
             if (this.fileData == null) {
                 return Promise.reject("No file has been added");
+            }
+
+            if (this.objectKey == null && this.parentFolder == null) {
+                return Promise.reject("No parent folder was chosen to upload the file into");
+            }
+
+            if (this.objectKey == null && this.name == null) {
+                return Promise.reject("No filename was chosen");
             }
 
             this.state = exports.fileOperationStates.RUNNING;
@@ -158,11 +167,23 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 thisScope.contentsAddress = `ipfs:${result.cid.toString()}`;
                 thisScope.bytesProgress = thisScope.bytesTotal;
 
-                return exports.createFile(thisScope.name, thisScope.parentFolder, {
+                if (thisScope.objectKey == null) { // Create instead of overwrite
+                    return exports.createFile(thisScope.name, thisScope.parentFolder, {
+                        ...thisScope.extraObjectData,
+                        size: encryptedData.byteLength,
+                        contentsAddress: thisScope.contentsAddress,
+                        encryptionKey: thisScope.encryptionKey
+                    }, thisScope.token);
+                }
+
+                return resources.setObject(thisScope.objectKey, {
+                    ...thisScope.extraObjectData,
                     size: encryptedData.byteLength,
                     contentsAddress: thisScope.contentsAddress,
                     encryptionKey: thisScope.encryptionKey
-                }, thisScope.token);
+                }, thisScope.token).then(function() {
+                    return Promise.resolve(thisScope.objectKey);
+                });
             }).then(function(key) {
                 if (thisScope.state != exports.fileOperationStates.CANCELLED) {
                     thisScope.state = exports.fileOperationStates.FINISHED;

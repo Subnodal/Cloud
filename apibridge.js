@@ -11,6 +11,9 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
     var subElements = require("com.subnodal.subelements");
     var dialogs = require("com.subnodal.subui.dialogs");
 
+    var resources = require("com.subnodal.cloud.resources");
+    var fs = require("com.subnodal.cloud.fs");
+    var associations = require("com.subnodal.cloud.associations");
     var embed = require("com.subnodal.cloud.embed");
 
     window.apiBridge = exports;
@@ -195,4 +198,167 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
         showSaveOpenFileDialog();
     }, true);
+
+    embed.registerEventDescriptor("readFile", function(data, respond) {
+        if (!data.hasOwnProperty("key")) {
+            respond({
+                status: "error",
+                result: "precondition",
+                message: "No object key was provided to read the file"
+            });
+
+            return;
+        }
+
+        var shouldRespondGenericError = true;
+
+        resources.getObject(data.key).then(function(item) {
+            if (item == null) {
+                respond({
+                    status: "error",
+                    result: "notFound",
+                    message: "The requested file was not found"
+                });
+
+                shouldRespondGenericError = false;
+
+                return Promise.reject();
+            }
+
+            if (item.type != "file") {
+                respond({
+                    status: "error",
+                    result: "typeMismatch",
+                    message: "The key belongs to an item that is not a file"
+                });
+
+                shouldRespondGenericError = false;
+
+                return Promise.reject();
+            }
+
+            return fs.FileDownloadOperation.createSpecificOperation(data.key).start();
+        }).then(function(data) {
+            respond({
+                status: "ok",
+                result: "read",
+                data
+            });
+        }).catch(function(error) {
+            if (!shouldRespondGenericError) {
+                return;
+            }
+
+            console.error(error);
+
+            respond({
+                status: "error",
+                result: "generic",
+                message: "The requested file could not be read from"
+            });
+        });
+    });
+
+    embed.registerEventDescriptor("writeFile", function(data, respond) {
+        if (!data.hasOwnProperty("key")) {
+            respond({
+                status: "error",
+                result: "precondition",
+                message: "No object key was provided to write to the file"
+            });
+
+            return;
+        }
+
+        if (!data.hasOwnProperty("data")) {
+            respond({
+                status: "error",
+                result: "precondition",
+                message: "No data was provided to write to the file"
+            });
+
+            return;
+        }
+
+        var shouldRespondGenericError = true;
+
+        resources.getObject(data.key).then(function(item) {
+            if (item == null) {
+                respond({
+                    status: "error",
+                    result: "notFound",
+                    message: "The requested file was not found"
+                });
+
+                shouldRespondGenericError = false;
+
+                return Promise.reject();
+            }
+
+            if (item.type != "file") {
+                respond({
+                    status: "error",
+                    result: "typeMismatch",
+                    message: "The key belongs to an item that is not a file"
+                });
+
+                shouldRespondGenericError = false;
+
+                return Promise.reject();
+            }
+
+            return fs.getItemPermissions(embed.getSaveOpenFolderView().currentFolderKey);
+        }).then(function(permissions) {
+            if (!permissions.write) {
+                respond({
+                    status: "error",
+                    result: "permissionDenied",
+                    message: "Write permission is denied for this file"
+                });
+
+                shouldRespondGenericError = false;
+
+                dialogs.open(document.querySelector("#permissionDeniedDialog"));
+
+                return Promise.reject();
+            }
+
+            var operation = fs.FileUploadOperation.createSpecificOperation(null, null, undefined, data.key);
+
+            operation.extraObjectData = {
+                suggestedOpenUrl: embed.getManifest().suggestedOpenUrl
+            };
+
+            operation.fileData = data.data;
+
+            return operation.start();
+        }).then(function() {
+            respond({
+                status: "ok",
+                result: "written"
+            });
+
+            embed.getManifest().associations.forEach(function(data) {
+                if (typeof(data.namingScheme?.appName) != "object") {
+                    return;
+                }
+
+                associations.register(associations.Association.deserialise(data));
+            });
+
+            associations.saveList();
+        }).catch(function(error) {
+            if (!shouldRespondGenericError) {
+                return;
+            }
+
+            console.error(error);
+
+            respond({
+                status: "error",
+                result: "generic",
+                message: "The requested file could not be written to"
+            });
+        });
+    });
 });
