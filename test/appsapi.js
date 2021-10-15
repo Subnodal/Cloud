@@ -20,7 +20,7 @@ cloud.ready(function() {
             return Promise.reject(response);
         }).then(function(response) {
             if (response.status == "ok") {
-                document.querySelector("#status").textContent = `Successfully written to file`;
+                document.querySelector("#status").textContent = "Successfully written to file";
 
                 return;
             }
@@ -41,7 +41,7 @@ cloud.ready(function() {
         }).then(function(response) {
             if (response.status == "ok") {
                 document.querySelector("#editor").value = new TextDecoder().decode(response.data);
-                document.querySelector("#status").textContent = `Successfully read from file`;
+                document.querySelector("#status").textContent = "Successfully read from file";
 
                 return;
             }
