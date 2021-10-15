@@ -129,7 +129,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         Present the save file dialog to the user so that they can choose a
         folder to save their file to and a filename to save their file as.
         @param defaultName <String | undefined = undefined> The default filename to populate if no filename is chosen (is the localised version of "Untitled" if argument isn't specified)
-        @returns <Promise> A `Promise` that is resolved as an object with the newly-created file's object key as key `key`.
+        @returns <Promise> A `Promise` that is resolved as an object with the newly-created file's object key as key `key`
     */
     exports.showSaveFileDialog = function(defaultName = undefined) {
         return exports.sendBridgeEventDescriptor("showSaveFileDialog", {name: defaultName});
@@ -139,19 +139,30 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         @name showOpenFileDialog
         Present the open file dialog to the user so that they can choose a file
         to open.
-        @param filterExtensions <[String] | null = manifest.associations?.length > 0 ? [manifest.associations[0].extension] : null> An array of extensions to only list the files of. Will list all files if `null`.
-        @returns <Promise> A `Promise` that is resolved as an object with the selected file's object key as key `key`.
+        @param filterExtensions <[String] | null = manifest.associations*.extension | null> An array of extensions to only list the files of. Will list all files if `null`
+        @returns <Promise> A `Promise` that is resolved as an object with the selected file's object key as key `key`
     */
-    exports.showOpenFileDialog = function(filterExtensions = exports.manifest.associations?.length > 0 ? [exports.manifest.associations[0].extension] : null) {
+    exports.showOpenFileDialog = function(filterExtensions = exports.manifest.associations?.length > 0 ? exports.manifest.associations.map((association) => association.extension) : null) {
         return exports.sendBridgeEventDescriptor("showOpenFileDialog", {filterExtensions});
     };
 
-    // TODO: Document
+    /*
+        @name readFile
+        Read the data from a file with a given object key.
+        @param key <String> The object key of the file to read from
+        @returns <Promise> A `Promise` that is resolved as an object with the read data as key `data`, in `ArrayBuffer` form
+    */
     exports.readFile = function(key) {
         return exports.sendBridgeEventDescriptor("readFile", {key});
     };
 
-    // TODO: Document
+    /*
+        @name writeFile
+        Write data to a file with a given object key.
+        @param key <String> The object key of the file to write to
+        @param data <ArrayBuffer | TypedArray | String | *> The data to write; an `ArrayBuffer` is preferred, but typed arrays are accepted, and so are strings (other objects will be converted to strings)
+        @returns <Promise> A `Promise` that is resolved when the data has been written to the file
+    */
     exports.writeFile = function(key, data) {
         if (ArrayBuffer.isView(data)) {
             data = data.buffer;

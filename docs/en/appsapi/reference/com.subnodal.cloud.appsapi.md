@@ -26,6 +26,14 @@ Available options are:
 **Parameters:**
 * **`options`** (`Object` = `{}`): The options to specify when initialising the Cloud Apps API
 
+## ▶️ `readFile`
+`function` · Read the data from a file with a given object key.
+
+**Parameters:**
+* **`key`** (`String`): The object key of the file to read from
+
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the read data as key `data`, in `ArrayBuffer` form
+
 ## ▶️ `ready`
 `function` · Call the given callback when the Cloud Apps API is ready to be used.
 
@@ -36,9 +44,9 @@ Available options are:
 `function` · Present the open file dialog to the user so that they can choose a file to open.
 
 **Parameters:**
-* **`filterExtensions`** (`[String] | null` = `manifest.associations?.length`): 0 ? [manifest.associations[0].extension] : null> An array of extensions to only list the files of. Will list all files if `null`.
+* **`filterExtensions`** (`[String] | null` = `manifest.associations*.extension | null`): An array of extensions to only list the files of. Will list all files if `null`
 
-**Returns:** `Promise` · A `Promise` that is resolved as an object with the selected file's object key as key `key`.
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the selected file's object key as key `key`
 
 ## ▶️ `showSaveFileDialog`
 `function` · Present the save file dialog to the user so that they can choose a folder to save their file to and a filename to save their file as.
@@ -46,4 +54,13 @@ Available options are:
 **Parameters:**
 * **`defaultName`** (`String | undefined`): The default filename to populate if no filename is chosen (is the localised version of "Untitled" if argument isn't specified)
 
-**Returns:** `Promise` · A `Promise` that is resolved as an object with the newly-created file's object key as key `key`.
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the newly-created file's object key as key `key`
+
+## ▶️ `writeFile`
+`function` · Write data to a file with a given object key.
+
+**Parameters:**
+* **`key`** (`String`): The object key of the file to write to
+* **`data`** (`ArrayBuffer | TypedArray | String | *`): The data to write; an `ArrayBuffer` is preferred, but typed arrays are accepted, and so are strings (other objects will be converted to strings)
+
+**Returns:** `Promise` · A `Promise` that is resolved when the data has been written to the file
