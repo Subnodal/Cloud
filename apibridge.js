@@ -213,7 +213,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
         var shouldRespondGenericError = true;
 
         resources.getObject(data.key).then(function(item) {
-            if (item == null) {
+            if (item == null || item.deleted) {
                 respond({
                     status: "error",
                     result: "notFound",
@@ -283,7 +283,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
         var shouldRespondGenericError = true;
 
         resources.getObject(data.key).then(function(item) {
-            if (item == null) {
+            if (item == null || item.deleted) {
                 respond({
                     status: "error",
                     result: "notFound",
