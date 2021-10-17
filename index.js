@@ -1444,11 +1444,11 @@ namespace("com.subnodal.cloud.index", function(exports) {
             menus.toggleContextMenu(document.querySelector("#itemContextMenu"), element);
         });
 
-        elements.attachSelectorEvent("dragover", "#currentFolderView", function(element, event) {
+        elements.attachSelectorEvent("dragover", "#folderArea, #currentFolderView", function(element, event) {
             event.preventDefault();
         });
 
-        elements.attachSelectorEvent("drop", "#currentFolderView li, #currentFolderView", function(element, event) {
+        elements.attachSelectorEvent("drop", "#currentFolderView li, #folderArea, #currentFolderView", function(element, event) {
             event.preventDefault();
 
             if (listingIsSearchResults) {
