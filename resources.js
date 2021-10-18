@@ -243,6 +243,7 @@ namespace("com.subnodal.cloud.resources", function(exports) {
 
     exports.setObject = function(key, data, token = profiles.getSelectedProfileToken()) {
         var oldData;
+        var uid;
 
         exports.setObjectCacheItem(key, {
             ...(exports.getObjectCache()[key] || {}),
@@ -260,7 +261,9 @@ namespace("com.subnodal.cloud.resources", function(exports) {
             oldData = receivedOldData;
 
             return profiles.getUidFromToken(token);
-        }).then(function(uid) {
+        }).then(function(receivedUid) {
+            uid = receivedUid;
+
             return firebase.database().ref("objects/" + key).set({
                 _payload: {
                     ...(oldData || {}),
@@ -273,6 +276,18 @@ namespace("com.subnodal.cloud.resources", function(exports) {
                 }
             });
         }).then(function() {
+            var profileData = profiles.getProfile(token);
+
+            var collaboratorData = {
+                name: profileData.name
+            };
+
+            if (JSON.stringify((oldData?.collaborators || {})[uid]) != JSON.stringify(collaboratorData)) {
+                firebase.database().ref("objects/" + key + "/_payload/collaborators/" + uid).set({
+                    name: profileData.name
+                });
+            }
+
             return Promise.resolve(key);
         });
     };
