@@ -1172,6 +1172,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
         fs.cancelAndClearFileOperationsQueue();
 
         associations.init().then(function() {
+            subElements.render();
+
             if (urls.getActionFromUrl() == "open") {
                 var itemKeys = urls.getItemsFromUrl().items;
     
