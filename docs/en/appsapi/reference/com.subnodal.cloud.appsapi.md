@@ -1,4 +1,9 @@
 # com.subnodal.cloud.appsapi
+## ▶️ `getUid`
+`function` · Get the currently signed-in user's unique identifier.
+
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the user's unique identifier string as key `uid`
+
 ## ▶️ `init`
 `function` · Initialise the Cloud Apps API. Once initialised, `ready` callbacks will be called.
 
