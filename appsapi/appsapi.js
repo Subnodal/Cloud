@@ -175,6 +175,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
             this.objectKey = null;
             this.revisions = [firstRevision, new exports.Revision()];
+            this.mergeSettled = false;
         }
 
         get previousRevision() {
@@ -185,29 +186,51 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return this.revisions[this.revisions.length - 1];
         }
 
-        get data() {
-            var currentData = {};
+        buildDataToRevision(index) {
+            var builtData = {};
 
-            this.revisions.forEach(function(revision) {
-                currentData = revision.applyData(currentData);
+            this.revisions.slice(0, index).forEach(function(revision) {
+                builtData = revision.applyData(builtData);
             });
 
-            return currentData;
+            return builtData;
+        }
+
+        get data() {
+            return this.buildDataToRevision(this.revisions.length - 1);
+        }
+
+        get dataBeforeChanges() {
+            return this.buildDataToRevision(this.revisions.length - 2);
         }
 
         set data(value) {
-            this.currentRevision.assignData(this.data, value);
+            this.currentRevision.assignData(this.dataBeforeChanges, value);
         }
 
         get hasUnsavedChanges() {
             return this.currentRevision.changes.length > 0;
         }
 
-        open(key = this.objectKey, keepCurrentChanges = false) {
-            var thisScope = this;
+        serialise() {
+            var serialisedRevisions = {};
 
-            this.objectKey = key;
+            this.revisions.forEach(function(revision) {
+                serialisedRevisions[String(Math.floor(revision.timestamp))] = revision.serialise();
+            });
 
+            return {
+                revisions: serialisedRevisions
+            };
+        }
+
+        static deserialise(data) {
+            this.revisions = Object.keys(data.revisions || {}).map(function(timestamp) {
+                return exports.Revision.deserialise(Number(timestamp, data.revisions[timestamp]));
+            });
+        }
+
+        static readRevisionData(key) {
             return exports.readFile(key).then(function(data) {
                 var readData = {};
 
@@ -215,43 +238,54 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                     readData = JSON.parse(new TextDecoder().decode(data));
                 } catch (e) {}
 
-                var stashedRevision = this.currentRevision;
-                var shouldApplyStashedRevision = keepCurrentChanges && this.hasUnsavedChanges;
+                readData.revisions ||= {};
 
-                thisScope.revisions = Object.keys(readData.revisions || {}).map(function(timestamp) {
-                    return exports.Revision.deserialise(Number(timestamp, readData.revisions[timestamp]));
-                });
+                return Promise.resolve(readData);
+            });
+        }
 
-                if (shouldApplyStashedRevision) {
-                    thisScope.revisions.push(stashedRevision);
+        open(key = this.objectKey, keepCurrentChanges = false) {
+            var thisScope = this;
+
+            this.objectKey = key;
+
+            return this.constructor.readRevisionData(key).then(function(revisionData) {
+                var previousRevisionData = {...revisionData};
+
+                if (keepCurrentChanges) {
+                    revisions.merge(revisionData, thisScope.serialise().revisions);
                 }
+
+                thisScope.mergeSettled = JSON.stringify(previousRevisionData) == JSON.stringify(revisionData);
+
+                thisScope.constructor.deserialise(revisionData);
 
                 return Promise.resolve(thisScope.data);
             });
         }
 
         save(key = this.objectKey) {
-            if (!this.hasUnsavedChanges) {
-                return Promise.resolve();
-            }
+            var shouldCreateNewRevision = thisScope.hasUnsavedChanges;
 
-            return this.open(key, true).then(function() {
-                return exports.getUid();
-            }).then(function(uid) {
+            return exports.getUid().then(function(uid) {
                 if (thisScope.currentRevision.author == null) {
                     thisScope.currentRevision.author = uid; // Assign currently signed-in user's UID to latest revision's author
                 }
 
-                var serialisedRevisions = {};
+                return exports.open(key, true);
+            }).then(function() {
+                if (!thisScope.mergeSettled) {
+                    return exports.writeFile(key, JSON.stringify(thisScope.serialise())).then(function() {
+                        if (shouldCreateNewRevision) {
+                            thisScope.revisions.push(new exports.Revision());
+                        }
 
-                thisScope.revisions.forEach(function(revision) {
-                    serialisedRevisions[String(Math.floor(revision.timestamp))] = revision.serialise();
-                });
+                        return Promise.resolve();
+                    });
+                }
 
-                return exports.writeFile(key, JSON.stringify({
-                    revisions: serialisedRevisions
-                }));
-            });
+                return Promise.resolve();
+            })
         }
     };
 
