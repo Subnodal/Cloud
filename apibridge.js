@@ -12,6 +12,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
     var dialogs = require("com.subnodal.subui.dialogs");
 
     var resources = require("com.subnodal.cloud.resources");
+    var profiles = require("com.subnodal.cloud.profiles");
     var fs = require("com.subnodal.cloud.fs");
     var associations = require("com.subnodal.cloud.associations");
     var embed = require("com.subnodal.cloud.embed");
@@ -119,6 +120,16 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
     embed.registerEventDescriptor("ensureAuthentication", function(data, respond) {
         respond({status: "ok", result: "authenticated"});
+    }, true);
+
+    embed.registerEventDescriptor("getUid", function(data, respond) {
+        profiles.getUidFromToken(profiles.getSelectedProfileToken()).then(function(uid) {
+            respond({
+                status: "ok",
+                result: "received",
+                uid
+            });
+        });
     }, true);
 
     function showSaveOpenFileDialog() {
@@ -360,5 +371,5 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                 message: "The requested file could not be written to"
             });
         });
-    });
+    }, true);
 });

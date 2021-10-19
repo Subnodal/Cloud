@@ -231,24 +231,37 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         }
 
         save(key = this.objectKey) {
-            var serialisedRevisions = {};
-
             if (!this.hasUnsavedChanges) {
                 return Promise.resolve();
             }
 
-            this.revisions.forEach(function(revision) {
-                serialisedRevisions[String(Math.floor(revision.timestamp))] = revision.serialise();
-            });
-
-            // TODO: Apply author UID to latest revision
-
             return this.open(key, true).then(function() {
+                return exports.getUid();
+            }).then(function(uid) {
+                if (thisScope.currentRevision.author == null) {
+                    thisScope.currentRevision.author = uid; // Assign currently signed-in user's UID to latest revision's author
+                }
+
+                var serialisedRevisions = {};
+
+                thisScope.revisions.forEach(function(revision) {
+                    serialisedRevisions[String(Math.floor(revision.timestamp))] = revision.serialise();
+                });
+
                 return exports.writeFile(key, JSON.stringify({
                     revisions: serialisedRevisions
                 }));
             });
         }
+    };
+
+    /*
+        @name getUid
+        Get the currently signed-in user's unique identifier.
+        @returns <Promise> A `Promise` that is resolved as an object with the user's unique identifier string as key `uid`
+    */
+    exports.getUid = function() {
+        return exports.sendBridgeEventDescriptor("getUid");
     };
 
     /*
