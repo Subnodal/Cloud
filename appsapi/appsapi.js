@@ -9,6 +9,8 @@
 
 // @namespace com.subnodal.cloud.appsapi
 namespace("com.subnodal.cloud.appsapi", function(exports) {
+    var revisions = require("com.subnodal.cloud.appsapi.revisions");
+
     exports.rootElement = null;
     exports.bridgeEmbed = null;
     exports.bridgeHostUrl = null;
@@ -122,6 +124,131 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 eventToken
             });
         });
+    };
+
+    exports.Revision = class {
+        constructor(author = null, lastModified = new Date().getTime()) {
+            this.lastModified = lastModified;
+            this.changes = [];
+            this.author = author;
+        }
+
+        assignData(current, incoming) {
+            this.changes = revisions.diffObjectPaths(
+                revisions.deflateObject(current),
+                revisions.deflateObject(incoming)
+            );
+
+            this.lastModified = new Date();
+        }
+
+        applyData(current) {
+            return revisions.inflateObject(revisions.applyDiffToObjectPaths(
+                revisions.deflateObject(current),
+                this.changes
+            ));
+        }
+
+        get timestamp() {
+            return this.lastModified.getTime();
+        }
+
+        static deserialise(timestamp, data) {
+            this.lastModified = new Date(timestamp);
+            this.changes = data.changes;
+            this.author = data.author;
+        }
+
+        serialise() {
+            return {
+                changes: this.changes,
+                author: this.author
+            };
+        }
+    };
+
+    exports.CollaborativeDocument = class {
+        constructor(defaultData = {}) {
+            var firstRevision = new exports.Revision();
+
+            firstRevision.assignData(defaultData);
+
+            this.objectKey = null;
+            this.revisions = [firstRevision, new exports.Revision()];
+        }
+
+        get previousRevision() {
+            return this.revisions[this.revisions.length - 2] || null;
+        }
+
+        get currentRevision() {
+            return this.revisions[this.revisions.length - 1];
+        }
+
+        get data() {
+            var currentData = {};
+
+            this.revisions.forEach(function(revision) {
+                currentData = revision.applyData(currentData);
+            });
+
+            return currentData;
+        }
+
+        set data(value) {
+            this.currentRevision.assignData(this.data, value);
+        }
+
+        get hasUnsavedChanges() {
+            return this.currentRevision.changes.length > 0;
+        }
+
+        open(key = this.objectKey, keepCurrentChanges = false) {
+            var thisScope = this;
+
+            this.objectKey = key;
+
+            return exports.readFile(key).then(function(data) {
+                var readData = {};
+
+                try {
+                    readData = JSON.parse(new TextDecoder().decode(data));
+                } catch (e) {}
+
+                var stashedRevision = this.currentRevision;
+                var shouldApplyStashedRevision = keepCurrentChanges && this.hasUnsavedChanges;
+
+                thisScope.revisions = Object.keys(readData.revisions || {}).map(function(timestamp) {
+                    return exports.Revision.deserialise(Number(timestamp, readData.revisions[timestamp]));
+                });
+
+                if (shouldApplyStashedRevision) {
+                    thisScope.revisions.push(stashedRevision);
+                }
+
+                return Promise.resolve(thisScope.data);
+            });
+        }
+
+        save(key = this.objectKey) {
+            var serialisedRevisions = {};
+
+            if (!this.hasUnsavedChanges) {
+                return Promise.resolve();
+            }
+
+            this.revisions.forEach(function(revision) {
+                serialisedRevisions[String(Math.floor(revision.timestamp))] = revision.serialise();
+            });
+
+            // TODO: Apply author UID to latest revision
+
+            return this.open(key, true).then(function() {
+                return exports.writeFile(key, JSON.stringify({
+                    revisions: serialisedRevisions
+                }));
+            });
+        }
     };
 
     /*
