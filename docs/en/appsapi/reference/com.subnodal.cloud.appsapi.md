@@ -1,4 +1,74 @@
 # com.subnodal.cloud.appsapi
+## 🎛️ `CollaborativeDocument`
+`class` · The manager for a revision-based document that supports collaboration.
+
+**Parameters:**
+* **`defaultData`** (`*`): The default data that serves as the first revision for the document
+
+## 🔡️ `CollaborativeDocument.currentRevision`
+`prop <Revision>` · The most recent revision, which contains the current working changes.
+
+## 🔡️ `CollaborativeDocument.data`
+`prop <*>` · The data stored in the document, reflective of the document's revisions.
+
+
+Changes made to this property will be stored in the current
+revision. New revisions are made when the document is saved.
+
+## 🔡️ `CollaborativeDocument.dataBeforeChanges`
+`prop <*>` · The data stored in the document, excluding the current changes.
+
+## ❄️️ `CollaborativeDocument.deserialise`
+`static method` · Convert a given document object into an instance of the `CollaborativeDocument` class.
+
+**Parameters:**
+* **`data`** (`{*}`): The document object to deserialise
+
+## 🔡️ `CollaborativeDocument.hasUnsavedChanges`
+`prop <Boolean>` · Whether the current revision has changes that have not yet been saved.
+
+## 🔡️ `CollaborativeDocument.mergeSettled`
+`prop <Boolean>` · Whether the opened version of this document reflects the version of this document before opening. If `true`, then it is necessary to save this document to include all merged changes.
+
+## 🔡️ `CollaborativeDocument.objectKey`
+`prop <String | null>` · The object key of the document to save or open with.
+
+## ⏩️ `CollaborativeDocument.open`
+`method` · Open the document by its object key and update this document instance with any new changes.
+
+**Parameters:**
+* **`key`** (`String` = `this.objectKey`): The object key of the document to open
+* **`keepCurrentChanges`** (`Boolean` = `false`): Whether to merge the current revision into the opened document revisions
+
+**Returns:** `Promise` · A `Promise` that is resolved with the opened document's data (including current changes, if chosen) when the document has been opened
+
+## 🔡️ `CollaborativeDocument.previousRevision`
+`prop <Revision>` · The revision before the most recent revision.
+
+## ❄️️ `CollaborativeDocument.readRevisionData`
+`static method` · Read the contents of a document given by its object key and get the resulting document object.
+
+**Parameters:**
+* **`key`** (`String`): The object key of the document to read from
+
+**Returns:** `Promise` · A `Promise` that is resolved with the resulting document object
+
+## 🔡️ `CollaborativeDocument.revisions`
+`prop <[Revision]>` · All of the revisions stored under this document.
+
+## ⏩️ `CollaborativeDocument.save`
+`method` · Save the revisions of this document instance into a document by its object key.
+
+**Parameters:**
+* **`key`** (`String` = `this.objectKey`): The object key of the document to save
+
+**Returns:** `Promise` · A `Promise` that is resolved when the document has been saved
+
+## ⏩️ `CollaborativeDocument.serialise`
+`method` · Convert this document into a document object.
+
+**Returns:** `{*}` · The serialised document
+
 ## 🎛️ `Revision`
 `class` · A single revision, containing diffed data changes.
 

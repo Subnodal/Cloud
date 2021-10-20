@@ -133,7 +133,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         @param author <String | null = null> The UID of the author, or `null` if not yet apparent
         @param lastModified <Date = new Date()> The default date at which the revision was last modified
     */
-   /*
+    /*
         @name Revision.lastModified
         @type prop <Date>
         The date at which the revision was last modified
@@ -199,20 +199,6 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         }
 
         /*
-            @name Revision.deserialise
-            @type static method
-            Convert a given revision object into an instance of the `Revision`
-            class.
-            @param timestamp <Number> The timestamp to apply to the revision instance
-            @param data <{*}> The revision object to deserialise
-        */
-        static deserialise(timestamp, data) {
-            this.lastModified = new Date(timestamp);
-            this.changes = data.changes;
-            this.author = data.author;
-        }
-
-        /*
             @name Revision.serialise
             @type method
             Convert this revision into a revision object.
@@ -224,8 +210,76 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 author: this.author
             };
         }
+
+        /*
+            @name Revision.deserialise
+            @type static method
+            Convert a given revision object into an instance of the `Revision`
+            class.
+            @param timestamp <Number> The timestamp to apply to the revision instance
+            @param data <{*}> The revision object to deserialise
+            @returns <CollaborativeDocument> The new revision instance from the given revision object
+        */
+        static deserialise(timestamp, data) {
+            var instance = new this(data.author, new Date(timestamp));
+
+            instance.changes = data.changes;
+
+            return instance;
+        }
     };
 
+    /*
+        @name CollaborativeDocument
+        @type class
+        The manager for a revision-based document that supports collaboration.
+        @param defaultData <*> The default data that serves as the first revision for the document
+    */
+    /*
+        @name CollaborativeDocument.objectKey
+        @type prop <String | null>
+        The object key of the document to save or open with.
+    */
+    /*
+        @name CollaborativeDocument.revisions
+        @type prop <[Revision]>
+        All of the revisions stored under this document.
+    */
+    /*
+        @name CollaborativeDocument.mergeSettled
+        @type prop <Boolean>
+        Whether the opened version of this document reflects the version of this
+        document before opening. If `true`, then it is necessary to save this
+        document to include all merged changes.
+    */
+    /*
+        @name CollaborativeDocument.previousRevision
+        @type prop <Revision>
+        The revision before the most recent revision.
+    */
+    /*
+        @name CollaborativeDocument.currentRevision
+        @type prop <Revision>
+        The most recent revision, which contains the current working changes.
+    */
+    /*
+        @name CollaborativeDocument.data
+        @type prop <*>
+        The data stored in the document, reflective of the document's revisions.
+            ~~~~
+            Changes made to this property will be stored in the current
+            revision. New revisions are made when the document is saved.
+    */
+    /*
+        @name CollaborativeDocument.dataBeforeChanges
+        @type prop <*>
+        The data stored in the document, excluding the current changes.
+    */
+    /*
+        @name CollaborativeDocument.hasUnsavedChanges
+        @type prop <Boolean>
+        Whether the current revision has changes that have not yet been saved.
+    */
     exports.CollaborativeDocument = class {
         constructor(defaultData = {}) {
             var firstRevision = new exports.Revision();
@@ -245,6 +299,14 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return this.revisions[this.revisions.length - 1];
         }
 
+        /*
+            @anme CollaborativeDocument.buildDataToRevision
+            @type method
+            Get the data representative of the revisions up to and including the
+            revision at the given index.
+            @param index <Number> The revision to build the data up to
+            @returns <*> The built data from revisions up to and including the given index
+        */
         buildDataToRevision(index) {
             var builtData = {};
 
@@ -255,12 +317,12 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return builtData;
         }
 
-        get data() {
-            return this.buildDataToRevision(this.revisions.length - 1);
-        }
-
         get dataBeforeChanges() {
             return this.buildDataToRevision(this.revisions.length - 2);
+        }
+
+        get data() {
+            return this.buildDataToRevision(this.revisions.length - 1);
         }
 
         set data(value) {
@@ -271,6 +333,12 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return this.currentRevision.changes.length > 0;
         }
 
+        /*
+            @name CollaborativeDocument.serialise
+            @type method
+            Convert this document into a document object.
+            @returns <{*}> The serialised document
+        */
         serialise() {
             var serialisedRevisions = {};
 
@@ -283,12 +351,32 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             };
         }
 
+        /*
+            @name CollaborativeDocument.deserialise
+            @type static method
+            Convert a given document object into an instance of the
+            `CollaborativeDocument` class.
+            @param data <{*}> The document object to deserialise
+            @returns <CollaborativeDocument> The new document instance from the given document object
+        */
         static deserialise(data) {
-            this.revisions = Object.keys(data.revisions || {}).map(function(timestamp) {
-                return exports.Revision.deserialise(Number(timestamp, data.revisions[timestamp]));
+            var instance = new this({});
+
+            instance.revisions = Object.keys(data.revisions || {}).map(function(timestamp) {
+                return exports.Revision.deserialise(Number(timestamp), data.revisions[timestamp]);
             });
+
+            return instance;
         }
 
+        /*
+            @name CollaborativeDocument.readRevisionData
+            @type static method
+            Read the contents of a document given by its object key and get the
+            resulting document object.
+            @param key <String> The object key of the document to read from
+            @returns <Promise> A `Promise` that is resolved with the resulting document object
+        */
         static readRevisionData(key) {
             return exports.readFile(key).then(function(data) {
                 var readData = {};
@@ -303,6 +391,15 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             });
         }
 
+        /*
+            @name CollaborativeDocument.open
+            @type method
+            Open the document by its object key and update this document
+            instance with any new changes.
+            @param key <String = this.objectKey> The object key of the document to open
+            @param keepCurrentChanges <Boolean = false> Whether to merge the current revision into the opened document revisions
+            @returns <Promise> A `Promise` that is resolved with the opened document's data (including current changes, if chosen) when the document has been opened
+        */
         open(key = this.objectKey, keepCurrentChanges = false) {
             var thisScope = this;
 
@@ -317,12 +414,20 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
                 thisScope.mergeSettled = JSON.stringify(previousRevisionData) == JSON.stringify(revisionData);
 
-                thisScope.constructor.deserialise(revisionData);
+                thisScope.revisions = thisScope.constructor.deserialise(revisionData).revisions;
 
                 return Promise.resolve(thisScope.data);
             });
         }
 
+        /*
+            @name CollaborativeDocument.save
+            @type method
+            Save the revisions of this document instance into a document by its
+            object key.
+            @param key <String = this.objectKey> The object key of the document to save
+            @returns <Promise> A `Promise` that is resolved when the document has been saved
+        */
         save(key = this.objectKey) {
             var shouldCreateNewRevision = thisScope.hasUnsavedChanges;
 
