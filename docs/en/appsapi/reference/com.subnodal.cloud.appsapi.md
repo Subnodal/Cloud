@@ -24,6 +24,8 @@ revision. New revisions are made when the document is saved.
 **Parameters:**
 * **`data`** (`{*}`): The document object to deserialise
 
+**Returns:** `CollaborativeDocument` · The new document instance from the given document object
+
 ## 🔡️ `CollaborativeDocument.hasUnsavedChanges`
 `prop <Boolean>` · Whether the current revision has changes that have not yet been saved.
 
@@ -103,6 +105,8 @@ revision. New revisions are made when the document is saved.
 **Parameters:**
 * **`timestamp`** (`Number`): The timestamp to apply to the revision instance
 * **`data`** (`{*}`): The revision object to deserialise
+
+**Returns:** `CollaborativeDocument` · The new revision instance from the given revision object
 
 ## 🔡️ `Revision.lastModified`
 `prop <Date>` · The date at which the revision was last modified
