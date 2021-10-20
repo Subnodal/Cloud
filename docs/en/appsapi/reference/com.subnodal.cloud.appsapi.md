@@ -1,4 +1,54 @@
 # com.subnodal.cloud.appsapi
+## 🎛️ `Revision`
+`class` · A single revision, containing diffed data changes.
+
+**Parameters:**
+* **`author`** (`String | null` = `null`): The UID of the author, or `null` if not yet apparent
+* **`lastModified`** (`Date` = `new Date()`): The default date at which the revision was last modified
+
+## ⏩️ `Revision.applyData`
+`method` · Apply the changes in this revision to the given data.
+
+**Parameters:**
+* **`current`** (`*`): The data to use as a basis for applying the changes under this revision
+
+**Returns:** `*` · The resulting data from applying the changes to the base data
+
+## ⏩️ `Revision.assignData`
+`method` · Find the diff of two data versions and store the changes in this revision.
+
+**Parameters:**
+* **`current`** (`*`): The previous data that was in place before this revision
+* **`incoming`** (`*`): The new data that is to be tracked under this revision
+
+## 🔡️ `Revision.author`
+`prop <String | null>` · The UID of the author, or `null` if not yet apparent
+
+## 🔡️ `Revision.changes`
+`prop <[{path: [String], data: *}]>` · A list of changes that have occurred in this revision
+
+## ❄️️ `Revision.deserialise`
+`static method` · Convert a given revision object into an instance of the `Revision` class.
+
+**Parameters:**
+* **`timestamp`** (`Number`): The timestamp to apply to the revision instance
+* **`data`** (`{*}`): The revision object to deserialise
+
+## 🔡️ `Revision.lastModified`
+`prop <Date>` · The date at which the revision was last modified
+
+## ⏩️ `Revision.serialise`
+`method` · Convert this revision into a revision object.
+
+**Returns:** `{*}` · The serialised revision
+
+## 🔡️ `Revision.timestamp`
+`prop <Number>` · The timestamp at which the revision was last modified.
+
+
+This is usually used as the key in an object containing
+revisions.
+
 ## ▶️ `getUid`
 `function` · Get the currently signed-in user's unique identifier.
 

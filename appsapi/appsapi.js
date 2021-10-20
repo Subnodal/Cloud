@@ -126,13 +126,51 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         });
     };
 
+    /*
+        @name Revision
+        @type class
+        A single revision, containing diffed data changes.
+        @param author <String | null = null> The UID of the author, or `null` if not yet apparent
+        @param lastModified <Date = new Date()> The default date at which the revision was last modified
+    */
+   /*
+        @name Revision.lastModified
+        @type prop <Date>
+        The date at which the revision was last modified
+    */
+    /*
+        @name Revision.changes
+        @type prop <[{path: [String], data: *}]>
+        A list of changes that have occurred in this revision
+    */
+    /*
+        @name Revision.author
+        @type prop <String | null>
+        The UID of the author, or `null` if not yet apparent
+    */
+    /*
+        @name Revision.timestamp
+        @type prop <Number>
+        The timestamp at which the revision was last modified.
+            ~~~~
+            This is usually used as the key in an object containing
+            revisions.
+    */
     exports.Revision = class {
-        constructor(author = null, lastModified = new Date().getTime()) {
+        constructor(author = null, lastModified = new Date()) {
             this.lastModified = lastModified;
             this.changes = [];
             this.author = author;
         }
 
+        /*
+            @name Revision.assignData
+            @type method
+            Find the diff of two data versions and store the changes in this
+            revision.
+            @param current <*> The previous data that was in place before this revision
+            @param incoming <*> The new data that is to be tracked under this revision
+        */
         assignData(current, incoming) {
             this.changes = revisions.diffObjectPaths(
                 revisions.deflateObject(current),
@@ -142,6 +180,13 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             this.lastModified = new Date();
         }
 
+        /*
+            @name Revision.applyData
+            @type method
+            Apply the changes in this revision to the given data.
+            @param current <*> The data to use as a basis for applying the changes under this revision
+            @returns <*> The resulting data from applying the changes to the base data
+        */
         applyData(current) {
             return revisions.inflateObject(revisions.applyDiffToObjectPaths(
                 revisions.deflateObject(current),
@@ -153,12 +198,26 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return this.lastModified.getTime();
         }
 
+        /*
+            @name Revision.deserialise
+            @type static method
+            Convert a given revision object into an instance of the `Revision`
+            class.
+            @param timestamp <Number> The timestamp to apply to the revision instance
+            @param data <{*}> The revision object to deserialise
+        */
         static deserialise(timestamp, data) {
             this.lastModified = new Date(timestamp);
             this.changes = data.changes;
             this.author = data.author;
         }
 
+        /*
+            @name Revision.serialise
+            @type method
+            Convert this revision into a revision object.
+            @returns <{*}> The serialised revision
+        */
         serialise() {
             return {
                 changes: this.changes,
