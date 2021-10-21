@@ -170,7 +170,13 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
             document.querySelector("#saveOpenFileName").value = item.name.replace(/\.[a-zA-Z0-9.]+$/, "");
         };
 
-        embed.getSaveOpenFolderView().handleFileOpen = function(item) {};
+        embed.getSaveOpenFolderView().handleFileOpen = function(item) {
+            if (item.type != "file") {
+                return;
+            }
+
+            exports.finishSaveOpen();
+        };
 
         embed.getSaveOpenFolderView().listingFilter =
             typeof(embed.getManifest().associations[0]?.extension) == "string" ?
@@ -372,4 +378,12 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
             });
         });
     }, true);
+
+    subElements.ready(function() {
+        document.querySelector("#saveOpenFileName").addEventListener("keydown", function(event) {
+            if (event.key == "Enter") {
+                exports.finishSaveOpen();
+            }
+        });
+    });
 });
