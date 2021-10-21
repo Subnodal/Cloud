@@ -318,7 +318,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                 return Promise.reject();
             }
 
-            return fs.getItemPermissions(embed.getSaveOpenFolderView().currentFolderKey);
+            return fs.getItemPermissions(data.key);
         }).then(function(permissions) {
             if (!permissions.write) {
                 respond({

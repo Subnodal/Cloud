@@ -284,7 +284,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         constructor(defaultData = {}) {
             var firstRevision = new exports.Revision();
 
-            firstRevision.assignData(defaultData);
+            firstRevision.assignData({}, defaultData);
 
             this.objectKey = null;
             this.revisions = [firstRevision, new exports.Revision()];
@@ -310,7 +310,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
         buildDataToRevision(index) {
             var builtData = {};
 
-            this.revisions.slice(0, index).forEach(function(revision) {
+            this.revisions.slice(0, index + 1).forEach(function(revision) {
                 builtData = revision.applyData(builtData);
             });
 
@@ -331,6 +331,16 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
         get hasUnsavedChanges() {
             return this.currentRevision.changes.length > 0;
+        }
+
+        /*
+            @name CollaborativeDocument.cleanRevisions
+            @type method
+            Remove all revisions from this document that have no changes (such
+            as when the document is saved but no changes have been made).
+        */
+        cleanRevisions() {
+            this.revisions = this.revisions.filter((revision, i) => i == 0 || revision.changes.length > 0);
         }
 
         /*
@@ -378,12 +388,17 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             @returns <Promise> A `Promise` that is resolved with the resulting document object
         */
         static readRevisionData(key) {
-            return exports.readFile(key).then(function(data) {
+            return exports.readFile(key).then(function(result) {
                 var readData = {};
 
+                if (result.status != "ok") {
+                    return Promise.reject(result.message);
+                }
+
                 try {
-                    readData = JSON.parse(new TextDecoder().decode(data));
-                } catch (e) {}
+                    readData = JSON.parse(new TextDecoder().decode(result.data));
+                } catch (e) {
+                }
 
                 readData.revisions ||= {};
 
@@ -409,7 +424,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 var previousRevisionData = {...revisionData};
 
                 if (keepCurrentChanges) {
-                    revisions.merge(revisionData, thisScope.serialise().revisions);
+                    revisions.merge(revisionData, thisScope.serialise());
                 }
 
                 thisScope.mergeSettled = JSON.stringify(previousRevisionData) == JSON.stringify(revisionData);
@@ -429,27 +444,33 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             @returns <Promise> A `Promise` that is resolved when the document has been saved
         */
         save(key = this.objectKey) {
-            var shouldCreateNewRevision = thisScope.hasUnsavedChanges;
+            var thisScope = this;
 
-            return exports.getUid().then(function(uid) {
-                if (thisScope.currentRevision.author == null) {
-                    thisScope.currentRevision.author = uid; // Assign currently signed-in user's UID to latest revision's author
-                }
+            if (key == null) {
+                return Promise.reject("The object key has not been assigned yet");
+            }
 
-                return exports.open(key, true);
+            this.cleanRevisions();
+
+            return exports.getUid().then(function(result) {
+                thisScope.revisions.forEach(function(revision) {
+                    if (revision.author == null) {
+                        revision.author = result.uid; // Assign currently signed-in user's UID to revisions that don't have an assigned author
+                    }
+                });
+
+                return thisScope.open(key, true);
             }).then(function() {
-                if (!thisScope.mergeSettled) {
-                    return exports.writeFile(key, JSON.stringify(thisScope.serialise())).then(function() {
-                        if (shouldCreateNewRevision) {
-                            thisScope.revisions.push(new exports.Revision());
-                        }
+                return exports.writeFile(key, JSON.stringify(thisScope.serialise())).then(function(result) {
+                    if (result.status != "ok") {
+                        return Promise.reject(result.message);
+                    }
 
-                        return Promise.resolve();
-                    });
-                }
+                    thisScope.revisions.push(new exports.Revision());
 
-                return Promise.resolve();
-            })
+                    return Promise.resolve();
+                });
+            });
         }
     };
 

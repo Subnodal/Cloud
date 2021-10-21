@@ -5,6 +5,9 @@
 **Parameters:**
 * **`defaultData`** (`*`): The default data that serves as the first revision for the document
 
+## ⏩️ `CollaborativeDocument.cleanRevisions`
+`method` · Remove all revisions from this document that have no changes (such as when the document is saved but no changes have been made).
+
 ## 🔡️ `CollaborativeDocument.currentRevision`
 `prop <Revision>` · The most recent revision, which contains the current working changes.
 
