@@ -45,18 +45,10 @@ revision. New revisions are made when the document is saved.
 * **`key`** (`String` = `this.objectKey`): The object key of the document to open
 * **`keepCurrentChanges`** (`Boolean` = `false`): Whether to merge the current revision into the opened document revisions
 
-**Returns:** `Promise` · A `Promise` that is resolved with the opened document's data (including current changes, if chosen) when the document has been opened
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the opened document's data (including current changes, if chosen) when the document has been opened as key `data`
 
 ## 🔡️ `CollaborativeDocument.previousRevision`
 `prop <Revision>` · The revision before the most recent revision.
-
-## ❄️️ `CollaborativeDocument.readRevisionData`
-`static method` · Read the contents of a document given by its object key and get the resulting document object.
-
-**Parameters:**
-* **`key`** (`String`): The object key of the document to read from
-
-**Returns:** `Promise` · A `Promise` that is resolved with the resulting document object
 
 ## 🔡️ `CollaborativeDocument.revisions`
 `prop <[Revision]>` · All of the revisions stored under this document.

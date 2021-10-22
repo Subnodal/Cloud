@@ -379,14 +379,6 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return instance;
         }
 
-        /*
-            @name CollaborativeDocument.readRevisionData
-            @type static method
-            Read the contents of a document given by its object key and get the
-            resulting document object.
-            @param key <String> The object key of the document to read from
-            @returns <Promise> A `Promise` that is resolved with the resulting document object
-        */
         static readRevisionData(key) {
             return exports.readFile(key).then(function(result) {
                 var readData = {};
@@ -416,7 +408,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             instance with any new changes.
             @param key <String = this.objectKey> The object key of the document to open
             @param keepCurrentChanges <Boolean = false> Whether to merge the current revision into the opened document revisions
-            @returns <Promise> A `Promise` that is resolved with the opened document's data (including current changes, if chosen) when the document has been opened
+            @returns <Promise> A `Promise` that is resolved as an object with the opened document's data (including current changes, if chosen) when the document has been opened as key `data`
         */
         open(key = this.objectKey, keepCurrentChanges = false) {
             var thisScope = this;
