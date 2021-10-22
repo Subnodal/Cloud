@@ -115,7 +115,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
                 delete exports.bridgeResponses[eventToken];
 
-                resolve(data);
+                (data?.status == "ok" ? resolve : reject)(data);
             });
 
             exports.bridgeEmbed.contentWindow.postMessage({
@@ -391,13 +391,16 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             return exports.readFile(key).then(function(result) {
                 var readData = {};
 
-                if (result.status != "ok") {
-                    return Promise.reject(result.message);
-                }
-
-                try {
-                    readData = JSON.parse(new TextDecoder().decode(result.data));
-                } catch (e) {
+                if (result.data.byteLength != 0) {
+                    try {
+                        readData = BSON.deserialize(result.data);
+                    } catch (e) {
+                        return Promise.reject({
+                            status: "error",
+                            result: "badFormatting",
+                            message: "The read document has bad formatting"
+                        });
+                    }
                 }
 
                 readData.revisions ||= {};
@@ -431,7 +434,11 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
                 thisScope.revisions = thisScope.constructor.deserialise(revisionData).revisions;
 
-                return Promise.resolve(thisScope.data);
+                return Promise.resolve({
+                    status: "ok",
+                    result: "opened",
+                    data: thisScope.data
+                });
             });
         }
 
@@ -447,7 +454,11 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
             var thisScope = this;
 
             if (key == null) {
-                return Promise.reject("The object key has not been assigned yet");
+                return Promise.reject({
+                    status: "error",
+                    result: "precondition",
+                    message: "The object key has not been assigned yet"
+                });
             }
 
             this.cleanRevisions();
@@ -461,14 +472,13 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
 
                 return thisScope.open(key, true);
             }).then(function() {
-                return exports.writeFile(key, JSON.stringify(thisScope.serialise())).then(function(result) {
-                    if (result.status != "ok") {
-                        return Promise.reject(result.message);
-                    }
+                return exports.writeFile(key, BSON.serialize(thisScope.serialise()));
+            }).then(function() {
+                thisScope.revisions.push(new exports.Revision());
 
-                    thisScope.revisions.push(new exports.Revision());
-
-                    return Promise.resolve();
+                return Promise.resolve({
+                    status: "ok",
+                    result: "saved"
                 });
             });
         }

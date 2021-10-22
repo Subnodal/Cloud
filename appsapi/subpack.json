@@ -2,6 +2,7 @@
     "identifier": "com.subnodal.cloud.appsapi",
     "modules": [
         "appsapi.js",
-        "revisions.js"
+        "revisions.js",
+        "../lib/bson.bundle.js"
     ]
 }
