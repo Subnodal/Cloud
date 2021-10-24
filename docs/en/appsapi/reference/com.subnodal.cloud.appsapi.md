@@ -118,6 +118,11 @@ revision. New revisions are made when the document is saved.
 This is usually used as the key in an object containing
 revisions.
 
+## ▶️ `getLocaleCode`
+`function` · Get the current user interface locale code.
+
+**Returns:** `Promise` · A `Promise` that is resolved as an object with the current locale code string as key `localeCode`
+
 ## ▶️ `getUid`
 `function` · Get the currently signed-in user's unique identifier.
 
@@ -163,6 +168,14 @@ Available options are:
 
 **Parameters:**
 * **`callback`** (`Function`): The callback to call when ready
+
+## ▶️ `setLocaleCode`
+`function` · Set the current user interface locale code, or reset it to what the user chose in the main Subnodal Cloud user interface.
+
+**Parameters:**
+* **`localeCode`** (`String | null` = `null`): The locale code to select, or `null` if reverting to default
+
+**Returns:** `Promise` · A `Promise` that is resolved when the locale code has been chosen
 
 ## ▶️ `showOpenFileDialog`
 `function` · Present the open file dialog to the user so that they can choose a file to open.

@@ -477,6 +477,26 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
     };
 
     /*
+        @name getLocaleCode
+        Get the current user interface locale code.
+        @returns <Promise> A `Promise` that is resolved as an object with the current locale code string as key `localeCode`
+    */
+    exports.getLocaleCode = function() {
+        return exports.sendBridgeEventDescriptor("getLocale");
+    };
+
+    /*
+        @name setLocaleCode
+        Set the current user interface locale code, or reset it to what the user
+        chose in the main Subnodal Cloud user interface.
+        @param localeCode <String | null = null> The locale code to select, or `null` if reverting to default
+        @returns <Promise> A `Promise` that is resolved when the locale code has been chosen
+    */
+        exports.setLocaleCode = function(localeCode) {
+            return exports.sendBridgeEventDescriptor("setLocale", {localeCode});
+        };
+
+    /*
         @name getUid
         Get the currently signed-in user's unique identifier.
         @returns <Promise> A `Promise` that is resolved as an object with the user's unique identifier string as key `uid`

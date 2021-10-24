@@ -9,6 +9,7 @@
 
 namespace("com.subnodal.cloud.apibridge", function(exports) {
     var subElements = require("com.subnodal.subelements");
+    var l10n = require("com.subnodal.subelements.l10n");
     var dialogs = require("com.subnodal.subui.dialogs");
 
     var resources = require("com.subnodal.cloud.resources");
@@ -131,6 +132,36 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
             });
         });
     }, true);
+
+    embed.registerEventDescriptor("setLocale", function(data, respond) {
+        if (typeof(data?.localeCode) != "string" && data?.localeCode != null) {
+            respond({
+                status: "error",
+                result: "prerequisite",
+                message: "No locale code was specified"
+            })
+
+            return;
+        }
+
+        l10n.switchToLocale(data.localeCode == null ? localStorage.getItem("subnodalCloud_locale") : data.localeCode);
+
+        subElements.render();
+        embed.getSaveOpenFolderView().render();
+
+        respond({
+            status: "ok",
+            result: "set"
+        });
+    });
+
+    embed.registerEventDescriptor("getLocale", function(data, respond) {
+        respond({
+            status: "ok",
+            result: "received",
+            localeCode: l10n.getLocaleCode()
+        });
+    });
 
     function showSaveOpenFileDialog() {
         embed.getSaveOpenFolderView().navigate(embed.getRootObjectKey(), true);
