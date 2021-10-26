@@ -16,6 +16,8 @@ namespace("com.subnodal.cloud.fs", function(exports) {
     var config = require("com.subnodal.cloud.config");
     var search = require("com.subnodal.cloud.search");
 
+    exports.RE_FILE_EXTENSION_MATCH = /(\.[a-zA-Z0-9.]+)$/;
+
     exports.sortByAttributes = {
         NAME: 0,
         CREATED_AT: 1,

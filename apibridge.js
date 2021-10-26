@@ -198,7 +198,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
                 return;
             }
 
-            document.querySelector("#saveOpenFileName").value = item.name.replace(/\.[a-zA-Z0-9.]+$/, "");
+            document.querySelector("#saveOpenFileName").value = item.name.replace(fs.RE_FILE_EXTENSION_MATCH, "");
         };
 
         embed.getSaveOpenFolderView().handleFileOpen = function(item) {

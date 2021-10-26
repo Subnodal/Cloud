@@ -759,7 +759,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 return;
             }
 
-            var extensionMatch = (data?.name || "").match(/(\.[a-zA-Z0-9.]+)$/);
+            var extensionMatch = (data?.name || "").match(fs.RE_FILE_EXTENSION_MATCH);
 
             if (extensionMatch && data?.type == "file") {
                 appendExtension = extensionMatch[1]; // Add original extension back on if it was hidden
@@ -839,8 +839,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
         [...filesList].forEach(function(file) {
             var operation = fs.FileUploadOperation.createSpecificOperation(exports.findNextAvailableName(
-                file.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                (file.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
+                file.name.replace(fs.RE_FILE_EXTENSION_MATCH, ""),
+                (file.name.match(fs.RE_FILE_EXTENSION_MATCH) || [])[1] || "",
                 null,
                 otherNames,
                 listing
@@ -925,7 +925,7 @@ namespace("com.subnodal.cloud.index", function(exports) {
                 var link = document.createElement("a");
 
                 link.href = URL.createObjectURL(blob);
-                link.download = operations[0].name.replace(/\.[a-zA-Z0-9.]+$/, "") + ".zip";
+                link.download = operations[0].name.replace(fs.RE_FILE_EXTENSION_MATCH, "") + ".zip";
 
                 link.click();
             });
@@ -973,8 +973,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
 
                 items.forEach(function(item) {
                     var newName = exports.findNextAvailableName(
-                        item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                        (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
+                        item.name.replace(fs.RE_FILE_EXTENSION_MATCH, ""),
+                        (item.name.match(fs.RE_FILE_EXTENSION_MATCH) || [])[1] || "",
                         null,
                         otherNames,
                         parentFolderListing
@@ -1519,8 +1519,8 @@ namespace("com.subnodal.cloud.index", function(exports) {
                     item.key = dropData.items[i];
 
                     item.name = exports.findNextAvailableName(
-                        item.name.replace(/\.[a-zA-Z0-9.]+$/, ""),
-                        (item.name.match(/(\.[a-zA-Z0-9.]+)$/) || [])[1] || "",
+                        item.name.replace(fs.RE_FILE_EXTENSION_MATCH, ""),
+                        (item.name.match(fs.RE_FILE_EXTENSION_MATCH) || [])[1] || "",
                         null,
                         otherNames,
                         listing
