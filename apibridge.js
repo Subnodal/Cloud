@@ -14,6 +14,7 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
 
     var resources = require("com.subnodal.cloud.resources");
     var profiles = require("com.subnodal.cloud.profiles");
+    var config = require("com.subnodal.cloud.config");
     var fs = require("com.subnodal.cloud.fs");
     var associations = require("com.subnodal.cloud.associations");
     var embed = require("com.subnodal.cloud.embed");
@@ -409,6 +410,43 @@ namespace("com.subnodal.cloud.apibridge", function(exports) {
             });
         });
     }, true);
+
+    embed.registerEventDescriptor("configGetSetting", function(data, respond) {
+        if (typeof(data.setting) != "string") {
+            respond({
+                status: "error",
+                result: "precondition",
+                message: "The requested setting is not a string"
+            });
+
+            return;
+        }
+
+        respond({
+            status: "ok",
+            result: "received",
+            data: config.getSetting(data.setting)
+        });
+    }, false, true);
+
+    embed.registerEventDescriptor("configSetSetting", function(data, respond) {
+        if (typeof(data.setting) != "string") {
+            respond({
+                status: "error",
+                result: "precondition",
+                message: "The requested setting is not a string"
+            });
+
+            return;
+        }
+
+        config.setSetting(data.setting, data.data || null);
+
+        respond({
+            status: "ok",
+            result: "set"
+        });
+    }, false, true);
 
     subElements.ready(function() {
         document.querySelector("#saveOpenFileName").addEventListener("keydown", function(event) {

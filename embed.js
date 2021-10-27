@@ -110,10 +110,25 @@ namespace("com.subnodal.cloud.embed", function(exports) {
         });
     };
 
-    exports.registerEventDescriptor = function(descriptor, callback, requiresAuthentication = false) {
+    exports.registerEventDescriptor = function(descriptor, callback, requiresAuthentication = false, internalOnly = false) {
         exports.eventDescriptors[descriptor] = function() {
             var mainArguments = arguments;
             var authenticationPromise = requiresAuthentication ? exports.checkAuthentication() : Promise.resolve(true);
+            if (
+                internalOnly &&
+                !(mainArguments[2].origin || "").match(/^https?:\/\/localhost(?::[0-9]+)?$/) && // For debugging purposes
+                !(mainArguments[2].origin || "").match(/^https?:\/\/(?:[a-zA-Z0-9-.]+\.)?subnodal\.com$/)
+            ) {
+                console.warn("Tried invoking internal event, but invocation origin is not allowed");
+
+                mainArguments[1]({
+                    status: "error",
+                    result: "internalOnly",
+                    message: "This API feature is reserved for internal use by Subnodal apps only"
+                });
+
+                return; // Origins don't match, and so cannot invoke internal event
+            }
 
             authenticationPromise.then(function(authenticated) {
                 if (!authenticated) {
@@ -152,6 +167,9 @@ namespace("com.subnodal.cloud.embed", function(exports) {
                             eventToken: event.data.eventToken,
                             data
                         }, event.origin);
+                    },
+                    {
+                        origin: event.origin
                     }
                 );
             }
@@ -191,6 +209,8 @@ namespace("com.subnodal.cloud.embed", function(exports) {
             document.querySelector("#saveOpenFileDialog")
         );
 
-        window.parent.postMessage({type: "sendManifest"}, "*");
+        config.init().then(function() {
+            window.parent.postMessage({type: "sendManifest"}, "*");            
+        });
     };
 });
