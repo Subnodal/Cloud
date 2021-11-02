@@ -66,6 +66,15 @@ revision. New revisions are made when the document is saved.
 
 **Returns:** `{*}` · The serialised document
 
+## ⏩️ `CollaborativeDocument.sync`
+`method` · Sync the changes between this version of the document and the changes made on Subnodal Cloud.
+
+
+This method can be called on a regular basis to implement an
+autosave/live update system.
+
+**Returns:** `Promise` · A `Promise` that is resolved when the document has been synced
+
 ## 🎛️ `Revision`
 `class` · A single revision, containing diffed data changes.
 

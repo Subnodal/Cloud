@@ -449,7 +449,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 return Promise.reject({
                     status: "error",
                     result: "precondition",
-                    message: "The object key has not been assigned yet"
+                    message: "The object key has not yet been assigned"
                 });
             }
 
@@ -473,6 +473,39 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                     result: "saved"
                 });
             });
+        }
+
+        /*
+            @name CollaborativeDocument.sync
+            @type method
+            Sync the changes between this version of the document and the
+            changes made on Subnodal Cloud.
+                ~~~~
+                This method can be called on a regular basis to implement an
+                autosave/live update system.
+            @returns <Promise> A `Promise` that is resolved when the document has been synced
+        */
+        sync() {
+            var thisScope = this;
+
+            if (this.objectKey == null) {
+                return Promise.reject({
+                    status: "error",
+                    result: "precondition",
+                    message: "This document has not yet been saved"
+                });
+            }
+
+            return this.open(this.objectKey, true).then(function() {
+                if (thisScope.mergeSettled) {
+                    return Promise.resolve({
+                        status: "ok",
+                        result: "noActionTaken"
+                    });
+                }
+
+                return this.save(this.objectKey);
+            })
         }
     };
 
