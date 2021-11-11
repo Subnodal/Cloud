@@ -122,7 +122,7 @@ namespace("com.subnodal.cloud.appsapi", function(exports) {
                 eventDescriptor,
                 data,
                 eventToken
-            });
+            }, new URL(exports.bridgeHostUrl).origin);
         });
     };
 
