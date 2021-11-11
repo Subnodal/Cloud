@@ -1,7 +1,7 @@
 [
     {
         "extension": "writer",
-        "openUrl": "https://subnodal.com/?app=writer&objectKey={objectKey}",
+        "openUrl": "https://writer.subnodal.com/?objectKey={objectKey}",
         "namingScheme": {
             "appName": {
                 "en_GB": "Subnodal Writer",
