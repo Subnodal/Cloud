@@ -1209,7 +1209,7 @@ namespace("com.subnodal.cloud.fs", function(exports) {
                 switch (sortBy) {
                     case exports.sortByAttributes.NAME:
                     default:
-                        return Math.min(Math.max(collator.compare(a.name, b.name), -1), 1);
+                        return Math.min(Math.max(collator.compare(a.name, b.name), -1), 1) * sortMagnitude;
 
                     case exports.sortByAttributes.CREATED_AT:
                         return (a.createdAt - b.createdAt) * sortMagnitude;
